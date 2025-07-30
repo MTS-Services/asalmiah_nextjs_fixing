@@ -1,0 +1,30 @@
+{
+  "applinks": {
+      "details": [
+           {
+             "appIDs": ["TTFNZFZUC5.com.offaratcustomer"],
+             "components": [
+               
+               {
+                  "/": "/product-detail/*",
+                  "comment": "Matches any URL with a path that starts with /product-detail/."
+               },
+               {
+                "/": "/companies/*",
+                "comment": "Matches any URL with a path that starts with /companies/."
+             }
+               
+               
+             ]
+           }
+       ]
+   },
+   "webcredentials": {
+      "apps": ["TTFNZFZUC5.com.offaratcustomer" ]
+   },
+
+
+    "appclips": {
+        "apps": ["TTFNZFZUC5.com.offaratcustomer"]
+    }
+}

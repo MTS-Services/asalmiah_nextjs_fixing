@@ -1,0 +1,12 @@
+.custompill a {
+    background: #eee;
+    margin-right: 10px;
+    padding: 0 20px;
+    height: 45px;
+    line-height: 45px;
+    color: #000 !important;
+    &.active{
+        background: #da2a2c!important;
+        color:#fff!important;
+    }
+}
