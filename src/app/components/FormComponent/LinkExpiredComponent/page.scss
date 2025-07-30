@@ -1,0 +1,30 @@
+.link-expired-page {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .link-expired-page header {
+    margin-bottom: 20px;
+  }
+  
+  .link-expired-page .content {
+    margin-bottom: 20px;
+  }
+  
+  .link-expired-page .actions {
+    margin-top: 20px;
+  }
+  
+  .link-expired-page .actions button {
+    margin-right: 10px;
+  }
+  
+  .link-expired-page footer {
+    margin-top: 20px;
+    text-align: center;
+  }
