@@ -63,6 +63,7 @@ const Add = () => {
   const detail = useDetails();
 
   const { mutate, error, isPending } = useMutation({
+    
     mutationFn: (payload) => ADD_PRODUCT_API(payload),
     onSuccess: (resp) => {
       toastAlert("success", resp?.data?.message);
