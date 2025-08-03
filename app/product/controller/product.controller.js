@@ -14,6 +14,7 @@ const { COMPANY_MODEL } = require("../../company/model/model");
 const { CALSSIFICATION } = require("../../classification/model/model");
 const { CLASS_MODEL } = require("../../class/model/class.model");
 const { CATEGORY_MODEL } = require("../../category/model/category.model");
+const ORDER = require("../../order/model/order.model");
 
 const {
   setResponseObject,
@@ -62,7 +63,7 @@ product.add = async (req, res, next) => {
   console.log(req.body);
   try {
     if (!fs.existsSync(dir)) {
-      !fs.mkdirSync(dir, {
+      fs.mkdirSync(dir, {
         recursive: true,
       });
     }
@@ -313,7 +314,7 @@ product.add = async (req, res, next) => {
 product.update = async (req, res, next) => {
   try {
     if (!fs.existsSync(dir)) {
-      !fs.mkdirSync(dir, {
+      fs.mkdirSync(dir, {
         recursive: true,
       });
     }
@@ -333,6 +334,7 @@ product.update = async (req, res, next) => {
         "Product already exist with this name"
       );
       next();
+      return;
     }
     upload(req, res, async (err) => {
       if (err) {
@@ -341,12 +343,25 @@ product.update = async (req, res, next) => {
       } else {
         const data = req.body;
         data.updatedBy = req.userId;
-        if (
-          data.isDelivered === undefined ||
-          data.isDelivered === null ||
-          data.isDelivered === ""
-        ) {
-          data.isDelivered = true;
+        
+        // Handle isDelivered field conversion to boolean
+        if (data.isDelivered !== undefined) {
+          if (typeof data.isDelivered === 'string') {
+            const trimmedValue = data.isDelivered.trim().toLowerCase();
+            if (trimmedValue === 'true' || trimmedValue === '1') {
+              data.isDelivered = true;
+            } else if (trimmedValue === 'false' || trimmedValue === '0' || trimmedValue === '') {
+              data.isDelivered = false;
+            } else {
+              data.isDelivered = true; // default to true for any other string value
+            }
+          } else if (typeof data.isDelivered === 'boolean') {
+            // Already a boolean, keep as is
+          } else {
+            data.isDelivered = true; // default value
+          }
+        } else {
+          data.isDelivered = true; // default value when undefined
         }
 
         if (data.couponValidity) {
@@ -584,7 +599,7 @@ product.list = async (req, res, next) => {
         };
         break;
 
-      case "1":
+      case "2":
         filter = {
           stateId: CONST.INACTIVE,
         };
@@ -830,13 +845,14 @@ product.list = async (req, res, next) => {
         },
       },
     ]);
-    if (productList && productList[0].data.length) {
+    if (productList && productList[0] && productList[0].data && productList[0].data.length > 0) {
+      const totalCount = productList[0].count && productList[0].count[0] ? productList[0].count[0].count : 0;
       await setResponseObject(
         req,
         true,
         "Product list found successfully",
         productList[0].data,
-        productList[0].count[0].count,
+        totalCount,
         pageNo,
         pageLimit
       );
@@ -1093,6 +1109,38 @@ product.detail = async (req, res, next) => {
         $unwind: { path: "$classification", preserveNullAndEmptyArrays: true },
       },
       {
+        $lookup: {
+          from: "classes",
+          let: { id: "$classId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                name: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arbicName", "$name"],
+                    },
+                    else: "$name",
+                  },
+                },
+                arbicName: 1,
+              },
+            },
+          ],
+          as: "class",
+        },
+      },
+      {
+        $unwind: { path: "$class", preserveNullAndEmptyArrays: true },
+      },
+      {
         $project: {
           _id: 1,
           productName: {
@@ -1184,6 +1232,7 @@ product.detail = async (req, res, next) => {
           totalQuantityInCart: 1,
           dynamicquestions: 1,
           classification: 1,
+          class: 1,
           wishlist: 1,
           isWishlist: 1,
           averageRating: {
@@ -1490,6 +1539,14 @@ product.pendingProduct = async (req, res, next) => {
             $options: "i",
           },
         },
+        {
+          "classDetails.name": {
+            $regex: req.query.search
+              ? req.query.search.replace(new RegExp("\\\\", "g"), "\\\\").trim()
+              : "",
+            $options: "i",
+          },
+        },
       ];
     }
 
@@ -1702,6 +1759,87 @@ product.pendingProduct = async (req, res, next) => {
       },
       {
         $lookup: {
+          from: "categories",
+          let: { id: "$categoryId" }, // foreign key
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] }, // primary key (auths)
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: 1,
+                arabicCategory: 1,
+              },
+            },
+          ],
+          as: "categoryDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$categoryDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "subcategories",
+          let: { id: "$subcategoryId" }, // foreign key
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] }, // primary key (auths)
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                subcategory: 1,
+                arabicSubcategory: 1,
+              },
+            },
+          ],
+          as: "subCategoryDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$subCategoryDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "classes",
+          let: { id: "$classId" }, // foreign key
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] }, // primary key (auths)
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                arbicName: 1,
+              },
+            },
+          ],
+          as: "classDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$classDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
           from: "dynamicquestions",
           let: { id: "$_id" }, // foreign key
           pipeline: [
@@ -1749,11 +1887,18 @@ product.pendingProduct = async (req, res, next) => {
           productCode: true,
           categoryDetails: {
             _id: true,
-            categoryName: true,
+            category: true,
+            arabicCategory: true,
           },
           subCategoryDetails: {
             _id: true,
-            subcategoryName: true,
+            subcategory: true,
+            arabicSubcategory: true,
+          },
+          classDetails: {
+            _id: true,
+            name: true,
+            arbicName: true,
           },
           isAssign: true,
           createdBy: 1,
@@ -1789,13 +1934,14 @@ product.pendingProduct = async (req, res, next) => {
       },
     ]);
 
-    if (productList && productList[0].data.length) {
+    if (productList && productList[0] && productList[0].data && productList[0].data.length > 0) {
+      const totalCount = productList[0].count && productList[0].count[0] ? productList[0].count[0].count : 0;
       await setResponseObject(
         req,
         true,
         "Product list found successfully",
         productList[0].data,
-        productList[0].count[0].count,
+        totalCount,
         pageNo,
         pageLimit
       );
@@ -2320,7 +2466,7 @@ product.importCsv = async (req, res, next) => {
  * @param {*} res
  * @param {*} next
  */
-product.userProduct = async (req, res, next) => {
+product.userProduct = async (req, _, next) => {
   try {
     let language = req.headers["language"] ? req.headers["language"] : "EN";
     let country = req.headers["country"] ? req.headers["country"] : "Kuwait";
@@ -2334,24 +2480,25 @@ product.userProduct = async (req, res, next) => {
       req.query.categoryId ||
       req.query.subcategoryId
     ) {
+      const orConditions = [];
+      if (req.query.companyId) {
+        orConditions.push({ company: new mongoose.Types.ObjectId(req.query.companyId) });
+      }
+      if (req.query.categoryId) {
+        orConditions.push({ categoryId: new mongoose.Types.ObjectId(req.query.categoryId) });
+      }
+      if (req.query.subcategoryId) {
+        orConditions.push({ subcategoryId: new mongoose.Types.ObjectId(req.query.subcategoryId) });
+      }
+      
       filter.push({
         $match: {
-          $or: [
-            { company: new mongoose.Types.ObjectId(req.query.companyId) },
-            {
-              categoryId: new mongoose.Types.ObjectId(req.query.categoryId),
-            },
-            {
-              subcategoryId: new mongoose.Types.ObjectId(
-                req.query.subcategoryId
-              ),
-            },
-          ],
+          $or: orConditions,
         },
       });
     }
 
-    if (req.query.classificationArr) {
+    if (req.query.classificationArr && req.query.classificationArr.trim() !== "") {
       filter.push({
         $match: {
           classification: {
@@ -2363,7 +2510,7 @@ product.userProduct = async (req, res, next) => {
       });
     }
 
-    if (req.query.companyArr) {
+    if (req.query.companyArr && req.query.companyArr.trim() !== "") {
       filter.push({
         $match: {
           company: {
@@ -2371,6 +2518,30 @@ product.userProduct = async (req, res, next) => {
               .split(",")
               .map((i) => new mongoose.Types.ObjectId(i)),
           }, // Using the array directly
+        },
+      });
+    }
+
+    if (req.query.categoryArr && req.query.categoryArr.trim() !== "") {
+      filter.push({
+        $match: {
+          categoryId: {
+            $in: req.query.categoryArr
+              .split(",")
+              .map((i) => new mongoose.Types.ObjectId(i)),
+          },
+        },
+      });
+    }
+
+    if (req.query.subCategoryArr && req.query.subCategoryArr.trim() !== "") {
+      filter.push({
+        $match: {
+          subcategoryId: {
+            $in: req.query.subCategoryArr
+              .split(",")
+              .map((i) => new mongoose.Types.ObjectId(i)),
+          },
         },
       });
     }
@@ -2629,7 +2800,6 @@ product.userProduct = async (req, res, next) => {
         },
       ];
     }
-
     if (req.query.classification && req.query.classificationCompany) {
       filter.push({
         $match: {
@@ -2896,13 +3066,14 @@ product.userProduct = async (req, res, next) => {
       },
     ]);
 
-    if (productList && productList[0].data.length) {
+    if (productList && productList[0] && productList[0].data && productList[0].data.length > 0) {
+      const totalCount = productList[0].count && productList[0].count[0] ? productList[0].count[0].count : 0;
       await setResponseObject(
         req,
         true,
         "Product list found successfully",
         productList[0].data,
-        productList[0].count[0].count,
+        totalCount,
         pageNo,
         pageLimit
       );
@@ -3171,13 +3342,14 @@ product.userProducts = async (req, res, next) => {
       },
     ]);
 
-    if (productList && productList[0].data.length) {
+    if (productList && productList[0] && productList[0].data && productList[0].data.length > 0) {
+      const totalCount = productList[0].count && productList[0].count[0] ? productList[0].count[0].count : 0;
       await setResponseObject(
         req,
         true,
         "Product list found successfully",
         productList[0].data,
-        productList[0].count[0].count,
+        totalCount,
         pageNo,
         pageLimit
       );
@@ -3485,13 +3657,14 @@ product.searchProductList = async (req, res, next) => {
       },
     ]);
 
-    if (productList && productList[0].data.length) {
+    if (productList && productList[0] && productList[0].data && productList[0].data.length > 0) {
+      const totalCount = productList[0].count && productList[0].count[0] ? productList[0].count[0].count : 0;
       await setResponseObject(
         req,
         true,
         "Product list found successfully",
         productList[0].data,
-        productList[0].count[0].count,
+        totalCount,
         pageNo,
         pageLimit
       );
@@ -3694,7 +3867,7 @@ product.sellerGraphProduct = async (req, res, next) => {
  */
 product.venderDashboard = async (req, res, next) => {
   try {
-    const products = await PRODUCT.find({ createdBy: req.userId });
+    const products = await PRODUCT_MODEL.find({ createdBy: req.userId });
 
     const productArr = [];
     products.map((e) => {
@@ -4572,13 +4745,14 @@ product.newArrival = async (req, res, next) => {
       },
     ]);
 
-    if (productList && productList[0].data.length) {
+    if (productList && productList[0] && productList[0].data && productList[0].data.length > 0) {
+      const totalCount = productList[0].count && productList[0].count[0] ? productList[0].count[0].count : 0;
       await setResponseObject(
         req,
         true,
         "Product list found successfully",
         productList[0].data,
-        productList[0].count[0].count,
+        totalCount,
         pageNo,
         pageLimit
       );
