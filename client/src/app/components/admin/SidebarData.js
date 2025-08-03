@@ -550,14 +550,19 @@ export const SidebarData = [
 
 /******************SUB ADMIN (DESIGNED AND PROMOTION USER********************/
 const getPermissionsByLabelSidebar = () => {
+  if (typeof window === 'undefined') return []; // ⛔ Server: don't run
+
+  console.log("detail", detail);
   if (detail?.roleId == constant.ADMIN) {
     return;
   }
-  let dataStorage = localStorage.getItem("permissionStore");
-  let data = dataStorage !== "undefined" ? JSON.parse(dataStorage) : []
-  let rolesPrivilegesData = data?.rolesPrivileges ? JSON.parse(data?.rolesPrivileges?.at(0)) : ""
+
+  const dataStorage = localStorage.getItem("permissionStore");
+  const data = dataStorage !== "undefined" ? JSON.parse(dataStorage) : [];
+  const rolesPrivilegesData = data?.rolesPrivileges ? JSON.parse(data?.rolesPrivileges?.at(0)) : "";
   return dataStorage ? rolesPrivilegesData : [];
-}
+};
+
 
 const getDynamicSubNav = (data, category) => {
   const subNav = [];

@@ -112,14 +112,14 @@ company.add = async (req, res, next) => {
       if (req?.files?.logo) {
         data.logo =
           process.env.IMAGE_BASE_URL +
-          req.files?.logo?.[0].path.replace(/\s+/g, "");
+          req.files?.logo?.[0].path.replace(/\s+/g, "").replace(/\\/g, "/");
         data.logo = data.logo.replace(/\/\.\.\//g, "/");
       }
 
       if (req?.files?.coverImg) {
         data.coverImg =
           process.env.IMAGE_BASE_URL +
-          req.files?.coverImg?.[0].path.replace(/\s+/g, "");
+          req.files?.coverImg?.[0].path.replace(/\s+/g, "").replace(/\\/g, "/");
         data.coverImg = data.coverImg.replace(/\/\.\.\//g, "/");
       }
 
@@ -973,7 +973,7 @@ company.update = async (req, res, next) => {
         }
         data.logo =
           process.env.IMAGE_BASE_URL +
-          req.files?.logo?.[0].path.replace(/\s+/g, "");
+          req.files?.logo?.[0].path.replace(/\s+/g, "").replace(/\\/g, "/");
         data.logo = data.logo.replace(/\/\.\.\//g, "/");
       }
 
@@ -996,7 +996,7 @@ company.update = async (req, res, next) => {
         }
         data.coverImg =
           process.env.IMAGE_BASE_URL +
-          req.files?.coverImg?.[0].path.replace(/\s+/g, "");
+          req.files?.coverImg?.[0].path.replace(/\s+/g, "").replace(/\\/g, "/");
         data.coverImg = data.coverImg.replace(/\/\.\.\//g, "/");
       }
 

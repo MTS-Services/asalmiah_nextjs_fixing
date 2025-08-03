@@ -61,10 +61,12 @@ paymentHttp.interceptors.request.use(
 /****************************AUTHENTICATION*******************************/
 
 export const loginAPI = async (body) => {
+  console.log("loginAPI", body);
   return await http.post(`/auth/userLogin`, body);
 };
 
 export const socialLoginAPI = async (body) => {
+  console.log("socialLoginAPI", body);
   return await http.post(`/auth/social/login`, body);
 };
 
@@ -426,6 +428,7 @@ export const GET_CATEGORY_DETAIL = async (id) => {
   return await http.get(`/admin/category/detail/${id}`);
 };
 export const EDIT_CATEGORY_API = async (id, body) => {
+  console.log("EDIT_CATEGORY_API", body);
   return await http.put(`/admin/category/update/${id}`, body);
 };
 export const STATE_UPDATE_CATEGORY_API = async (id, stateId) => {

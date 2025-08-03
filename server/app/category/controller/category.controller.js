@@ -99,8 +99,8 @@ category.add = async (req, res, next) => {
       if (req?.files?.categoryImg) {
         data.categoryImg =
           process.env.IMAGE_BASE_URL +
-          req.files?.categoryImg?.[0].path.replace(/\s+/g, "");
-        data.categoryImg = data.categoryImg.replace(/\/\.\.\//g, "/");
+          "uploads/category/" +
+          req.files?.categoryImg?.[0].filename;
       }
       const result = await CATEGORY_MODEL.create(data);
       if (result) {
@@ -412,8 +412,8 @@ category.update = async (req, res, next) => {
         }
         data.categoryImg =
           process.env.IMAGE_BASE_URL +
-          req.files?.categoryImg?.[0].path.replace(/\s+/g, "");
-        data.categoryImg = data.categoryImg.replace(/\/\.\.\//g, "/");
+          "uploads/category/" +
+          req.files?.categoryImg?.[0].filename;
       }
       const updateData = await CATEGORY_MODEL.findByIdAndUpdate(
         { _id: req.params.id },
