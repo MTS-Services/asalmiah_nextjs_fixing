@@ -1,5 +1,5 @@
 export const constant = Object.freeze({
-  EMPTY_RECORD: "No Record Found",
+  EMPTY_RECORD: 'No Record Found',
   // role id
   ADMIN: 1,
   USER: 2,
@@ -53,8 +53,8 @@ export const constant = Object.freeze({
   SUCCESS: 1,
   FAILED: 2,
   // payment
-  COD: "0",
-  UPI: "1",
+  COD: '0',
+  UPI: '1',
   //Payment Type
   PAYMENT_TYPE_COD: 2,
   PAYMENT_TYPE_ONLINE: 1,
@@ -76,15 +76,15 @@ export const constant = Object.freeze({
   ORDER_CANCELLED: 5,
   ORDER_DELETED: 6,
   // address location
-  HOME: "0",
-  OFFICE: "1",
-  OTHERS: "2",
+  HOME: '0',
+  OFFICE: '1',
+  OTHERS: '2',
 
   // Store Status
   // 0 = active 1 => inactive 2 => delete
-  STORE_ACTIVE: "0",
-  STORE_INACTIVE: "1",
-  STORE_DELETE: "2",
+  STORE_ACTIVE: '0',
+  STORE_INACTIVE: '1',
+  STORE_DELETE: '2',
 
   //EMAIL QUEUE STATUS
 
@@ -96,9 +96,9 @@ export const constant = Object.freeze({
 
   // Complaint  delete
   COMPLAINT_DELETED: 3,
-  DOLLAR: "$",
-  PHONE: "2",
-  EMAIL: "1",
+  DOLLAR: '$',
+  PHONE: '2',
+  EMAIL: '1',
   API: 1,
   APP: 2,
   WEB: 3,
@@ -141,12 +141,13 @@ export const constant = Object.freeze({
   ANDROID: 2,
   IOS: 3,
 });
+
 export const Paginations = Object.freeze({
   DEFAULT_PAGE: 1,
   PER_PAGE: 10,
   PRODUCT_PER_PAGE: 12,
 });
 export const PROVIDERS = {
-  GOOGLE: "google",
-  FACEBOOK: "facebook",
+  GOOGLE: 'google',
+  FACEBOOK: 'facebook',
 };

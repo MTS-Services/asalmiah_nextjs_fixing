@@ -1,23 +1,7 @@
-import axios from "axios";
-import { store } from "../redux/store";
-import URL from "../utils/config";
-import { Paginations } from "../utils/constants";
-// const http = axios.create({
-//   baseURL: URL,
-// });
-// /* request interceptor */
-// http.interceptors.request.use(
-//   function (config) {
-//     let token = store.getState()?.auth?.data?.token;
-//     if (token) {
-//       config.headers["authorization"] = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   function (error) {
-//     return Promise.reject(error);
-//   }
-// );
+import axios from 'axios';
+import { store } from '../redux/store';
+import URL from '../utils/config';
+import { Paginations } from '../utils/constants';
 
 const http = axios.create({
   baseURL: URL,
@@ -28,12 +12,12 @@ http.interceptors.request.use(
   function (config) {
     let token = store.getState()?.auth?.data?.token;
     if (token) {
-      config.headers["authorization"] = `Bearer ${token}`;
+      config.headers['authorization'] = `Bearer ${token}`;
     }
 
     let country = store.getState()?.country;
     if (country) {
-      config.headers["country"] = country?.country;
+      config.headers['country'] = country?.country;
     }
 
     return config;
@@ -49,8 +33,8 @@ const paymentHttp = axios.create({
 
 paymentHttp.interceptors.request.use(
   function (config) {
-    const customToken = "sk_test_JYveiWjzynFTsdp3HPtw1SQ5"; // replace with your custom token
-    config.headers["authorization"] = `Bearer ${customToken}`;
+    const customToken = 'sk_test_JYveiWjzynFTsdp3HPtw1SQ5'; // replace with your custom token
+    config.headers['authorization'] = `Bearer ${customToken}`;
     return config;
   },
   function (error) {
@@ -69,11 +53,11 @@ export const socialLoginAPI = async (body) => {
 };
 
 export const adminLogin = async (data) => {
-  return await http.post("/auth/login", data);
+  return await http.post('/auth/login', data);
 };
 
 export const signup = async (data) => {
-  return await http.post("/auth/signup", data);
+  return await http.post('/auth/signup', data);
 };
 
 export const verifyOTP = async (body) => {
@@ -97,15 +81,15 @@ export const resetOldPassword = async (body) => {
 };
 
 export const logOut = async () => {
-  return await http.post("/auth/logout");
+  return await http.post('/auth/logout');
 };
 
 export const forgetPassword = async (body) => {
-  return await http.post("/auth/forgotPassword", body);
+  return await http.post('/auth/forgotPassword', body);
 };
 
 export const resetPasswordLink = async (body) => {
-  return await http.post("/auth/passwordLink", body);
+  return await http.post('/auth/passwordLink', body);
 };
 
 export const userChangePassword = async (body) => {
@@ -292,7 +276,7 @@ export const deleteBackup = async (id) => {
  * Get All Products List For Admin
  * @returns
  */
-export const getAdminProductList = async (pageNo = "", perPage = "") => {
+export const getAdminProductList = async (pageNo = '', perPage = '') => {
   return await http.get(
     `/admin/product/all?pageNo=${pageNo}&pageLimit=${perPage}`
   );
@@ -335,7 +319,7 @@ export const productFilter = async (body) => {
  * @returns
  */
 export const userAddProduct = async (body) => {
-  return await http.post("/users/product/addProduct", body);
+  return await http.post('/users/product/addProduct', body);
 };
 /**
  * Get All Products List
@@ -347,7 +331,7 @@ export const getAdminProductLists = async (
   search,
   filter,
   companyArr,
-  company = ""
+  company = ''
 ) => {
   return await http.get(`/admin/product/pendingProduct`, {
     params: {
@@ -379,7 +363,7 @@ export const PRODUCT_DETAILS_ADMIN = async (id) => {
  * category api's ->categorys
  * add,edit,delete,
  */
-export const getAllCategory = async (page = 1, stateId = "") => {
+export const getAllCategory = async (page = 1, stateId = '') => {
   return await http.get(
     `/admin/category/get-all?pageNo=${page}&stateId=${stateId}`
   );
@@ -389,7 +373,7 @@ export const getAllCategory = async (page = 1, stateId = "") => {
  * category api's ->subcategory
  * add,edit,delete,
  */
-export const getAllSubCategory = async (page = 1, stateId = "") => {
+export const getAllSubCategory = async (page = 1, stateId = '') => {
   return await http.get(
     `/admin/subcategory/get-all?pageNo=${page}&stateId=${stateId}`
   );
@@ -495,7 +479,7 @@ export const GET_COMPANY_API = async (
       stateId: state,
       startDate: startDate,
       endDate: endDate,
-      country: country
+      country: country,
     },
   });
 };
@@ -576,8 +560,8 @@ export const GET_SEARCH_COMPANY_API_ACTIVE_PRODUCT = async (
   pageLimit,
   state,
   search,
-  country = "",
-  categoryId = ""
+  country = '',
+  categoryId = ''
 ) => {
   return await http.get(
     `/admin/company/dropDownCompany?pageNo=${page}&pageLimit=${pageLimit}&stateId=${state}&search=${search}&active=${true}&country=${country}&categoryId=${categoryId}`
@@ -644,6 +628,7 @@ export const GET_SUBCATEGORY_LIST_HOME = async (id, page) => {
     },
   });
 };
+
 export const GET_COMPANY_SUBCATEGORY_LIST_HOME = async (
   id,
   subcategoryId,
@@ -852,7 +837,7 @@ export const USER_CATEGORYLIST = async (page) => {
   });
 };
 
-export const USER_COMPANYLIST = async (search = "") => {
+export const USER_COMPANYLIST = async (search = '') => {
   return await http.get(`/company/activeCompanyList?search=${search}`);
 };
 
@@ -955,6 +940,7 @@ export const DELETE_BANNER_API = async (id) => {
 export const GET_BANNER_USER_API = async () => {
   return await http.get(`/banner/activeBanner`);
 };
+
 export const GET_BRANCHES_API = async (page, companyId) => {
   return await http.get(`/users/branch/branchByCompany`, {
     params: {
@@ -1019,15 +1005,15 @@ export const USER_ADDRESS_LIST = async (page) => {
   });
 };
 
-export const USER_CART = async (orderType = "", page = 1) => {
+export const USER_CART = async (orderType = '', page = 1) => {
   return await http.get(
     `/users/cart/list?orderType=${orderType}&pageNo=${page}`
   );
 };
 
 export const PROMOCODE_USER_CART = async (
-  promoCode = "",
-  orderType = "",
+  promoCode = '',
+  orderType = '',
   page
 ) => {
   return await http.get(
@@ -1036,9 +1022,9 @@ export const PROMOCODE_USER_CART = async (
 };
 
 export const USER_CART_WITHOUT_LOGIN = async (
-  orderType = "",
+  orderType = '',
   page = 1,
-  deviceToken = ""
+  deviceToken = ''
 ) => {
   return await http.get(
     `/cart/list?orderType=${orderType}&pageNo=${page}&deviceToken=${deviceToken}`
@@ -1046,10 +1032,10 @@ export const USER_CART_WITHOUT_LOGIN = async (
 };
 
 export const PROMOCODE_USER_CART_WITHOUT_LOGIN = async (
-  promoCode = "",
-  orderType = "",
+  promoCode = '',
+  orderType = '',
   page,
-  deviceToken = ""
+  deviceToken = ''
 ) => {
   return await http.get(
     `/cart/list?promoId=${promoCode}&orderType=${orderType}&pageNo=${page}&deviceToken=${deviceToken}`
@@ -1417,7 +1403,7 @@ export const GET_CLASSIFICATION_PRODUCTLIST = async (
       classification: classification,
       classificationCompany: classificationCompany,
       pageNo: page,
-      pageLimit: pageLimit
+      pageLimit: pageLimit,
     },
   });
 };
@@ -1433,7 +1419,7 @@ export const GET_CLASSIFICATION_PRODUCTLIST_AUTH = async (
       classification: classification,
       classificationCompany: classificationCompany,
       pageNo: page,
-      pageLimit: pageLimit
+      pageLimit: pageLimit,
     },
   });
 };
@@ -2043,7 +2029,7 @@ export const DELETE_ADMIN_PRODUCT = async (body) => {
 
 /****************************SMS LOGS MODULE*******************************/
 
-export const adminGetAllSMS = async (pageNo, search = "") => {
+export const adminGetAllSMS = async (pageNo, search = '') => {
   return await http.get(
     `/admin/smsLogs/list?pageNo=${pageNo}&search=${search}`
   );
@@ -2088,7 +2074,6 @@ export const DELETE_VERSION = async (id) => {
 export const USER_COUNTRY_EXIST = async (body) => {
   return await http.post(`/auth/userExist`, body);
 };
-
 
 export const USER_ROLES_PRIVILIGES = async () => {
   return await http.get(`/admin/permission/permissionDetails`);

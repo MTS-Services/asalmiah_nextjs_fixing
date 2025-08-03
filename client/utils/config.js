@@ -10,9 +10,11 @@ Unauthorized copying of this file, via any medium is strictly prohibited.
 
 let apiBase = process.env.NEXT_PUBLIC_API;
 
-if (apiBase === "https://www.offarat.com/api/") {
+// Trim whitespace to avoid issues with accidental spaces
+if (apiBase?.trim() === 'https://www.offarat.com/api/') {
   console.log = () => {};
   console.warn = () => {};
   console.error = () => {};
 }
+
 export default apiBase;

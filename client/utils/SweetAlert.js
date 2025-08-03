@@ -9,11 +9,11 @@
  * 
  */
 
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
 export const toastAlert = (icon, title) => {
   Swal.fire({
     toast: true,
-    position: "top-end",
+    position: 'top-end',
     icon: icon,
     title: title,
     showConfirmButton: false,
@@ -21,5 +21,5 @@ export const toastAlert = (icon, title) => {
   });
 };
 export const showInformation = (title) => {
-  Swal.fire({ title: title, confirmButtonColor: "#41e389" });
+  Swal.fire({ title: title, confirmButtonColor: '#41e389' });
 };
