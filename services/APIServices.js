@@ -631,7 +631,7 @@ export const GET_SEARCH_SUBCATEGORY_API = async (
 /****************************USER MODULE*******************************/
 
 export const GET_CATEGORY_LIST_HOME = async () => {
-  return await http.get(`/category/activeCategoryList`);
+  return await http.get(`/category/list`);
 };
 
 export const GET_SUB_CATEGORY_LIST_HOME = async () => {
@@ -1445,6 +1445,56 @@ export const GET_CLASSIFICATION_PRODUCTLIST_AUTH = async (
 export const GET_USERS_DASHBOARD_COUNT = async () => {
   return await http.get(`/users/dashboard/count`);
 };
+
+/*****************************CLASS MODULE*******************************/
+export const ADD_CLASS_API = async (body) => {
+  console.log("ADD_CLASS_API", body);
+  return await http.post(`/admin/class/add`, body);
+};
+
+export const EDIT_CLASS_API = async (id, body) => {
+  return await http.put(`/admin/class/update/${id}`, body);
+};
+
+export const GET_CLASS_DETAIL_API = async (id) => {
+  return await http.get(`/admin/class/detail/${id}`);
+};
+
+export const GET_CLASS_LIST_API = async (page, search, state) => {
+  return await http.get(`/admin/class/list`, {
+    params: {
+      pageNo: page,
+      pageLimit: Paginations.PER_PAGE,
+      search: search,
+      stateId: state,
+    },
+  });
+};
+
+export const STATE_UPDATE_CLASS_API = async (id, stateId) => {
+  if (!id || !stateId) {
+    throw new Error("ID and stateId are required");
+  }
+  return await http.put(
+    `/admin/class/updateState/${id}?stateId=${stateId}`
+  );
+};
+
+export const GET_SEARCH_CLASS_API = async (
+  page,
+  pageLimit,
+  state,
+  search
+) => {
+  return await http.get(
+    `/admin/class/dropDownClass?pageNo=${page}&pageLimit=${pageLimit}&stateId=${state}&search=${search}`
+  );
+};
+
+export const GET_CLASS_ACTIVE_LIST = async () => {
+  return await http.get(`/class/activeList`);
+};
+/*****************************END CLASS MODULE*******************************/
 
 export const ADD_PERMISSIONS = async (body) => {
   return await http.post(`/admin/permission/add`, body);

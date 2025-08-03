@@ -90,7 +90,9 @@ export const SidebarData = [
     iconOpened: <FaIcons.FaCaretUp />,
     cName:
       pathName == "/admin/page/category-management" ||
-        pathName == "/admin/page/subcategory-management"
+        pathName == "/admin/page/subcategory-management" ||
+        pathName == "/admin/page/classification-management" ||
+        pathName == "/admin/page/class-management"
         ? "nav-text nav-text-active"
         : "nav-text",
     path_active_name: "category-management",
@@ -115,6 +117,13 @@ export const SidebarData = [
         icon: <BiCategory />,
         cName: "nav-text",
         path_active_name: "classification-management",
+      },
+      {
+        title: "Class",
+        path: `/admin/page/class-management`,
+        icon: <BiCategory />,
+        cName: "nav-text",
+        path_active_name: "class-management",
       },
     ],
   },
