@@ -38,6 +38,7 @@ import {
   GET_COMPANY_API,
   GET_SEARCH_CATEGORY_API,
   GET_SEARCH_CLASSIFICATION_API,
+  GET_SEARCH_CLASS_API,
   PRODUCT_DETAILS_ADMIN,
 } from "../../../../../../../services/APIServices";
 import { productCountryCode } from "../../../../../../../utils/CountryCode";
@@ -126,6 +127,7 @@ const Edit = () => {
       company: "",
       color: [],
       classification: "",
+      class: "",
       startDate: "",
       endDate: "",
       termsCondition: "",
@@ -171,6 +173,8 @@ const Edit = () => {
           .label("Description"),
 
         company: yup.object().required("Company is required").label("Company"),
+        classification: yup.object().required("Classification is required").label("Classification"),
+        class: yup.object().required("Class is required").label("Class"),
 
         mrpPrice: yup.string().when("size", {
           is: (size) => !size?.at(0)?.mrp,
@@ -383,6 +387,7 @@ const Edit = () => {
       formData.append("offerContent", values?.offerContent);
       formData.append("quantity", values?.quantity);
       formData.append("classification", values?.classification.value);
+      formData.append("classId", values?.class.value);
       formData.append("startDate", new Date(values?.startDate));
       formData.append("endDate", new Date(values?.endDate));
       formData.append("termsCondition", values?.termsCondition ?? "");
@@ -591,6 +596,10 @@ const Edit = () => {
           value: resp?.data?.data?.classification?._id ?? "",
           label: resp?.data?.data?.classification?.name ?? "",
         },
+        class: {
+          value: resp?.data?.data?.class?._id ?? "",
+          label: resp?.data?.data?.class?.name ?? "",
+        },
         // categoryId: {
         //   value: resp?.data?.data?.categoryDetails?._id ?? "",
         //   label: resp?.data?.data?.categoryDetails?.category ?? "",
@@ -732,6 +741,27 @@ const Edit = () => {
     setFieldValue("address", place?.formatted_address);
     setFieldValue("latitude", place?.geometry?.location?.lat());
     setFieldValue("longitude", place?.geometry?.location?.lng());
+  };
+
+  const searchClassList = async (search, loadedOptions, { page }) => {
+    let resp = await GET_SEARCH_CLASS_API(
+      page,
+      Paginations.PER_PAGE,
+      constant?.ACTIVE,
+      search
+    );
+    let array = await resp?.data?.data;
+
+    return {
+      options: array?.map((i) => ({
+        label: i?.name,
+        value: i?._id,
+      })),
+      hasMore: resp?.data?.data?.length > 0 ? true : false,
+      additional: {
+        page: page + 1,
+      },
+    };
   };
 
   return (
@@ -923,6 +953,31 @@ const Edit = () => {
                         />
                         {touched.classification && errors.classification ? (
                           <span className="error">{errors.classification}</span>
+                        ) : (
+                          ""
+                        )}
+                      </Form.Group>
+                    </Col>
+
+                    <Col lg={couponServiceState == true ? 3 : 6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label className="fw-bold">
+                          Select Class
+                          <span className="text-danger">*</span>
+                        </Form.Label>
+                        <AsyncPaginate
+                          value={values?.class}
+                          loadOptions={searchClassList}
+                          onChange={(e) => {
+                            setFieldValue("class", e);
+                          }}
+                          additional={{
+                            page: 1,
+                          }}
+                          placeholder="Enter Class"
+                        />
+                        {touched.class && errors.class ? (
+                          <span className="error">{errors.class}</span>
                         ) : (
                           ""
                         )}
