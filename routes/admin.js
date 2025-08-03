@@ -27,10 +27,12 @@ const {
   _smsLogs
 } = require("../app/errorLogs/controller/logsController");
 const _user = require("../app/userService/controller/userController");
+
 const _contact = require("../app/contactUs/controller/contactUs.controller");
 const _smtp = require("../app/smtp/controller/smtp.controller");
 const _backup = require("../app/backup/controller/backup.controller");
 const _category = require("../app/category/controller/category.controller");
+const _class = require("../app/class/controller/class.controller");
 const _subcategory = require("../app/subCategory/controller/subCategory.controller");
 const _company = require("../app/company/controller/controller");
 const _deliveryCompany = require("../app/companyDelivery/controller/controller");
@@ -167,6 +169,18 @@ router.group("/category", (category) => {
   category.delete("/delete/:id", _category.delete);
 });
 
+
+/* Class Management  */
+router.group("/class", (classRoute) => {
+  classRoute.post("/add", _class.add);
+  classRoute.get("/list", _class.list);
+  classRoute.get("/detail/:id", _class.detail);
+  classRoute.put("/update/:id", _class.update);
+  classRoute.put("/updateState/:id", _class.updateState);
+  classRoute.delete("/delete/:id", _class.delete);
+  classRoute.get("/dropDownClass", _class.dropDownClass);
+  classRoute.get("/activeList", _class.activeList);
+});
 /* Sub category Management  */
 router.group("/subcategory", (subcategory) => {
   subcategory.post("/add", _subcategory.add);
@@ -309,7 +323,17 @@ router.group("/classification", (classification) => {
   classification.put("/updateState/:id", _classification.updateState);
   classification.delete("/delete/:id", _classification.delete);
   classification.get("/dropDown", _classification.activeList);
+  classification.get("/category/:categoryId", _classification.getByCategory);
+});
 
+/* Class Management  */
+router.group("/class", (classRoute) => {
+  classRoute.post("/add", _class.add);
+  classRoute.get("/list", _class.list);
+  classRoute.get("/detail/:id", _class.detail);
+  classRoute.put("/update/:id", _class.update);
+  classRoute.put("/updateState/:id", _class.updateState);
+  classRoute.get("/classification/:classificationId", _class.getClassesByClassification);
 });
 
 /* Review Management  */

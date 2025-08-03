@@ -12,17 +12,13 @@ let mongoose = require("mongoose");
 const { CONST } = require("../../../helpers/constant");
 const SCHEMA = mongoose.Schema;
 
-let classification = new SCHEMA(
+let classSchema = new SCHEMA(
   {
     name: {
       type: String,
     },
     arbicName: {
       type: String,
-    },
-    categoryId: {
-      type: mongoose.Types.ObjectId,
-      ref: "category",
     },
     order: {
       type: Number,
@@ -44,7 +40,4 @@ let classification = new SCHEMA(
   { timestamps: true }
 );
 
-module.exports.CALSSIFICATION = mongoose.model(
-  "classification",
-  classification
-);
+module.exports.CLASS_MODEL = mongoose.model("class", classSchema);

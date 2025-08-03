@@ -1,13 +1,14 @@
 /** 
-@copyright : ToXsl Technologies Pvt. Ltd. <  www.toxsl.com >
-@author     : Shiv Charan Panjeta < shiv@toxsl.com >
+
+@copyright : Mak tech solutions 
+@author     : Md. shariar hosain sanny 
 
 All Rights Reserved.
 Proprietary and confidential :  All information contained herein is, and remains
 the property of ToXSL Technologies Pvt. Ltd. and its partners.
 Unauthorized copying of this file, via any medium is strictly prohibited.
 */
-const { CALSSIFICATION } = require("../model/model");
+const { CLASS_MODEL } = require("../model/class.model");
 const {
   setResponseObject,
   validationData,
@@ -15,38 +16,18 @@ const {
 } = require("../../../middleware/commonFunction");
 const mongoose = require("mongoose");
 const { CONST } = require("../../../helpers/constant");
-const { PRODUCT_MODEL } = require("../../product/model/product.model");
 const { PERMISSION_MODEL } = require("../../permission/model/model");
-const { CATEGORY_MODEL } = require("../../category/model/category.model");
-const _classification = {};
+const _class = {};
 
-/*Add classification*/
-_classification.add = async (req, res, next) => {
+/*Add class*/
+_class.add = async (req, res, next) => {
   try {
     const data = req.body;
     data.createdBy = req.userId;
     data.name = capitalizeLetter(data?.name)?.trim();
     data.arbicName = capitalizeLetter(data?.arbicName)?.trim();
     
-    // Validate categoryId if provided
-    if (data.categoryId) {
-      const categoryExists = await CATEGORY_MODEL.findOne({
-        _id: data.categoryId,
-        stateId: { $ne: CONST.DELETED },
-      });
-      
-      if (!categoryExists) {
-        await setResponseObject(
-          req,
-          false,
-          "Category not found or deleted"
-        );
-        next();
-        return;
-      }
-    }
-    
-    const isExists = await CALSSIFICATION.findOne({
+    const isExists = await CLASS_MODEL.findOne({
       $and: [
         { name: validationData(data.name) },
         { stateId: { $ne: CONST.DELETED } },
@@ -57,23 +38,23 @@ _classification.add = async (req, res, next) => {
       await setResponseObject(
         req,
         false,
-        "Classification already exist with name"
+        "Class already exist with name"
       );
       next();
       return;
     }
 
-    const result = await CALSSIFICATION.create(data);
+    const result = await CLASS_MODEL.create(data);
     if (result) {
       await setResponseObject(
         req,
         true,
-        "Classification added successfully",
+        "Class added successfully",
         result
       );
       next();
     } else {
-      await setResponseObject(req, false, "Classification not added");
+      await setResponseObject(req, false, "Class not added");
       next();
     }
   } catch (error) {
@@ -82,9 +63,10 @@ _classification.add = async (req, res, next) => {
   }
 };
 
-/*Get all classification*/
-_classification.list = async (req, res, next) => {
+/*Get all classes*/
+_class.list = async (req, res, next) => {
   try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
     let pageNo = parseInt(req.query.pageNo) || 1;
     let pageLimit = parseInt(req.query.pageLimit) || 10;
 
@@ -128,7 +110,7 @@ _classification.list = async (req, res, next) => {
         break;
     }
 
-    let list = await CALSSIFICATION.aggregate([
+    let list = await CLASS_MODEL.aggregate([
       {
         $match: {
           stateId: { $ne: CONST.DELETED },
@@ -196,33 +178,6 @@ _classification.list = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: "categories",
-          let: { id: { $ifNull: ["$categoryId", ""] } },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$$id", "$_id"] },
-                stateId: { $ne: CONST.DELETED },
-              },
-            },
-            {
-              $project: {
-                _id: 1,
-                category: 1,
-                arabicCategory: 1,
-                categoryImg: 1,
-                order: 1,
-              },
-            },
-          ],
-          as: "category",
-        },
-      },
-      {
-        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
-      },
-      {
-        $lookup: {
           from: "permissionschemas",
           let: { id: "$createdBy._id" },
           pipeline: [
@@ -245,8 +200,6 @@ _classification.list = async (req, res, next) => {
           _id: "$_id",
           name: { $first: "$name" },
           arbicName: { $first: "$arbicName" },
-          categoryId: { $first: "$categoryId" },
-          category: { $first: "$category" },
           order: { $first: "$order" },
           stateId: { $first: "$stateId" },
           createdAt: { $first: "$createdAt" },
@@ -260,17 +213,17 @@ _classification.list = async (req, res, next) => {
         $addFields: {
           sortKey: {
             $cond: {
-              if: { $gt: ["$order", 0] }, // Check if 'order' exists and is greater than 0
-              then: { $toInt: { $ifNull: ["$order", 0] } }, // Convert to integer safely
-              else: Number.MAX_SAFE_INTEGER, // Assign a high value for sorting purposes
+              if: { $gt: ["$order", 0] },
+              then: { $toInt: { $ifNull: ["$order", 0] } },
+              else: Number.MAX_SAFE_INTEGER,
             },
           },
         },
       },
       {
         $sort: {
-          sortKey: 1, // Sort by the new sortKey field first (ascending)
-          createdAt: -1, // Then sort by createdAt in descending order
+          sortKey: 1,
+          createdAt: -1,
         },
       },
       {
@@ -285,7 +238,7 @@ _classification.list = async (req, res, next) => {
       await setResponseObject(
         req,
         true,
-        "Classification list found successfully",
+        "Class list found successfully",
         list[0].data,
         list[0].count[0].count,
         pageNo,
@@ -293,7 +246,7 @@ _classification.list = async (req, res, next) => {
       );
       next();
     } else {
-      await setResponseObject(req, true, "Classification list not found", []);
+      await setResponseObject(req, true, "Class list not found", []);
       next();
     }
   } catch (error) {
@@ -302,16 +255,18 @@ _classification.list = async (req, res, next) => {
   }
 };
 
-/*View classification */
-_classification.detail = async (req, res, next) => {
+/*View class details*/
+_class.detail = async (req, res, next) => {
   try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
     let findPermision = await PERMISSION_MODEL.findOne({
       $or: [{ promotionId: req.userId }, { designedId: req.userId }],
     });
     if (findPermision) {
       let parsePermission = findPermision.rolesPrivileges;
     }
-    const getSingle = await CALSSIFICATION.aggregate([
+    
+    const getSingle = await CLASS_MODEL.aggregate([
       {
         $match: {
           _id: new mongoose.Types.ObjectId(req.params.id),
@@ -371,44 +326,18 @@ _classification.detail = async (req, res, next) => {
       {
         $unwind: { path: "$updatedBy", preserveNullAndEmptyArrays: true },
       },
-      {
-        $lookup: {
-          from: "categories",
-          let: { id: { $ifNull: ["$categoryId", ""] } },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$$id", "$_id"] },
-                stateId: { $ne: CONST.DELETED },
-              },
-            },
-            {
-              $project: {
-                _id: 1,
-                category: 1,
-                arabicCategory: 1,
-                categoryImg: 1,
-                order: 1,
-              },
-            },
-          ],
-          as: "category",
-        },
-      },
-      {
-        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
-      },
     ]);
+    
     if (getSingle.length > 0) {
       await setResponseObject(
         req,
         true,
-        "Classification found successfully",
+        "Class found successfully",
         getSingle[0]
       );
       next();
     } else {
-      await setResponseObject(req, true, "Classification not found", "");
+      await setResponseObject(req, true, "Class not found", "");
       next();
     }
   } catch (error) {
@@ -417,65 +346,30 @@ _classification.detail = async (req, res, next) => {
   }
 };
 
-/*Update classification*/
-_classification.update = async (req, res, next) => {
+/*Update class*/
+_class.update = async (req, res, next) => {
   try {
     const data = req.body;
     data.updatedBy = req.userId;
     data.name = capitalizeLetter(data?.name)?.trim();
     data.arbicName = capitalizeLetter(data?.arbicName)?.trim();
-    
-    // Validate categoryId if provided
-    if (data.categoryId) {
-      const categoryExists = await CATEGORY_MODEL.findOne({
-        _id: data.categoryId,
-        stateId: { $ne: CONST.DELETED },
-      });
-      
-      if (!categoryExists) {
-        await setResponseObject(
-          req,
-          false,
-          "Category not found or deleted"
-        );
-        next();
-        return;
-      }
-    }
-    
-    // if (data.order !== "") {
-    //   const isExists = await CALSSIFICATION.findOne({
-    //     _id: { $ne: new mongoose.Types.ObjectId(req.params.id) },
-    //     name: validationData(data.name),
-    //     stateId: { $ne: CONST.DELETED },
-    //   });
 
-    //   if (isExists) {
-    //     await setResponseObject(
-    //       req,
-    //       false,
-    //       `Classification already exist with this name`
-    //     );
-    //     next();
-    //     return;
-    //   }
-    // }
-
-    const updateData = await CALSSIFICATION.findByIdAndUpdate(
+    const updateData = await CLASS_MODEL.findByIdAndUpdate(
       { _id: req.params.id },
       data,
       { new: true }
     );
+    
     if (updateData) {
       await setResponseObject(
         req,
         true,
-        "Classification updated successfully",
+        "Class updated successfully",
         updateData
       );
       next();
     } else {
-      await setResponseObject(req, false, "Classification not updated");
+      await setResponseObject(req, false, "Class not updated");
       next();
     }
   } catch (error) {
@@ -484,32 +378,37 @@ _classification.update = async (req, res, next) => {
   }
 };
 
-/*Udate classification state*/
-_classification.updateState = async (req, _res, next) => {
+/*Update class state*/
+_class.updateState = async (req, res, next) => {
   try {
-    console.log("Updating classification state", req.params.id, req.body.stateId);
+    const data = req.body;
     let filter = {};
     let resp;
 
-    switch (req.query.stateId) {
-      case "1":
+    switch (data.stateId) {
+      case CONST.ACTIVE:
+      case 1:
         filter = {
-          stateId: 1, // 1 => ACTIVE
+          stateId: CONST.ACTIVE,
         };
-        resp = "Classification Active successfully";
+        resp = "Class Active successfully";
         break;
 
-      case "2":
+      case CONST.INACTIVE:
+      case 2:
         filter = {
-          stateId: 2, // 2 => INACTIVE
+          stateId: CONST.INACTIVE,
         };
-        resp = "Classification In-Active successfully";
+        resp = "Class In-Active successfully";
         break;
 
       default:
+        await setResponseObject(req, false, "Invalid state provided");
+        next();
+        return;
     }
 
-    let updateState = await CALSSIFICATION.findByIdAndUpdate(
+    let updateState = await CLASS_MODEL.findByIdAndUpdate(
       { _id: req.params.id },
       {
         $set: filter,
@@ -521,7 +420,7 @@ _classification.updateState = async (req, _res, next) => {
       await setResponseObject(req, true, resp, updateState);
       next();
     } else {
-      await setResponseObject(req, false, "Classification state not updated");
+      await setResponseObject(req, false, "Class state not updated");
       next();
     }
   } catch (error) {
@@ -530,21 +429,22 @@ _classification.updateState = async (req, _res, next) => {
   }
 };
 
-/*Delete classification*/
-_classification.delete = async (req, res, next) => {
+/*Delete class*/
+_class.delete = async (req, res, next) => {
   try {
-    const deleteData = await CALSSIFICATION.findByIdAndUpdate(
+    const deleteData = await CLASS_MODEL.findByIdAndUpdate(
       {
         _id: req.params.id,
       },
       { stateId: CONST.DELETED },
       { new: true }
     );
+    
     if (deleteData) {
-      await setResponseObject(req, true, "Classification deleted successfully");
+      await setResponseObject(req, true, "Class deleted successfully");
       next();
     } else {
-      await setResponseObject(req, false, "Classification not deleted");
+      await setResponseObject(req, false, "Class not deleted");
       next();
     }
   } catch (error) {
@@ -553,9 +453,10 @@ _classification.delete = async (req, res, next) => {
   }
 };
 
-/*Get all classification*/
-_classification.activeList = async (req, res, next) => {
+/*Get active classes*/
+_class.activeList = async (req, res, next) => {
   try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
     let pageNo = parseInt(req.query.pageNo) || 1;
     let pageLimit = parseInt(req.query.pageLimit) || 10;
 
@@ -581,7 +482,7 @@ _classification.activeList = async (req, res, next) => {
       ];
     }
 
-    let list = await CALSSIFICATION.aggregate([
+    let list = await CLASS_MODEL.aggregate([
       {
         $match: {
           stateId: { $eq: CONST.ACTIVE },
@@ -607,7 +508,7 @@ _classification.activeList = async (req, res, next) => {
       await setResponseObject(
         req,
         true,
-        "Classification list found successfully",
+        "Class list found successfully",
         list[0].data,
         list[0].count[0].count,
         pageNo,
@@ -615,7 +516,7 @@ _classification.activeList = async (req, res, next) => {
       );
       next();
     } else {
-      await setResponseObject(req, true, "Classification list not found", []);
+      await setResponseObject(req, true, "Class list not found", []);
       next();
     }
   } catch (error) {
@@ -624,112 +525,32 @@ _classification.activeList = async (req, res, next) => {
   }
 };
 
-/*Get all classification*/
-_classification.companyClassification = async (req, res, next) => {
+/*Get dropdown class list*/
+_class.dropDownClass = async (req, res, next) => {
   try {
     let language = req.headers["language"] ? req.headers["language"] : "EN";
 
-    let pageNo = parseInt(req.query.pageNo) || 1;
-    let pageLimit = parseInt(req.query.pageLimit) || 10;
-
-    let list = await PRODUCT_MODEL.aggregate([
-      {
-        $match: {
-          company: new mongoose.Types.ObjectId(req.params.id),
-          stateId: CONST.ACTIVE,
+    let searchFilter = {};
+    if (req.query.search && req.query.search !== "undefined") {
+      searchFilter.$or = [
+        {
+          name: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\").trim(),
+            $options: "i",
+          },
         },
-      },
-      {
-        $lookup: {
-          from: "classifications",
-          let: { id: "$classification" },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$$id", "$_id"] },
-                stateId: CONST.ACTIVE,
-              },
-            },
-            {
-              $project: {
-                _id: 1,
-                name: {
-                  $cond: {
-                    if: { $eq: [language, "AR"] }, // Check if language is 'AR'
-                    then: {
-                      $ifNull: ["$arbicName", "$name"], // Use arabicCategory if it exists, otherwise use category
-                    },
-                    else: "$name", // If language is not 'AR', use category
-                  },
-                },
-                order: 1,
-                stateId: 1,
-                createdAt: 1,
-              },
-            },
-            {
-              $addFields: {
-                sortKey: {
-                  $cond: {
-                    if: { $gt: ["$order", 0] }, // Check if 'order' exists and is greater than 0
-                    then: { $toInt: { $ifNull: ["$order", 0] } }, // Convert to integer safely
-                    else: Number.MAX_SAFE_INTEGER, // Assign a high value for sorting purposes
-                  },
-                },
-              },
-            },
-          ],
-          as: "classification",
+        {
+          arbicName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\").trim(),
+            $options: "i",
+          },
         },
-      },
-      {
-        $unwind: { path: "$classification", preserveNullAndEmptyArrays: true },
-      },
-      {
-        $group: {
-          _id: "$classification._id",
-          classification: { $first: "$classification" },
-        },
-      },
-      {
-        $sort: {
-          "classification.sortKey": 1, // Sort by the sortKey field first (ascending)
-          "classification.createdAt": -1, // Then sort by createdAt in descending order
-        },
-      },
-      {
-        $facet: {
-          data: [{ $skip: pageLimit * (pageNo - 1) }, { $limit: pageLimit }],
-          count: [{ $count: "count" }],
-        },
-      },
-    ]);
-
-    if (list && list[0].data.length) {
-      await setResponseObject(
-        req,
-        true,
-        "Classification list found successfully",
-        list[0].data,
-        list[0].count[0].count,
-        pageNo,
-        pageLimit
-      );
-      next();
-    } else {
-      await setResponseObject(req, true, "Classification list not found", []);
-      next();
+      ];
     }
-  } catch (error) {
-    await setResponseObject(req, false, error.message, "");
-    next();
-  }
-};
-
-/*Get all classification*/
-_classification.activeClassification = async (req, res, next) => {
-  try {
-    let language = req.headers["language"] ? req.headers["language"] : "EN";
 
     let roleFilter = {};
     if (
@@ -744,7 +565,7 @@ _classification.activeClassification = async (req, res, next) => {
       };
     }
 
-    let list = await CALSSIFICATION.aggregate([
+    let list = await CLASS_MODEL.aggregate([
       {
         $match: {
           stateId: { $eq: CONST.ACTIVE },
@@ -754,28 +575,22 @@ _classification.activeClassification = async (req, res, next) => {
         $match: roleFilter,
       },
       {
-        $lookup: {
-          from: "products",
-          let: { id: "$_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$$id", "$classification"] },
-                stateId: CONST.ACTIVE,
-                quantity: { $gt: 0 },
-              },
-            },
-          ],
-          as: "products",
-        },
+        $match: searchFilter,
       },
       {
-        $match: {
-          products: { $ne: [] }, // Filter to include only classifications with products
+        $addFields: {
+          sortKey: {
+            $cond: {
+              if: { $gt: ["$order", 0] },
+              then: { $toInt: { $ifNull: ["$order", 0] } },
+              else: Number.MAX_SAFE_INTEGER,
+            },
+          },
         },
       },
       {
         $sort: {
+          sortKey: 1,
           createdAt: 1,
         },
       },
@@ -784,11 +599,11 @@ _classification.activeClassification = async (req, res, next) => {
           _id: 1,
           name: {
             $cond: {
-              if: { $eq: [language, "AR"] }, // Check if language is 'AR'
+              if: { $eq: [language, "AR"] },
               then: {
-                $ifNull: ["$arbicName", "$name"], // Use arabicCategory if it exists, otherwise use category
+                $ifNull: ["$arbicName", "$name"],
               },
-              else: "$name", // If language is not 'AR', use category
+              else: "$name",
             },
           },
           arbicName: 1,
@@ -803,12 +618,12 @@ _classification.activeClassification = async (req, res, next) => {
       await setResponseObject(
         req,
         true,
-        "Classification list found successfully",
+        "Class list found successfully",
         list
       );
       next();
     } else {
-      await setResponseObject(req, true, "Classification list not found", []);
+      await setResponseObject(req, true, "Class list not found", []);
       next();
     }
   } catch (error) {
@@ -817,56 +632,22 @@ _classification.activeClassification = async (req, res, next) => {
   }
 };
 
-/*Get classifications by category*/
-_classification.getByCategory = async (req, res, next) => {
+/*Get classes by classification*/
+_class.getClassesByClassification = async (req, res, next) => {
   try {
     let language = req.headers["language"] ? req.headers["language"] : "EN";
     
-    // Validate categoryId parameter
-    if (!req.params.categoryId || !mongoose.Types.ObjectId.isValid(req.params.categoryId)) {
-      await setResponseObject(
-        req,
-        false,
-        "Invalid category ID provided"
-      );
-      next();
-      return;
-    }
-
-    // First check if category exists
-    const categoryExists = await CATEGORY_MODEL.findOne({
-      _id: req.params.categoryId,
-      stateId: { $ne: CONST.DELETED },
-    });
-
-    if (!categoryExists) {
-      await setResponseObject(
-        req,
-        false,
-        "Category not found or deleted"
-      );
-      next();
-      return;
-    }
-
-    // Check if any classifications exist for this category (for debugging)
-    const classificationCount = await CALSSIFICATION.countDocuments({
-      categoryId: new mongoose.Types.ObjectId(req.params.categoryId),
-    });
-
-    console.log(`Total classifications for category ${req.params.categoryId}:`, classificationCount);
-
-    const list = await CALSSIFICATION.aggregate([
+    const classes = await CLASS_MODEL.aggregate([
       {
         $match: {
-          categoryId: new mongoose.Types.ObjectId(req.params.categoryId),
+          classificationId: new mongoose.Types.ObjectId(req.params.classificationId),
           stateId: { $eq: CONST.ACTIVE },
         },
       },
       {
         $lookup: {
-          from: "categories",
-          let: { id: { $ifNull: ["$categoryId", ""] } },
+          from: "classifications",
+          let: { id: { $ifNull: ["$classificationId", ""] } },
           pipeline: [
             {
               $match: {
@@ -877,24 +658,23 @@ _classification.getByCategory = async (req, res, next) => {
             {
               $project: {
                 _id: 1,
-                category: {
+                name: {
                   $cond: {
                     if: { $eq: [language, "AR"] },
                     then: {
-                      $ifNull: ["$arabicCategory", "$category"],
+                      $ifNull: ["$arbicName", "$name"],
                     },
-                    else: "$category",
+                    else: "$name",
                   },
                 },
-                categoryImg: 1,
               },
             },
           ],
-          as: "category",
+          as: "classification",
         },
       },
       {
-        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
+        $unwind: { path: "$classification", preserveNullAndEmptyArrays: true },
       },
       {
         $project: {
@@ -908,49 +688,32 @@ _classification.getByCategory = async (req, res, next) => {
               else: "$name",
             },
           },
-          category: 1,
+          classification: 1,
           order: 1,
           createdAt: 1,
         },
       },
       {
-        $addFields: {
-          sortKey: {
-            $cond: {
-              if: { $gt: ["$order", 0] },
-              then: { $toInt: { $ifNull: ["$order", 0] } },
-              else: Number.MAX_SAFE_INTEGER,
-            },
-          },
-        },
-      },
-      {
-        $sort: { sortKey: 1, createdAt: -1 },
+        $sort: { order: 1, createdAt: -1 },
       },
     ]);
 
-    if (list && list.length > 0) {
+    if (classes && classes.length > 0) {
       await setResponseObject(
         req,
         true,
-        "Classifications found successfully",
-        list
+        "Classes found successfully",
+        classes
       );
       next();
     } else {
-      await setResponseObject(
-        req,
-        true, 
-        `No active classifications found for this category. Total classifications: ${classificationCount}`,
-        []
-      );
+      await setResponseObject(req, true, "No classes found", []);
       next();
     }
   } catch (error) {
-    console.error("Error in getByCategory:", error);
     await setResponseObject(req, false, error.message, "");
     next();
   }
 };
 
-module.exports = _classification;
+module.exports = _class;
