@@ -87,8 +87,8 @@ subcategory.add = async (req, res, next) => {
       if (req?.files?.subCategoryImg) {
         data.subCategoryImg =
           process.env.IMAGE_BASE_URL +
-          req?.files?.subCategoryImg?.[0].path.replace(/\s+/g, "");
-        data.subCategoryImg = data?.subCategoryImg.replace(/\/\.\.\//g, "/");
+          "uploads/subCategoryImg/" +
+          req.files?.subCategoryImg?.[0].filename;
       }
       const result = await SUBCATEGORY_MODEL.create(data);
       if (result) {
@@ -358,8 +358,8 @@ subcategory.update = async (req, res, next) => {
         }
         data.subCategoryImg =
           process.env.IMAGE_BASE_URL +
-          req.files?.subCategoryImg?.[0].path.replace(/\s+/g, "");
-        data.subCategoryImg = data.subCategoryImg.replace(/\/\.\.\//g, "/");
+          "uploads/subCategoryImg/" +
+          req.files?.subCategoryImg?.[0].filename;
       }
       const updateData = await SUBCATEGORY_MODEL.findByIdAndUpdate(
         { _id: req.params.id },

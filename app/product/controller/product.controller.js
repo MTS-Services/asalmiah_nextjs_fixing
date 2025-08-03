@@ -57,6 +57,7 @@ const product = {};
  * @param {*} next
  */
 product.add = async (req, res, next) => {
+  console.log(req.body);
   try {
     if (!fs.existsSync(dir)) {
       !fs.mkdirSync(dir, {
@@ -95,7 +96,7 @@ product.add = async (req, res, next) => {
         if (req?.files?.productImg) {
           const arr = [];
           req.files.productImg.map((e) => {
-            let url = process.env.IMAGE_BASE_URL + e.path.replace(/\s+/g, "");
+            let url = process.env.IMAGE_BASE_URL + e.path.replace(/\s+/g, "").replace(/\\/g, "/");
             let type = e.mimetype;
             url = url.replace(/\/\.\.\//g, "/");
             arr.push({
@@ -303,7 +304,7 @@ product.update = async (req, res, next) => {
           const previousImages = findproduct.productImg;
           const arr = [];
           req.files.productImg.map(async (e) => {
-            let url = process.env.IMAGE_BASE_URL + e.path.replace(/\s+/g, "");
+            let url = process.env.IMAGE_BASE_URL + e.path.replace(/\s+/g, "").replace(/\\/g, "/");
             let type = e.mimetype;
             url = url.replace(/\/\.\.\//g, "/");
             arr.push({

@@ -82,7 +82,7 @@ review.addReview = async (req, res, next) => {
           if (req.files.reviewImg) {
             const arr = [];
             req.files.reviewImg.map((e) => {
-              let url = process.env.IMAGE_BASE_URL + e.path.replace(/\s+/g, "");
+              let url = process.env.IMAGE_BASE_URL + e.path.replace(/\s+/g, "").replace(/\\/g, "/");
               url = url.replace(/\/\.\.\//g, "/");
               arr.push({
                 url: url,
@@ -143,7 +143,7 @@ review.addReview = async (req, res, next) => {
           if (req.files.reviewImg) {
             const arr = [];
             req.files.reviewImg.map((e) => {
-              let url = process.env.IMAGE_BASE_URL + e.path.replace(/\s+/g, "");
+              let url = process.env.IMAGE_BASE_URL + e.path.replace(/\s+/g, "").replace(/\\/g, "/");
               url = url.replace(/\/\.\.\//g, "/");
               arr.push({
                 url: url,

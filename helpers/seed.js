@@ -65,6 +65,76 @@ const createCategory = async () => {
   }
 };
 
+
+const createSubcategory = async () => {
+    const subCategoryArr = [
+      {
+        category: "Food",
+        arabicCategory: "طعام",
+        categoryImg:
+          "https://cdn.pixabay.com/photo/2022/06/27/05/38/spices-7286739_1280.jpg",
+      },
+      {
+        category: "Health",
+        arabicCategory: "صحة",
+        categoryImg:
+          "https://cdn.pixabay.com/photo/2015/07/30/14/36/hypertension-867855_1280.jpg",
+      },
+      {
+        category: "Grocery",
+        arabicCategory: "خضروات",
+        categoryImg:
+          "https://cdn.pixabay.com/photo/2022/08/01/07/59/vegetables-7357585_1280.png",
+      },
+      {
+        category: "Cars",
+        arabicCategory: "سيارات",
+        categoryImg:
+          "https://cdn.pixabay.com/photo/2022/11/10/20/04/street-7583585_1280.jpg",
+      },
+      {
+        category: "Electric",
+        arabicCategory: "كهربائي",
+        categoryImg:
+          "https://cdn.pixabay.com/photo/2018/07/30/10/13/screws-3572190_1280.jpg",
+      },
+      {
+        category: "Entertainment",
+        arabicCategory: "ترفيه",
+        categoryImg:
+          "https://cdn.pixabay.com/photo/2019/11/02/01/15/headphones-4595492_1280.jpg",
+      },
+      {
+        category: "Cosmetology",
+        arabicCategory: "التجميل",
+        categoryImg:
+          "https://cdn.pixabay.com/photo/2024/10/01/17/45/ai-generated-9089095_1280.png",
+      },
+    ];
+
+    const findAdmin = await USER.findOne({ roleId: CONST.ADMIN });
+
+    for (const element of subCategoryArr) {
+      const payload = {
+        category: element.category,
+        arabicCategory: element.arabicCategory,
+        categoryImg: element.categoryImg,
+        createdBy: findAdmin._id,
+      };
+
+      const isExist = await CATEGORY_MODEL.findOne({
+        category: payload.category,
+      });
+
+      if (isExist) {
+        logger.info(`Category already created`);
+      } else {
+        await CATEGORY_MODEL(payload).save();
+        logger.info(`Category created successfully`);
+      }
+    }
+  };
+
 const seed = async () => {
   await createAdmin();
   await createCategory();
