@@ -180,6 +180,7 @@ router.group("/class", (classRoute) => {
   classRoute.delete("/delete/:id", _class.delete);
   classRoute.get("/dropDownClass", _class.dropDownClass);
   classRoute.get("/activeList", _class.activeList);
+  classRoute.get("/classification/:classificationId", _class.getClassesByClassification);
 });
 /* Sub category Management  */
 router.group("/subcategory", (subcategory) => {
@@ -324,16 +325,6 @@ router.group("/classification", (classification) => {
   classification.delete("/delete/:id", _classification.delete);
   classification.get("/dropDown", _classification.activeList);
   classification.get("/category/:categoryId", _classification.getByCategory);
-});
-
-/* Class Management  */
-router.group("/class", (classRoute) => {
-  classRoute.post("/add", _class.add);
-  classRoute.get("/list", _class.list);
-  classRoute.get("/detail/:id", _class.detail);
-  classRoute.put("/update/:id", _class.update);
-  classRoute.put("/updateState/:id", _class.updateState);
-  classRoute.get("/classification/:classificationId", _class.getClassesByClassification);
 });
 
 /* Review Management  */

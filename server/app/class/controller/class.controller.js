@@ -18,49 +18,51 @@ const mongoose = require("mongoose");
 const { CONST } = require("../../../helpers/constant");
 const { PERMISSION_MODEL } = require("../../permission/model/model");
 const _class = {};
-
 /*Add class*/
 _class.add = async (req, res, next) => {
-  try {
-    const data = req.body;
-    data.createdBy = req.userId;
-    data.name = capitalizeLetter(data?.name)?.trim();
-    data.arbicName = capitalizeLetter(data?.arbicName)?.trim();
-    
-    const isExists = await CLASS_MODEL.findOne({
-      $and: [
-        { name: validationData(data.name) },
-        { stateId: { $ne: CONST.DELETED } },
-      ],
-    });
+    try {
+        const data = req.body;
+        data.createdBy = req.userId;
+        data.name = capitalizeLetter(data?.name)?.trim();
+        data.arbicName = capitalizeLetter(data?.arbicName)?.trim();
+        
+        const isExists = await CLASS_MODEL.findOne({
+            $and: [
+                { 
+                    name: { 
+                        $regex: new RegExp(`^${data.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i')
+                    } 
+                },
+                { stateId: { $ne: CONST.DELETED } },
+            ],
+        });
 
-    if (isExists) {
-      await setResponseObject(
-        req,
-        false,
-        "Class already exist with name"
-      );
-      next();
-      return;
-    }
+        if (isExists) {
+            await setResponseObject(
+                req,
+                false,
+                "Class already exist with name"
+            );
+            return next(); // Use return here to stop execution
+        }
 
-    const result = await CLASS_MODEL.create(data);
-    if (result) {
-      await setResponseObject(
-        req,
-        true,
-        "Class added successfully",
-        result
-      );
-      next();
-    } else {
-      await setResponseObject(req, false, "Class not added");
-      next();
+        const result = await CLASS_MODEL.create(data);
+        if (result) {
+            await setResponseObject(
+                req,
+                true,
+                "Class added successfully",
+                result
+            );
+            next();
+        } else {
+            await setResponseObject(req, false, "Class not added");
+            next();
+        }
+    } catch (error) {
+        await setResponseObject(req, false, error.message, "");
+        next();
     }
-  } catch (error) {
-    await setResponseObject(req, false, error.message, "");
-    next();
-  }
 };
 
 /*Get all classes*/
@@ -380,53 +382,58 @@ _class.update = async (req, res, next) => {
 
 /*Update class state*/
 _class.updateState = async (req, res, next) => {
-  try {
-    const data = req.body;
-    let filter = {};
-    let resp;
+    try {
+        const data = req.query;
+        let filter = {};
+        let resp;
 
-    switch (data.stateId) {
-      case CONST.ACTIVE:
-      case 1:
-        filter = {
-          stateId: CONST.ACTIVE,
-        };
-        resp = "Class Active successfully";
-        break;
+        // Convert string values to numbers for comparison
+        const stateId = parseInt(data.stateId);
 
-      case CONST.INACTIVE:
-      case 2:
-        filter = {
-          stateId: CONST.INACTIVE,
-        };
-        resp = "Class In-Active successfully";
-        break;
+        switch (stateId) {
+            case CONST.ACTIVE:
+            case 1:
+                filter = {
+                    stateId: CONST.ACTIVE,
+                };
+                resp = "Class activated successfully";
+                break;
 
-      default:
-        await setResponseObject(req, false, "Invalid state provided");
+            case CONST.INACTIVE:
+            case 2:
+                filter = {
+                    stateId: CONST.INACTIVE,
+                };
+                resp = "Class deactivated successfully";
+                break;
+
+            default:
+                await setResponseObject(req, false, "Invalid state provided");
+                return next();
+        }
+
+        // Add updatedBy field
+        filter.updatedBy = req.userId;
+
+        let updateState = await CLASS_MODEL.findByIdAndUpdate(
+            { _id: req.params.id },
+            {
+                $set: filter,
+            },
+            { new: true }
+        );
+
+        if (updateState) {
+            await setResponseObject(req, true, resp, updateState);
+            next();
+        } else {
+            await setResponseObject(req, false, "Class state not updated");
+            next();
+        }
+    } catch (error) {
+        await setResponseObject(req, false, error.message, "");
         next();
-        return;
     }
-
-    let updateState = await CLASS_MODEL.findByIdAndUpdate(
-      { _id: req.params.id },
-      {
-        $set: filter,
-      },
-      { new: true }
-    );
-
-    if (updateState) {
-      await setResponseObject(req, true, resp, updateState);
-      next();
-    } else {
-      await setResponseObject(req, false, "Class state not updated");
-      next();
-    }
-  } catch (error) {
-    await setResponseObject(req, false, error.message, "");
-    next();
-  }
 };
 
 /*Delete class*/

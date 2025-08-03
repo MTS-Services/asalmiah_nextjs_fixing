@@ -11,7 +11,6 @@ Unauthorized copying of this file, via any medium is strictly prohibited.
 
 import Link from "next/link";
 import * as yup from "yup";
-// import useDocumentTitle from "@/utils/ useDocumentTitle";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
@@ -21,39 +20,27 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import useSlider from "../../../../../../hooks/useSlider";
 import {
-  ADD_CLASSIFICATION_API,
-  GET_CATEGORY_LIST_HOME
+  ADD_CLASS_API
 } from "../../../../../../services/APIServices";
 import { toastAlert } from "../../../../../../utils/SweetAlert";
 import { getLinkHref, restrictAlpha } from "../../../../../../utils/helper";
 import useDetails from "../../../../../../hooks/useDetails";
-import { useQuery } from "@tanstack/react-query";
 
 const Add = () => {
-  // useDocumentTitle("Add Category");
   const router = useRouter();
 
   const isSlider = useSlider();
   const detail = useDetails();
   const queryClient = useQueryClient();
 
-  // Fetch categories for dropdown
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const resp = await GET_CATEGORY_LIST_HOME();
-      return resp?.data?.data || [];
-    },
-  });
-
   const { mutate, error, isPending } = useMutation({
-    mutationFn: (payload) => ADD_CLASSIFICATION_API(payload),
+    mutationFn: (payload) => ADD_CLASS_API(payload),
     onSuccess: (resp) => {
       toastAlert("success", resp?.data?.message);
       resetForm();
-      router.push(getLinkHref(detail?.roleId, "/page/classification-management"));
+      router.push(getLinkHref(detail?.roleId, "/page/class-management"));
       queryClient.invalidateQueries({
-        queryKey: ["classification-management"],
+        queryKey: ["class-management"],
       });
     },
   });
@@ -73,7 +60,6 @@ const Add = () => {
     initialValues: {
       name: "",
       arbicName: "",
-      categoryId: "",
       order: "",
     },
 
@@ -81,29 +67,23 @@ const Add = () => {
       name: yup
         .string()
         .required()
-        .label("Classification Name")
+        .label("Class Name")
         .trim()
         .matches(
           /^(?=.*[a-zA-Z])[a-zA-Z0-9\s\-]+$/,
-          "Please enter a valid Classification Name , it must contain at least one letter"
+          "Please enter a valid Class Name , it must contain at least one letter"
         ),
       arbicName: yup
         .string()
         .required()
-        .label("Classification Name (in arabic)")
+        .label("Class Name (in arabic)")
         .trim(),
-      categoryId: yup
-        .string()
-        .required()
-        .label("Category"),
-      // order: yup.string().required().label("Order").trim(),
     }),
 
     onSubmit: async (values) => {
       const body = {
         name: values?.name,
         arbicName: values?.arbicName,
-        categoryId: values?.categoryId,
         order: values?.order,
       };
       mutate(body);
@@ -125,23 +105,23 @@ const Add = () => {
             <li>
               {" "}
               <Link
-                href={getLinkHref(detail?.roleId, "/page/classification-management")}
+                href={getLinkHref(detail?.roleId, "/page/class-management")}
                 className="text-capitalize text-black"
               >
-                Classification management
+                Class management
               </Link>
             </li>
             <li>/</li>
-            <li className="text-capitalize">Add Classification</li>
+            <li className="text-capitalize">Add Class</li>
           </ul>
         </div>
         <div className="row">
           <div className="col-lg-12">
             <div className="card">
               <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
-                <h5 className="mb-md-0">Add Classification</h5>
+                <h5 className="mb-md-0">Add Class</h5>
                 <Link
-                  href={getLinkHref(detail?.roleId, "/page/classification-management")}
+                  href={getLinkHref(detail?.roleId, "/page/class-management")}
                   className="btn_theme"
                 >
                   Back
@@ -153,14 +133,14 @@ const Add = () => {
                     <Col md={6} className="mx-auto">
                       <Form.Group className="mb-4">
                         <Form.Label>
-                          Classification Name
+                          Class Name
                           <span className="text-danger">*</span>
                         </Form.Label>
                         <Form.Control
                           className="form-control"
                           type="text"
                           name="name"
-                          placeholder="Enter Classification Name"
+                          placeholder="Enter Class Name"
                           onChange={handleChange}
                           value={values?.name}
                         />
@@ -176,49 +156,20 @@ const Add = () => {
                     <Col md={6} className="mx-auto">
                       <Form.Group className="mb-4">
                         <Form.Label>
-                          Classification Name (In Arabic)
+                          Class Name (In Arabic)
                           <span className="text-danger">*</span>
                         </Form.Label>
                         <Form.Control
                           className="form-control"
                           type="text"
                           name="arbicName"
-                          placeholder="Enter Classification Name (in arabic)"
+                          placeholder="Enter Class Name (in arabic)"
                           onChange={handleChange}
                           value={values?.arbicName}
                         />
                         {touched?.arbicName && errors?.arbicName ? (
                           <span className="error">
                             {touched?.arbicName && errors?.arbicName}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={6} className="mx-auto">
-                      <Form.Group className="mb-4">
-                        <Form.Label>
-                          Category
-                          <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Select
-                          className="form-control"
-                          name="categoryId"
-                          onChange={handleChange}
-                          value={values?.categoryId}
-                        >
-                          <option value="">Select Category</option>
-                          {categories?.map((category) => (
-                            <option key={category?._id} value={category?._id}>
-                              {category?.category}
-                            </option>
-                          ))}
-                        </Form.Select>
-                        {touched?.categoryId && errors?.categoryId ? (
-                          <span className="error">
-                            {touched?.categoryId && errors?.categoryId}
                           </span>
                         ) : (
                           ""
@@ -238,13 +189,6 @@ const Add = () => {
                           onBlur={handleBlur}
                           onKeyPress={restrictAlpha}
                         />
-                        {/* {touched?.order && errors?.order ? (
-                          <span className="error">
-                            {touched?.order && errors?.order}
-                          </span>
-                        ) : (
-                          ""
-                        )} */}
                       </Form.Group>
                     </Col>
                   </Row>

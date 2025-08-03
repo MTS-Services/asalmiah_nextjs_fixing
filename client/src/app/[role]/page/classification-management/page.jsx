@@ -239,6 +239,7 @@ const CategoryManagement = () => {
                           )}
                         </th>
                         <th>Classification Name Arabic</th>
+                        <th>Category</th>
                         <th>Order sort no.</th>
 
                         <th
@@ -274,6 +275,7 @@ const CategoryManagement = () => {
                               <td>{serialNumber(page, index)}</td>
                               <td>{data?.name}</td>
                               <td>{data?.arbicName}</td>
+                              <td>{data?.category?.category || "N/A"}</td>
                               <td>{data?.order ?? "-"}</td>
                               <td>{moment(data?.createdAt).format("LL")}</td>
                               {detail?.roleId == constant.ADMIN ? <td>

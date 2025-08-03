@@ -29,14 +29,11 @@ export const constant = Object.freeze({
 
   CATEGORY_ACTIVE: 0,
 
-  // product state id
+  // product specific state id
   // 1 => ACTIVE, 2 => INACTIVE, 3 => out of stock, 4 => DELETED, 5 => Discontinued, 6 => Banned/reported
-  ACTIVE: 1,
-  INACTIVE: 2,
-  DELETED: 3,
-  BAN: 4,
-  PENDING: 5,
-  REJECT: 6,
+  PRODUCT_OUTOFSTOCK: 3,
+  PRODUCT_DISCONTINUED: 5,
+  PRODUCT_BANNED: 6,
 
   // Pagination
   PER_PAGE: 10,

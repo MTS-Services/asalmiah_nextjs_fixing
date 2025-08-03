@@ -16,22 +16,20 @@ import { Table } from "react-bootstrap";
 import useDetails from "../../../../../../../hooks/useDetails";
 import useSlider from "../../../../../../../hooks/useSlider";
 import {
-  GET_CLASSIFICATION_DETAIL_API
+  GET_CLASS_DETAIL_API
 } from "../../../../../../../services/APIServices";
 import { getLinkHref, getLinkHrefRouteSingleView, ROLE_STATUS, stateId } from "../../../../../../../utils/helper";
 import { constant } from "../../../../../../../utils/constants";
-
-// import useDocumentTitle from "@/utils/ useDocumentTitle";
 
 const View = () => {
   const isSlider = useSlider();
   const navigate = useRouter();
   const detail = useDetails();
   const { id } = useParams();
-  const { data: categoryview, isFetching } = useQuery({
-    queryKey: ["classification-detail", { id }],
+  const { data: classview, isFetching } = useQuery({
+    queryKey: ["class-detail", { id }],
     queryFn: async () => {
-      const res = await GET_CLASSIFICATION_DETAIL_API(id);
+      const res = await GET_CLASS_DETAIL_API(id);
       return res?.data?.data;
     },
   });
@@ -51,23 +49,23 @@ const View = () => {
             <li>
               {" "}
               <Link
-                href={getLinkHref(detail?.roleId, "/page/classification-management")}
+                href={getLinkHref(detail?.roleId, "/page/class-management")}
                 className="text-capitalize text-black"
               >
-                Classification management
+                Class management
               </Link>
             </li>
             <li>/</li>
-            <li className="text-capitalize">Classification details</li>
+            <li className="text-capitalize">Class details</li>
           </ul>
         </div>
         <div className="row">
           <div className="col-lg-12">
             <div className="card">
               <div className="card-header d-flex justify-content-between align-items-center flex-wrap">
-                <h5 className="mb-md-0">Classification Details</h5>
+                <h5 className="mb-md-0">Class Details</h5>
                 <Link
-                  href={getLinkHref(detail?.roleId, "/page/classification-management")}
+                  href={getLinkHref(detail?.roleId, "/page/class-management")}
                   className="btn_theme"
                 >
                   Back
@@ -77,58 +75,44 @@ const View = () => {
                 <Table bordered>
                   <tr>
                     <td>
-                      <b>Classification Name</b>
+                      <b>Class Name</b>
                     </td>
-                    <td>{categoryview?.name}</td>
+                    <td>{classview?.name}</td>
                   </tr>
                   <tr>
                     <td>
-                      <b>Classification Name Arabic</b>
+                      <b>Class Name Arabic</b>
                     </td>
-                    <td>{categoryview?.arbicName}</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <b>Category</b>
-                    </td>
-                    <td>{categoryview?.category?.category || "N/A"}</td>
+                    <td>{classview?.arbicName}</td>
                   </tr>
                   <tr>
                     <td>
                       <b>Priority Order</b>
                     </td>
-                    <td>{categoryview?.order || "N/A"}</td>
+                    <td>{classview?.order || "N/A"}</td>
                   </tr>
-                  <tr>
-                    <td>
-                      <b>CreatedOn</b>
-                    </td>
-                    <td>{moment(categoryview?.createdAt).format("lll")}</td>
-                  </tr>
-
                   {detail?.roleId == constant.ADMIN ? <tr>
                     <td>
                       <b>Created By</b>
                     </td>
                     <td><Link href={"#"} onClick={(e) => {
                       e.preventDefault()
-                      if (categoryview?.createdBy?.roleId !== constant.ADMIN) {
+                      if (classview?.createdBy?.roleId !== constant.ADMIN) {
 
+                        navigate.push(getLinkHrefRouteSingleView(detail?.roleId, classview?.createdBy?._id, ROLE_STATUS(classview?.createdBy?.roleId)))
 
-
-                        navigate.push(getLinkHrefRouteSingleView(detail?.roleId, categoryview?.createdBy?._id, ROLE_STATUS(categoryview?.createdBy?.roleId)))
 
                       } else {
                         navigate.push(getLinkHref(detail?.roleId, "/page/profile"))
                       }
-                    }}> {categoryview?.createdBy?.fullName ?? "-"} </Link></td>
+                    }}> {classview?.createdBy?.fullName ?? "-"} </Link></td>
                   </tr> : ""}
 
                   {detail?.roleId == constant.ADMIN ? <tr>
                     <td>
                       <b>Created On</b>
                     </td>
-                    <td>{moment(categoryview?.createdAt).format("LLL") ?? "-"}</td>
+                    <td>{moment(classview?.createdAt).format("LLL") ?? "-"}</td>
                   </tr> : ""}
 
                   {detail?.roleId == constant.ADMIN ? <tr>
@@ -137,21 +121,21 @@ const View = () => {
                     </td>
                     <td><Link href={"#"} onClick={(e) => {
                       e.preventDefault()
-                      if (categoryview?.updatedBy?.roleId !== constant.ADMIN) {
-                        navigate.push(getLinkHrefRouteSingleView(detail?.roleId, categoryview?.updatedBy?._id, ROLE_STATUS(categoryview?.updatedBy?.roleId)))
+                      if (classview?.updatedBy?.roleId !== constant.ADMIN) {
+                        navigate.push(getLinkHrefRouteSingleView(detail?.roleId, classview?.updatedBy?._id, ROLE_STATUS(classview?.updatedBy?.roleId)))
 
                       } else {
                         navigate.push(getLinkHref(detail?.roleId, "/page/profile"))
 
                       }
-                    }}> {categoryview?.updatedBy?.fullName ?? "-"} </Link></td>
+                    }}> {classview?.updatedBy?.fullName ?? "-"} </Link></td>
                   </tr> : ""}
 
                   {detail?.roleId == constant.ADMIN ? <tr>
                     <td>
                       <b>Updated On</b>
                     </td>
-                    <td>{moment(categoryview?.updatedAt).format("LLL") ?? "-"}</td>
+                    <td>{moment(classview?.updatedAt).format("LLL") ?? "-"}</td>
                   </tr> : ""}
 
                   <tr>
@@ -160,7 +144,7 @@ const View = () => {
                     </td>
                     <td>
                       <badge className="btn-sm d-inline-block bg-success text-white">
-                        {stateId(categoryview?.stateId)}
+                        {stateId(classview?.stateId)}
                       </badge>
                     </td>
                   </tr>
