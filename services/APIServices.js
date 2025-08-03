@@ -698,7 +698,7 @@ export const GET_PRODUCTLIST = async (
   minDiscount,
   maxDiscount
 ) => {
-  return await http.get(`/product/userProduct`, {
+  return await http.get(`/product/userProducts`, {
     params: {
       search: search,
       categoryId: categoryId,
