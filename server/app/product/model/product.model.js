@@ -111,6 +111,10 @@ const product = new Schema(
       type: mongoose.Types.ObjectId,
       ref: "classification",
     },
+    classId: {
+      type: mongoose.Types.ObjectId,
+      ref: "class",
+    },
     subcategoryId: {
       type: mongoose.Types.ObjectId,
       ref: "subcategory",

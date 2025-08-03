@@ -32,7 +32,8 @@ const _company = require("../app/company/controller/controller");
 const _banner = require("../app/banner/controller/banner.controller");
 const _testimonial = require("../app/testimonial/controller/testimonial.controller");
 const _contactInfo = require("../app/contactInfo/controller/controller");
-const _classification = require("../app/classification/controller/controller")
+const _classification = require("../app/classification/controller/controller");
+const _class = require("../app/class/controller/class.controller");
 const _review = require("../app/review/controller/review.controller");
 const _payment = require("../app/payment/controller/payment.controller");
 const { webhooks } = require("../app/payment/model/webhook.model");
@@ -125,6 +126,16 @@ router.group("/product", (product) => {
   product.get("/bestSellerProduct", _product.bestSellerProduct, handleResponse.RESPONSE);
   product.get("/newArrival", _product.newArrival,handleResponse.RESPONSE);
   product.get("/searchProductList", _product.searchProductList, handleResponse.RESPONSE);
+  
+  // New filtering routes
+  product.get("/company/:companyId", _product.getByCompany, handleResponse.RESPONSE);
+  product.get("/category/:categoryId", _product.getByCategory, handleResponse.RESPONSE);
+  product.get("/classification/:classificationId", _product.getByClassification, handleResponse.RESPONSE);
+  product.get("/class/:classId", _product.getByClass, handleResponse.RESPONSE);
+  product.get("/subcategory/:subcategoryId", _product.getBySubcategory, handleResponse.RESPONSE);
+  
+  // Multi-filter route for filtering by any combination
+  product.get("/filter", _product.filterProducts, handleResponse.RESPONSE);
 
 
 });
@@ -148,6 +159,14 @@ router.group("/classification", (classification) => {
   classification.get("/dropDown", _classification.activeList, handleResponse.RESPONSE);
   classification.get("/companyClassification/:id", _classification.companyClassification, handleResponse.RESPONSE);
   classification.get("/activeClassification", _classification.activeClassification, handleResponse.RESPONSE);
+  classification.get("/category/:categoryId", _classification.getByCategory, handleResponse.RESPONSE);
+});
+
+/* Class Management  */
+router.group("/class", (classRoute) => {
+  classRoute.get("/dropDownClass", _class.dropDownClass, handleResponse.RESPONSE);
+  classRoute.get("/activeList", _class.activeList, handleResponse.RESPONSE);
+  classRoute.get("/classification/:classificationId", _class.getClassesByClassification, handleResponse.RESPONSE);
 });
 
 /* Review Management  */

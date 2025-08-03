@@ -971,6 +971,7 @@ export const GET_BRANCHES_API = async (page, companyId) => {
 /****************************USER BANNER*******************************/
 
 export const ADD_PRODUCT_API = async (body) => {
+  console.log("ADD_PRODUCT_API", body);
   return await http.post(`/admin/product/add`, body);
 };
 
