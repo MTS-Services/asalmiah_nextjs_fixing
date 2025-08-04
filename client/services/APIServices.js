@@ -2,22 +2,7 @@ import axios from 'axios';
 import { store } from '../redux/store';
 import URL from '../utils/config';
 import { Paginations } from '../utils/constants';
-// const http = axios.create({
-//   baseURL: URL,
-// });
-// /* request interceptor */
-// http.interceptors.request.use(
-//   function (config) {
-//     let token = store.getState()?.auth?.data?.token;
-//     if (token) {
-//       config.headers["authorization"] = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   function (error) {
-//     return Promise.reject(error);
-//   }
-// );
+
 
 const http = axios.create({
   baseURL: URL,
@@ -647,6 +632,7 @@ export const GET_SUBCATEGORY_LIST_HOME = async (id, page) => {
     },
   });
 };
+
 export const GET_COMPANY_SUBCATEGORY_LIST_HOME = async (
   id,
   subcategoryId,
@@ -958,6 +944,7 @@ export const DELETE_BANNER_API = async (id) => {
 export const GET_BANNER_USER_API = async () => {
   return await http.get(`/banner/activeBanner`);
 };
+
 export const GET_BRANCHES_API = async (page, companyId) => {
   return await http.get(`/users/branch/branchByCompany`, {
     params: {

@@ -1,32 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 const TranslateWidget = () => {
   const [loading, setLoading] = useState(false);
   useEffect(() => {
-
     // Load the Google Translate script
     const addGoogleTranslateScript = () => {
-      const script = document.createElement("script");
+      const script = document.createElement('script');
       script.src =
-        "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+        '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
       script.async = true;
       document.body.appendChild(script);
     };
 
     const googleTranslateElementInit = () => {
-
       new window.google.translate.TranslateElement(
         {
-          pageLanguage: "en", // Set your default language here
-          includedLanguages: "en,ar", // Include only English and Arabic
+          pageLanguage: 'en', // Set your default language here
+          includedLanguages: 'en,ar', // Include only English and Arabic
           layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE, // Use SIMPLE layout
           autoDisplay: false,
           multilanguagePage: true,
-          gaTrack: "no",
+          gaTrack: 'no',
           disablePoweredBy: true,
           attribute: false,
         },
-        "google_translate_element"
+        'google_translate_element'
       );
     };
 
@@ -35,11 +33,11 @@ const TranslateWidget = () => {
 
     const removeDuplicateLanguageSelectors = () => {
       const languageSelectors = document.getElementsByClassName(
-        "skiptranslate goog-te-gadget"
+        'skiptranslate goog-te-gadget'
       );
 
       const spanRemove = document.getElementsByClassName(
-        "VIpgJd-ZVi9od-xl07Ob-lTBxed"
+        'VIpgJd-ZVi9od-xl07Ob-lTBxed'
       );
       // Check if there are any span elements
       if (spanRemove.length > 0) {
@@ -51,28 +49,31 @@ const TranslateWidget = () => {
         }
         // Loop through the span elements to get the language text
         for (let i = 0; i < spanRemove.length; i++) {
-          const spanElement = spanRemove[i]?.querySelector("span");
-          if (spanElement && spanElement?.textContent?.trim() != '' && spanElement?.textContent?.trim() != "Select Language") {
-            const currentLanguage = localStorage.getItem("language");
-            localStorage.setItem("language", spanElement?.textContent?.trim());
+          const spanElement = spanRemove[i]?.querySelector('span');
+          if (
+            spanElement &&
+            spanElement?.textContent?.trim() != '' &&
+            spanElement?.textContent?.trim() != 'Select Language'
+          ) {
+            const currentLanguage = localStorage.getItem('language');
+            localStorage.setItem('language', spanElement?.textContent?.trim());
             if (spanElement?.textContent?.trim() !== currentLanguage) {
-              setLoading(true); 
+              setLoading(true);
               window.location.reload(); // Refresh the page
             }
           }
         }
       }
-      const dropdown = document.querySelector(".goog-te-combo");
+      const dropdown = document.querySelector('.goog-te-combo');
       if (dropdown) {
-        dropdown.addEventListener("change", (event) => {
+        dropdown.addEventListener('change', (event) => {
           const selectedLanguage = event.target.value; // Get the selected value
-          localStorage.setItem("language", selectedLanguage); // Store it in localStorage
-
+          localStorage.setItem('language', selectedLanguage); // Store it in localStorage
         });
       }
     };
     const observer = new MutationObserver(removeDuplicateLanguageSelectors);
-    observer.observe(document.getElementById("google_translate_element"), {
+    observer.observe(document.getElementById('google_translate_element'), {
       childList: true,
       subtree: true,
     });
@@ -83,10 +84,9 @@ const TranslateWidget = () => {
   }, []);
 
   return (
-    <div className="transalte-style">
+    <div className='transalte-style'>
       {/* {loading && <Loading />} */}
-      <div id="google_translate_element"></div>
-   
+      <div id='google_translate_element'></div>
     </div>
   );
 };
