@@ -7,26 +7,26 @@ Proprietary and confidential :  All information contained herein is, and remains
 the property of Toxsl Technologies Pvt. Ltd. and its partners.
 Unauthorized copying of this file, via any medium is strictly prohibited.
 */
-"use client";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+'use client';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const showNotification = (type, message, toastId = "") => {
+const showNotification = (type, message, toastId = '') => {
   switch (type) {
-    case "success":
+    case 'success':
       toast.success(message, {
-        position: "top-right",
+        position: 'top-right',
       });
       break;
-    case "danger":
+    case 'danger':
       toast.error(message, {
-        position: "top-right",
+        position: 'top-right',
         toastId: toastId,
       });
       break;
-    case "default":
+    case 'default':
       toast(message, {
-        position: "top-right",
+        position: 'top-right',
       });
       break;
     default:

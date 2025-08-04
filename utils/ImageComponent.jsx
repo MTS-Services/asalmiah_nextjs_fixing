@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   ShimmerCircularImage,
   ShimmerContentBlock,
   ShimmerThumbnail,
-} from "react-shimmer-effects";
+} from 'react-shimmer-effects';
 const ImageComponent = ({
   data,
   functionData,
@@ -23,7 +23,7 @@ const ImageComponent = ({
   return (
     <>
       {!designImage && !dynamicLabellingState && loading && !content && (
-        <div className="shimmer" />
+        <div className='shimmer' />
       )}
       {designImage && loading && !content && (
         <ShimmerCircularImage width={147} height={147} size={147} />
@@ -32,30 +32,30 @@ const ImageComponent = ({
         <ShimmerThumbnail
           height={shimmerHeight}
           rounded
-          className={ShimmerClassName ?? ""}
+          className={ShimmerClassName ?? ''}
         />
       )}
       {!content ? (
         <img
           src={
-            data ? data : staticData ? staticData : "/images/static_image.jpg"
+            data ? data : staticData ? staticData : '/images/static_image.jpg'
           }
           width={width}
           height={height}
-          alt={alt ?? "image"}
-          className={className ?? ""}
+          alt={alt ?? 'image'}
+          className={className ?? ''}
           onLoad={() => setLoading(false)}
           onError={() => setLoading(false)}
-          style={{ display: loading ? "none" : "block" }}
+          style={{ display: loading ? 'none' : 'block' }}
         />
       ) : (
-        ""
+        ''
       )}
 
       {content ? (
         <ShimmerContentBlock title thumbnailWidth={7} thumbnailHeight={7} />
       ) : (
-        ""
+        ''
       )}
     </>
   );

@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { constant } from "../utils/constants";
+import { NextResponse } from 'next/server';
+import { constant } from '../utils/constants';
 
 function getLocale(request) {
   // Negotiator expects plain object so we need to transform headers
@@ -21,16 +21,16 @@ function getLocale(request) {
 
 export const middleware = (request) => {
   const pathName = request.nextUrl.pathname;
-  const hostname = request.headers.get("referer");
-  const host = request.headers.get("host");
+  const hostname = request.headers.get('referer');
+  const host = request.headers.get('host');
 
-  let currentPath = hostname?.replace(`http://${host}`, "");
+  let currentPath = hostname?.replace(`http://${host}`, '');
 
   const data =
-    request?.cookies?.get("userDetail")?.value &&
-    JSON?.parse(request?.cookies?.get("userDetail")?.value);
+    request?.cookies?.get('userDetail')?.value &&
+    JSON?.parse(request?.cookies?.get('userDetail')?.value);
   const headers = new Headers(request.headers);
-  headers.set("token", data?.token);
+  headers.set('token', data?.token);
 
   // function cartLengthFunc() {
   //   const cartData = request?.cookies?.get("cartItems")?.value;
@@ -43,7 +43,7 @@ export const middleware = (request) => {
   //   }
   // }
 
-  const cartData = request?.cookies?.get("cartItems")?.value;
+  const cartData = request?.cookies?.get('cartItems')?.value;
   const cartLength = cartData ? JSON.parse(cartData).length : 0;
 
   const resp = NextResponse.next({
@@ -59,16 +59,16 @@ export const middleware = (request) => {
   if (
     data?.roleId == constant.USER &&
     data?.token &&
-    request.nextUrl.pathname === "/login"
+    request.nextUrl.pathname === '/login'
   ) {
     const searchParams = new URLSearchParams(request.nextUrl.search);
-    const returnUrl = searchParams.get("pathname");
+    const returnUrl = searchParams.get('pathname');
     if (returnUrl) {
       return NextResponse.redirect(
         new URL(decodeURIComponent(returnUrl), request.url)
       );
     } else {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
 
@@ -106,20 +106,20 @@ export const middleware = (request) => {
     return NextResponse.redirect(new URL(`/promotion-user`, request.url));
   }
 
-  if (isAdmin && request.nextUrl.pathname === "/") {
+  if (isAdmin && request.nextUrl.pathname === '/') {
     // Redirect to /admin
     return NextResponse.redirect(new URL(`/admin`, request.url), {
       replace: true,
     });
   }
 
-  if (isPromotionUser && request.nextUrl.pathname === "/") {
+  if (isPromotionUser && request.nextUrl.pathname === '/') {
     return NextResponse.redirect(new URL(`/promotion-user`, request.url), {
       replace: true,
     });
   }
 
-  if (isDesignedUser && request.nextUrl.pathname === "/") {
+  if (isDesignedUser && request.nextUrl.pathname === '/') {
     // Redirect to /admin
     return NextResponse.redirect(new URL(`/designed-user`, request.url), {
       replace: true,
@@ -138,9 +138,7 @@ export const middleware = (request) => {
     if (data && data?.roleId == constant.DESIGNED_USER) {
       return NextResponse.next();
     } else {
-      return NextResponse.redirect(
-        new URL(`/designed-user`, request.url)
-      );
+      return NextResponse.redirect(new URL(`/designed-user`, request.url));
     }
   }
 
@@ -148,9 +146,7 @@ export const middleware = (request) => {
     if (data && data?.roleId == constant.PROMOTION_USER) {
       return NextResponse.next();
     } else {
-      return NextResponse.redirect(
-        new URL(`/promotion-user`, request.url)
-      );
+      return NextResponse.redirect(new URL(`/promotion-user`, request.url));
     }
   }
 
@@ -329,7 +325,7 @@ export const middleware = (request) => {
 export const config = {
   matcher: [
     // Skip all internal paths (_next)
-    "/((?!_next).*)",
+    '/((?!_next).*)',
     // Optional: only run on root (/) URL
     // '/'
   ],

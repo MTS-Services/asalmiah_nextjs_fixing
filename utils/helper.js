@@ -9,13 +9,20 @@
  * 
  */
 
-import moment from "moment";
-import { Spinner } from "react-bootstrap";
+import moment from 'moment';
+import { Spinner } from 'react-bootstrap';
 import { AiOutlineWhatsApp } from 'react-icons/ai';
 import { BiMoney } from 'react-icons/bi';
 import { CiDeliveryTruck } from 'react-icons/ci';
 import { FaUserAlt, FaUserFriends } from 'react-icons/fa';
-import { FaAppStore, FaBell, FaBuilding, FaCodeBranch, FaPencil, FaQuestion } from "react-icons/fa6";
+import {
+  FaAppStore,
+  FaBell,
+  FaBuilding,
+  FaCodeBranch,
+  FaPencil,
+  FaQuestion,
+} from 'react-icons/fa6';
 import { FiSettings } from 'react-icons/fi';
 import { GiSwipeCard } from 'react-icons/gi';
 import { IoMdCash } from 'react-icons/io';
@@ -24,13 +31,13 @@ import { MdAttachEmail, MdContacts, MdSwapHoriz } from 'react-icons/md';
 import { PiSpinnerBallDuotone } from 'react-icons/pi';
 import { SiOctobercms } from 'react-icons/si';
 import { TbReportSearch } from 'react-icons/tb';
-import { defaultCountries, parseCountry } from "react-international-phone";
-import { v4 as uuidv4 } from "uuid";
-import { constant, Paginations } from "./constants";
-import { toastAlert } from "./SweetAlert";
+import { defaultCountries, parseCountry } from 'react-international-phone';
+import { v4 as uuidv4 } from 'uuid';
+import { constant, Paginations } from './constants';
+import { toastAlert } from './SweetAlert';
 
 export const truncate = (str, n) => {
-  return str?.length > n ? str.substr(0, n - 1) + "..." : str;
+  return str?.length > n ? str.substr(0, n - 1) + '...' : str;
 };
 
 export const restrictAlpha = (e) => {
@@ -86,58 +93,58 @@ export const downloadFile = (fileAbsoluteUrl) => {
  */
 
 export const paramTitleContent = (
-  content = "",
-  appendFront = "",
-  appendBack = ""
+  content = '',
+  appendFront = '',
+  appendBack = ''
 ) => {
   if (content) {
     let content = content?.trim();
 
-    if (content === "null" || content == "") {
-      return "";
+    if (content === 'null' || content == '') {
+      return '';
     }
 
     return appendFront + content + appendBack;
   }
-  return "";
+  return '';
 };
 
 // Order Delivery Status
 export const getOrderDeliveryStatus = (status) => {
   switch (status) {
     case constant?.ORDER_PENDING_STATUS:
-      return "Pending";
+      return 'Pending';
     case constant?.ORDER_READY_STATUS:
-      return "Ready";
+      return 'Ready';
     case constant?.ORDER_CANCELED_STATUS:
-      return "Cancelled";
+      return 'Cancelled';
     case constant?.ORDER_SHIPPE_STATUS:
-      return "Shipped";
+      return 'Shipped';
 
     case constant?.ORDER_COMPLETED_STATUS:
-      return "Delivered";
+      return 'Delivered';
     case constant?.ORDER_APPROVE:
-      return "Approve";
+      return 'Approve';
     case constant?.ORDER_REJECT:
-      return "Reject";
+      return 'Reject';
     default:
-      return "Pending";
+      return 'Pending';
   }
 };
 // Order  Status
 export const getOrderStatus = (status) => {
   switch (status) {
     case constant?.DELIVERY_PENDING:
-      return "Pending";
+      return 'Pending';
     case constant?.DELIVERY_ACCEPTED:
-      return "Accepted";
+      return 'Accepted';
     case constant?.DELIVERY_CANCELLED:
-      return "Cancelled";
+      return 'Cancelled';
 
     case constant?.DELIVERY_DELIVERED:
-      return "Delivered";
+      return 'Delivered';
     default:
-      return "Pending";
+      return 'Pending';
   }
 };
 /**
@@ -148,13 +155,13 @@ export const getOrderStatus = (status) => {
 export const getOrderStatusColor = (state) => {
   switch (state) {
     case constant?.DELIVERY_PENDING:
-      return "badge bg-primary";
+      return 'badge bg-primary';
     case constant?.DELIVERY_PENDING:
-      return "badge bg-warning";
+      return 'badge bg-warning';
     case constant?.DELIVERY_CANCELLED:
-      return "badge bg-danger";
+      return 'badge bg-danger';
     case constant?.DELIVERY_DELIVERED:
-      return "badge bg-success";
+      return 'badge bg-success';
     default:
       return;
   }
@@ -165,40 +172,40 @@ export const getOrderStatusColor = (state) => {
 export const paymentStatus = (status) => {
   switch (status) {
     case constant?.PAYMENT_TYPE_COD:
-      return "COD";
+      return 'COD';
     case constant?.PAYMENT_TYPE_ONLINE:
-      return "Online";
+      return 'Online';
     case constant?.WALLET:
-      return "Wallet";
+      return 'Wallet';
     default:
-      return "Na";
+      return 'Na';
   }
 };
 
 export const paymentReturnStatus = (status) => {
   switch (status) {
     case 1:
-      return "Wallet";
+      return 'Wallet';
     case 2:
-      return "Account";
+      return 'Account';
 
     default:
-      return "Na";
+      return 'Na';
   }
 };
 //  Order  Status
 export const stateId = (state, lang) => {
   switch (state) {
     case constant?.PENDING:
-      return "Pending";
+      return 'Pending';
     case constant?.ACTIVE:
-      return "Active";
+      return 'Active';
     case constant?.INACTIVE:
-      return "In-Active";
+      return 'In-Active';
     case constant?.BLOCKED:
-      return "Blocked";
+      return 'Blocked';
     case constant?.DELETED:
-      return "Deleted";
+      return 'Deleted';
     default:
       return;
   }
@@ -206,15 +213,15 @@ export const stateId = (state, lang) => {
 export const stateIdColor = (state) => {
   switch (state) {
     case constant?.PENDING:
-      return "badge bg-warning";
+      return 'badge bg-warning';
     case constant?.ACTIVE:
-      return "badge bg-success";
+      return 'badge bg-success';
     case constant?.REJECT:
-      return "badge bg-danger";
+      return 'badge bg-danger';
     case constant?.INACTIVE:
-      return "badge bg-danger";
+      return 'badge bg-danger';
     case constant?.DELETED:
-      return "badge bg-danger";
+      return 'badge bg-danger';
 
     default:
       return;
@@ -238,17 +245,17 @@ export const stringRegx = /^[a-zA-Z ]+$/;
 export const CheckAdminState = (state) => {
   switch (state) {
     case constant?.ACTIVE:
-      return <span className="badge bg-success">Active</span>;
+      return <span className='badge bg-success'>Active</span>;
     case constant?.INACTIVE:
-      return <span className="badge bg-warning">In-Active</span>;
+      return <span className='badge bg-warning'>In-Active</span>;
     case constant?.DELETED:
-      return <span className="badge bg-danger">Delete</span>;
+      return <span className='badge bg-danger'>Delete</span>;
     case constant?.ORDER_PENDING_STATUS:
-      return <span className="badge bg-primary">Pending</span>;
+      return <span className='badge bg-primary'>Pending</span>;
     case constant?.PRODUCT_OUTOFSTOCK:
-      return <span className="badge bg-primary">Out Of Stock</span>;
+      return <span className='badge bg-primary'>Out Of Stock</span>;
     case constant?.PRODUCT_STOCK:
-      return <span className="badge bg-danger">Stock</span>;
+      return <span className='badge bg-danger'>Stock</span>;
     default:
       break;
   }
@@ -257,9 +264,9 @@ export const CheckAdminState = (state) => {
 export const EMAIL_QUEUE_STATE = (state) => {
   switch (state) {
     case constant?.SUCCESS:
-      return <span className="badge bg-success">Success</span>;
+      return <span className='badge bg-success'>Success</span>;
     case constant?.FAILED:
-      return <span className="badge bg-danger">Failed</span>;
+      return <span className='badge bg-danger'>Failed</span>;
 
     default:
       break;
@@ -273,24 +280,24 @@ export const serialNumber = (page, index) => {
 };
 export const pageType = (value) => {
   if (value == constant?.TERMS_CONDITIONS) {
-    return "Terms & Conditions";
+    return 'Terms & Conditions';
   } else if (value == constant?.PRIVACY_POLICY) {
-    return "Privacy Policy";
+    return 'Privacy Policy';
   } else if (value == constant?.ABOUT_US) {
-    return "About us";
+    return 'About us';
   } else if (value == constant?.REPORT) {
-    return "Report";
+    return 'Report';
   } else if (value == constant?.REFUND_POLICY) {
-    return "Refund Policy";
+    return 'Refund Policy';
   } else {
-    return "No Data Found";
+    return 'No Data Found';
   }
 };
 
 export const IMAGE_LOADER = () => {
   return (
-    <Spinner animation="border" role="status">
-      <span className="visually-hidden">Loading...</span>
+    <Spinner animation='border' role='status'>
+      <span className='visually-hidden'>Loading...</span>
     </Spinner>
   );
 };
@@ -298,11 +305,11 @@ export const IMAGE_LOADER = () => {
 export const AddressType = (state) => {
   switch (state) {
     case 1:
-      return "Home";
+      return 'Home';
     case 2:
-      return "Office";
+      return 'Office';
     case 3:
-      return "Others";
+      return 'Others';
 
     default:
       break;
@@ -312,11 +319,11 @@ export const AddressType = (state) => {
 export const GenderType = (state) => {
   switch (state) {
     case constant?.MALE:
-      return "Male";
+      return 'Male';
     case constant?.FEMALE:
-      return "Female";
+      return 'Female';
     case constant?.GENDER_OTHERS:
-      return "Others";
+      return 'Others';
     default:
       break;
   }
@@ -333,19 +340,19 @@ export const GenderType = (state) => {
 export const DeliveryStatusType = (state) => {
   switch (state) {
     case 5:
-      return <span className="badge bg-primary text-white">Pending</span>;
+      return <span className='badge bg-primary text-white'>Pending</span>;
     case 6:
-      return <span className="badge bg-warning text-white">Reject</span>;
+      return <span className='badge bg-warning text-white'>Reject</span>;
     case 7:
-      return <span className="badge bg-danger text-white">Out of stock</span>;
+      return <span className='badge bg-danger text-white'>Out of stock</span>;
     case 8:
-      return <span className="badge bg-warning text-white">Shipped</span>;
+      return <span className='badge bg-warning text-white'>Shipped</span>;
     case 9:
-      return <span className="badge bg-success text-white">Completed</span>;
+      return <span className='badge bg-success text-white'>Completed</span>;
     case 10:
-      return <span className="badge bg-danger text-white">Cancelled</span>;
+      return <span className='badge bg-danger text-white'>Cancelled</span>;
     case 11:
-      return <span className="badge bg-secondary text-white">Ready</span>;
+      return <span className='badge bg-secondary text-white'>Ready</span>;
     default:
       break;
   }
@@ -354,19 +361,19 @@ export const DeliveryStatusType = (state) => {
 export const CheckAdminDeliveryStatus = (state) => {
   switch (state) {
     case 5:
-      return <span className="badge bg-primary text-white">Pending</span>;
+      return <span className='badge bg-primary text-white'>Pending</span>;
     case 6:
-      return <span className="badge bg-warning text-white">Reject</span>;
+      return <span className='badge bg-warning text-white'>Reject</span>;
     case 7:
-      return <span className="badge bg-danger text-white">Out of stock</span>;
+      return <span className='badge bg-danger text-white'>Out of stock</span>;
     case 8:
-      return <span className="badge bg-success text-white">Shipped</span>;
+      return <span className='badge bg-success text-white'>Shipped</span>;
     case 9:
-      return <span className="badge bg-success text-white">Completed</span>;
+      return <span className='badge bg-success text-white'>Completed</span>;
     case 10:
-      return <span className="badge bg-danger text-white">Cancelled</span>;
+      return <span className='badge bg-danger text-white'>Cancelled</span>;
     case 11:
-      return <span className="badge bg-secondary text-white">Ready</span>;
+      return <span className='badge bg-secondary text-white'>Ready</span>;
     default:
       break;
   }
@@ -374,7 +381,7 @@ export const CheckAdminDeliveryStatus = (state) => {
 
 export const countries = defaultCountries.filter((country) => {
   const { iso2 } = parseCountry(country);
-  return ["kw", "ae", "jo"].includes(iso2);
+  return ['kw', 'ae', 'jo'].includes(iso2);
 });
 
 export const filterPassedTime = (time) => {
@@ -390,11 +397,11 @@ export const filterPassedTime = (time) => {
 export const orderTypeStatus = (state) => {
   switch (state) {
     case 1:
-      return "Delivery";
+      return 'Delivery';
     case 2:
-      return "Pickup";
+      return 'Pickup';
     case 3:
-      return "Coupon";
+      return 'Coupon';
 
     default:
       break;
@@ -404,11 +411,11 @@ export const orderTypeStatus = (state) => {
 export const PromoCodeStatus = (state) => {
   switch (state) {
     case 1:
-      return "All";
+      return 'All';
     case 2:
-      return "Category";
+      return 'Category';
     case 3:
-      return "Company";
+      return 'Company';
 
     default:
       break;
@@ -416,6 +423,7 @@ export const PromoCodeStatus = (state) => {
 };
 
 export function getStartAndEndDate() {
+
   if (typeof window === "undefined") {
     return { startIsoDate: null, endIsoDate: null }; // Return null on server-side
   }
@@ -428,14 +436,20 @@ export function getStartAndEndDate() {
   }
 
   const [startTime, endTime] = timeSlot?.split(" - ");
+
+//   let date = localStorage.getItem('date');
+//   let timeSlot = localStorage.getItem('time');
+
+//   const [startTime, endTime] = timeSlot?.split(' - ');
+
   const startDateObject = new Date(date);
-  const [startHours, startMinutes] = startTime?.split(":");
+  const [startHours, startMinutes] = startTime?.split(':');
   startDateObject.setHours(parseInt(startHours));
   startDateObject.setMinutes(parseInt(startMinutes));
   const startIsoDate = startDateObject?.toISOString();
 
   const endDateObject = new Date(date);
-  const [endHours, endMinutes] = endTime?.split(":");
+  const [endHours, endMinutes] = endTime?.split(':');
   endDateObject.setHours(parseInt(endHours));
   endDateObject.setMinutes(parseInt(endMinutes));
   const endIsoDate = endDateObject?.toISOString();
@@ -445,10 +459,10 @@ export function getStartAndEndDate() {
 
 export const transactionStatus = (state) => {
   switch (state) {
-    case "pending":
-      return <span className="badge bg-primary">Pending</span>;
-    case "success":
-      return <span className="badge bg-success">Success</span>;
+    case 'pending':
+      return <span className='badge bg-primary'>Pending</span>;
+    case 'success':
+      return <span className='badge bg-success'>Success</span>;
     default:
       break;
   }
@@ -456,15 +470,15 @@ export const transactionStatus = (state) => {
 
 export function formatCurrency(amount, country) {
   // Ensure amount is a number and round to 2 decimal places
-  const formattedAmount = amount ? Number(amount).toFixed(2) : "";
+  const formattedAmount = amount ? Number(amount).toFixed(2) : '';
 
   const currencyMapping = {
-    Kuwait: "KD",
-    Jordan: "JOD",
-    UAE: "AED",
+    Kuwait: 'KD',
+    Jordan: 'JOD',
+    UAE: 'AED',
     // Add more countries and their currencies as needed
   };
-  const currencyCode = currencyMapping[country] || "KD";
+  const currencyCode = currencyMapping[country] || 'KD';
 
   // Return formatted string
   return amount ? `${currencyCode}  ${formattedAmount}` : `${currencyCode}`;
@@ -473,15 +487,15 @@ export function formatCurrency(amount, country) {
 export const SpinType = (state) => {
   switch (state) {
     case 1:
-      return "Percentage";
+      return 'Percentage';
     case 2:
-      return "Fix";
+      return 'Fix';
     case 3:
-      return "Free Delivery";
+      return 'Free Delivery';
     case 4:
-      return "Hard luck";
+      return 'Hard luck';
     case 5:
-      return "Referral";
+      return 'Referral';
     default:
       break;
   }
@@ -493,11 +507,11 @@ export const SpinType = (state) => {
 export const priorityType = (state) => {
   switch (state) {
     case 1:
-      return "High";
+      return 'High';
     case 2:
-      return "Medium";
+      return 'Medium';
     case 3:
-      return "Low";
+      return 'Low';
     default:
       break;
   }
@@ -506,9 +520,9 @@ export const priorityType = (state) => {
 export const CheckAdminEnable = (state) => {
   switch (state) {
     case constant?.ENABLE:
-      return <span className="badge bg-success">Enable</span>;
+      return <span className='badge bg-success'>Enable</span>;
     case constant?.DISABLE:
-      return <span className="badge bg-warning">Disable</span>;
+      return <span className='badge bg-warning'>Disable</span>;
     default:
       break;
   }
@@ -517,9 +531,9 @@ export const CheckAdminEnable = (state) => {
 export const accountTypeFunc = (state, lang) => {
   switch (state) {
     case constant?.PERCENTAGE:
-      return "Percentage";
+      return 'Percentage';
     case constant?.FIX_AMOUNT:
-      return "Fix amount";
+      return 'Fix amount';
     default:
       return;
   }
@@ -528,9 +542,9 @@ export const accountTypeFunc = (state, lang) => {
 export const cashbackTypeFunc = (state, lang) => {
   switch (state) {
     case 1:
-      return "Promotion";
+      return 'Promotion';
     case 2:
-      return "Cashback";
+      return 'Cashback';
     default:
       return;
   }
@@ -539,9 +553,9 @@ export const cashbackTypeFunc = (state, lang) => {
 export const typeFor = (state) => {
   switch (state) {
     case 1:
-      return "Invoice";
+      return 'Invoice';
     case 2:
-      return "Commission";
+      return 'Commission';
     default:
       return;
   }
@@ -550,9 +564,9 @@ export const typeFor = (state) => {
 export const commissionTypeFunc = (state) => {
   switch (state) {
     case 1:
-      return "Percentage";
+      return 'Percentage';
     case 2:
-      return "Fix amount";
+      return 'Fix amount';
     default:
       return;
   }
@@ -561,17 +575,17 @@ export const commissionTypeFunc = (state) => {
 export const paymentTypeFunc = (state, lang) => {
   switch (state) {
     case constant?.CHEQUE:
-      return "Cheque";
+      return 'Cheque';
     case constant?.BANK_TRANSFER:
-      return "Bank Transfer";
+      return 'Bank Transfer';
     case constant?.LINK:
-      return "Link";
+      return 'Link';
     case constant?.ONLINE_TRANSFER:
-      return "Online";
+      return 'Online';
     case constant?.ADVANCE:
-      return "On Advance";
+      return 'On Advance';
     case constant?.PAYPAL:
-      return "Paypal";
+      return 'Paypal';
     default:
       return;
   }
@@ -580,9 +594,9 @@ export const paymentTypeFunc = (state, lang) => {
 export const cashbackrotationalFunc = (state, lang) => {
   switch (state) {
     case 1:
-      return "One Time";
+      return 'One Time';
     case 2:
-      return "Several Times";
+      return 'Several Times';
     default:
       return;
   }
@@ -591,33 +605,38 @@ export const cashbackrotationalFunc = (state, lang) => {
 export const Supplier = (state, lang) => {
   switch (state) {
     case 1:
-      return "Offrat";
+      return 'Offrat';
     case 2:
-      return "Supplier";
+      return 'Supplier';
     case 3:
-      return "Share";
+      return 'Share';
     default:
       return;
   }
 };
 
 export const checkLanguage = (english, arabic) => {
+
   if (typeof window === "undefined") {
     return english; // Default to English on server-side
   }
   
   const language = localStorage.getItem("language");
   if (language == "English") {
+
+//   const language = localStorage.getItem('language');
+//   if (language == 'English') {
+
     return english;
-  } else if (language == "Arabic") {
+  } else if (language == 'Arabic') {
     return arabic;
   } else {
     return english;
   }
 };
 export function generatePromocode(length = 8) {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let promocode = "";
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let promocode = '';
 
   for (let i = 0; i < length; i++) {
     promocode += characters.charAt(
@@ -630,10 +649,10 @@ export function generatePromocode(length = 8) {
 export const handleCopyToClipboard = (text) => {
   navigator?.clipboard?.writeText(text).then(
     () => {
-      toastAlert("success", "Copied to clipboard");
+      toastAlert('success', 'Copied to clipboard');
     },
     (err) => {
-      console.error("Could not copy text: ", err);
+      console.error('Could not copy text: ', err);
     }
   );
 };
@@ -644,20 +663,20 @@ export const handleCopyToClipboard = (text) => {
 export const ERROR_TYPE_STATUS = (status) => {
   switch (status) {
     case 1:
-      return "API";
+      return 'API';
     case 2:
-      return "App";
+      return 'App';
     case 3:
-      return "Web";
+      return 'Web';
     default:
-      return "Na";
+      return 'Na';
   }
 };
 
 export const FORMAT_NUMBER = (value, discount) => {
   if (discount) {
     if (value === null || isNaN(value)) {
-      return "0.00"; // Return "0.00" as a string
+      return '0.00'; // Return "0.00" as a string
     }
 
     // Attempt to convert the value to a number
@@ -665,14 +684,14 @@ export const FORMAT_NUMBER = (value, discount) => {
 
     // Check if the conversion resulted in a valid number
     if (isNaN(numberValue)) {
-      return "0.00"; // Return "0.00" if conversion fails
+      return '0.00'; // Return "0.00" if conversion fails
     }
 
     // Use toFixed(2) to format the number to two decimal places
     return numberValue.toFixed(2);
   } else {
     if (value === null || isNaN(value)) {
-      return "0.00"; // Return "0.00" as a string
+      return '0.00'; // Return "0.00" as a string
     }
 
     // Attempt to convert the value to a number
@@ -680,7 +699,7 @@ export const FORMAT_NUMBER = (value, discount) => {
 
     // Check if the conversion resulted in a valid number
     if (isNaN(numberValue)) {
-      return "0.00"; // Return "0.00" if conversion fails
+      return '0.00'; // Return "0.00" if conversion fails
     }
 
     // Use toFixed(2) to format the number to two decimal places
@@ -697,12 +716,12 @@ export const getDeviceToken = () => {
   }
   
   // Check if the device token already exists in local storage
-  let deviceToken = localStorage.getItem("deviceToken");
+  let deviceToken = localStorage.getItem('deviceToken');
 
   // If it doesn't exist, create a new one and store it
   if (!deviceToken) {
     deviceToken = uuidv4();
-    localStorage.setItem("deviceToken", deviceToken);
+    localStorage.setItem('deviceToken', deviceToken);
   }
 
   return deviceToken;
@@ -714,7 +733,7 @@ export function shouldShowRefundButton(orderCompletionDate) {
   const currentDate = moment(); // Get the current date
 
   // Calculate the difference in days
-  const daysSinceCompletion = currentDate.diff(completionDate, "days");
+  const daysSinceCompletion = currentDate.diff(completionDate, 'days');
 
   // Return true if the difference is less than or equal to 14 days
   return daysSinceCompletion <= 14;
@@ -724,68 +743,64 @@ export const getLinkHref = (roleId, route) => {
 
   switch (roleId) {
     case 4:
-      userSegment = "promotion-user";
+      userSegment = 'promotion-user';
       break;
     case 5:
-      userSegment = "designed-user";
+      userSegment = 'designed-user';
       break;
     default:
-      userSegment = "admin"; // Default case
+      userSegment = 'admin'; // Default case
   }
 
   return `/${userSegment}${route}`;
 };
-
 
 export const getLinkHrefRoute = (roleId, route) => {
   let userSegment;
 
   switch (roleId) {
     case 4:
-      userSegment = "promotion-user";
+      userSegment = 'promotion-user';
       break;
     case 5:
-      userSegment = "designed-user";
+      userSegment = 'designed-user';
       break;
     default:
-      userSegment = "admin"; // Default case
+      userSegment = 'admin'; // Default case
   }
 
   return `/${userSegment}${route}`;
 };
 
-
 export const ROLE_STATUS = (roleId) => {
   let userSegment;
   switch (roleId) {
     case 4:
-      userSegment = "promotion-users";
+      userSegment = 'promotion-users';
       break;
     case 5:
-      userSegment = "designed-users";
+      userSegment = 'designed-users';
       break;
     default:
-      userSegment = "admin"; 
+      userSegment = 'admin';
   }
   return userSegment;
 };
 
-
 export const getLinkHrefRouteSingleView = (roleId, route, userRole) => {
-
   let userSegment;
 
   switch (roleId) {
     case 4:
-      userSegment = "promotion-user";
+      userSegment = 'promotion-user';
       break;
     case 5:
-      userSegment = "designed-user";
+      userSegment = 'designed-user';
       break;
     default:
-      userSegment = "admin"; // Default case
+      userSegment = 'admin'; // Default case
   }
-  console.log("---->",`/${userSegment}/page/${userRole}/${route}`)
+  console.log('---->', `/${userSegment}/page/${userRole}/${route}`);
   return `/${userSegment}/page/${userRole}/${route}`;
 };
 
@@ -794,15 +809,12 @@ export const getPermissionsByLabel = (rolesPrivileges, label) => {
     // Parse the rolesPrivileges
     const parsedPrivileges = JSON.parse(rolesPrivileges?.at(0));
     // Filter for the specified label
-    return parsedPrivileges?.filter((privilege) =>
-      privilege?.label === label
-    )
+    return parsedPrivileges?.filter((privilege) => privilege?.label === label);
   } catch (error) {
-    console.error("Error parsing rolesPrivileges:", error);
+    console.error('Error parsing rolesPrivileges:', error);
     return [];
   }
 };
-
 
 export function formatCamelCaseString(camelCaseString) {
   return camelCaseString
@@ -814,7 +826,7 @@ export function formatCamelCaseString(camelCaseString) {
 export const iconMapping = {
   usersManagement: {
     salesPerson: <FaUserFriends />,
-    userPerson: <FaUserAlt />
+    userPerson: <FaUserAlt />,
   },
   companyManagement: {
     deliveryCompany: <CiDeliveryTruck />,
@@ -833,7 +845,6 @@ export const iconMapping = {
     refundReports: <TbReportSearch />,
     spinReports: <TbReportSearch />,
     // accountStatement: <TbReportSearch />
-
   },
   transactionManagement: {
     transactions: <MdSwapHoriz />,
@@ -855,5 +866,5 @@ export const iconMapping = {
     smtp: <MdAttachEmail />,
     twillio: <AiOutlineWhatsApp />,
     appVersion: <FaAppStore />,
-  }
+  },
 };
