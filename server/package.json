@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "start": "nodemon app.js",
+    "dev": "nodemon bin/www",
     "createAdmin": "node ./helpers/createAdmin.js",
     "createGovernate": "node ./helpers/createGovernate.js",
     "createPermission": "node ./helpers/createPermission.js",
     "gen-doc": "node ./config/swagger/swaggerConfig.js",
-
     "seed": "node ./helpers/seed.js"
   },
   "dependencies": {

@@ -3,6 +3,7 @@ import { store } from '../redux/store';
 import URL from '../utils/config';
 import { Paginations } from '../utils/constants';
 
+
 const http = axios.create({
   baseURL: URL,
 });
@@ -45,10 +46,12 @@ paymentHttp.interceptors.request.use(
 /****************************AUTHENTICATION*******************************/
 
 export const loginAPI = async (body) => {
+  console.log('loginAPI', body);
   return await http.post(`/auth/userLogin`, body);
 };
 
 export const socialLoginAPI = async (body) => {
+  console.log('socialLoginAPI', body);
   return await http.post(`/auth/social/login`, body);
 };
 
@@ -410,6 +413,7 @@ export const GET_CATEGORY_DETAIL = async (id) => {
   return await http.get(`/admin/category/detail/${id}`);
 };
 export const EDIT_CATEGORY_API = async (id, body) => {
+  console.log('EDIT_CATEGORY_API', body);
   return await http.put(`/admin/category/update/${id}`, body);
 };
 export const STATE_UPDATE_CATEGORY_API = async (id, stateId) => {
@@ -612,7 +616,7 @@ export const GET_SEARCH_SUBCATEGORY_API = async (
 /****************************USER MODULE*******************************/
 
 export const GET_CATEGORY_LIST_HOME = async () => {
-  return await http.get(`/category/activeCategoryList`);
+  return await http.get(`/category/list`);
 };
 
 export const GET_SUB_CATEGORY_LIST_HOME = async () => {
@@ -680,7 +684,7 @@ export const GET_PRODUCTLIST = async (
   minDiscount,
   maxDiscount
 ) => {
-  return await http.get(`/product/userProduct`, {
+  return await http.get(`/product/userProducts`, {
     params: {
       search: search,
       categoryId: categoryId,
@@ -954,6 +958,7 @@ export const GET_BRANCHES_API = async (page, companyId) => {
 /****************************USER BANNER*******************************/
 
 export const ADD_PRODUCT_API = async (body) => {
+  console.log('ADD_PRODUCT_API', body);
   return await http.post(`/admin/product/add`, body);
 };
 
@@ -1427,6 +1432,49 @@ export const GET_CLASSIFICATION_PRODUCTLIST_AUTH = async (
 export const GET_USERS_DASHBOARD_COUNT = async () => {
   return await http.get(`/users/dashboard/count`);
 };
+
+/*****************************CLASS MODULE*******************************/
+export const ADD_CLASS_API = async (body) => {
+  console.log('ADD_CLASS_API', body);
+  return await http.post(`/admin/class/add`, body);
+};
+
+export const EDIT_CLASS_API = async (id, body) => {
+  return await http.put(`/admin/class/update/${id}`, body);
+};
+
+export const GET_CLASS_DETAIL_API = async (id) => {
+  return await http.get(`/admin/class/detail/${id}`);
+};
+
+export const GET_CLASS_LIST_API = async (page, search, state) => {
+  return await http.get(`/admin/class/list`, {
+    params: {
+      pageNo: page,
+      pageLimit: Paginations.PER_PAGE,
+      search: search,
+      stateId: state,
+    },
+  });
+};
+
+export const STATE_UPDATE_CLASS_API = async (id, stateId) => {
+  if (!id || !stateId) {
+    throw new Error('ID and stateId are required');
+  }
+  return await http.put(`/admin/class/updateState/${id}?stateId=${stateId}`);
+};
+
+export const GET_SEARCH_CLASS_API = async (page, pageLimit, state, search) => {
+  return await http.get(
+    `/admin/class/dropDownClass?pageNo=${page}&pageLimit=${pageLimit}&stateId=${state}&search=${search}`
+  );
+};
+
+export const GET_CLASS_ACTIVE_LIST = async () => {
+  return await http.get(`/class/activeList`);
+};
+/*****************************END CLASS MODULE*******************************/
 
 export const ADD_PERMISSIONS = async (body) => {
   return await http.post(`/admin/permission/add`, body);

@@ -2,7 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
@@ -70,6 +70,12 @@ import {
 import "../../[role]/page/product-management/view-product/page.scss";
 import { trans } from "../../../../utils/trans";
 const ProductDetail = () => {
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   let detail = useDetails();
   const selectedCountry = useCountryState();
   let queryClient = useQueryClient();
@@ -81,20 +87,39 @@ const ProductDetail = () => {
   const [meta, setMeta] = useState("");
   const [page, setPage] = useState(Paginations?.DEFAULT_PAGE);
   const { id } = useParams();
+  
+  // Validate and sanitize MongoDB ObjectId
+  const sanitizedId = id ? id.toString().trim().slice(0, 24) : "";
+  const isValidObjectId = sanitizedId && sanitizedId.length === 24 && /^[0-9a-fA-F]{24}$/.test(sanitizedId);
+  
+  // Debug logging - only on client side
+  useEffect(() => {
+    if (isClient) {
+      console.log("Original ID:", id);
+      console.log("Sanitized ID:", sanitizedId);
+      console.log("ID Length:", sanitizedId.length);
+      console.log("Is Valid ObjectId:", isValidObjectId);
+    }
+  }, [isClient, id, sanitizedId, isValidObjectId]);
+  
   const {
     data: productDetailData,
     refetch,
     isPending: detailPending,
     isFetching,
   } = useQuery({
-    queryKey: ["product-detail", { id }],
+    queryKey: ["product-detail", { id: sanitizedId }],
     queryFn: async () => {
+      if (!isValidObjectId) {
+        throw new Error("Invalid product ID");
+      }
       const res =
         detail?.roleId == constant?.USER
-          ? await PRODUCT_DETAIL_AUTH(id)
-          : await PRODUCT_DETAIL_WITHOUT_AUTH(id);
+          ? await PRODUCT_DETAIL_AUTH(sanitizedId)
+          : await PRODUCT_DETAIL_WITHOUT_AUTH(sanitizedId);
       return res?.data?.data ?? "";
     },
+    enabled: isValidObjectId, // Only run query if ID is valid
   });
   const wishlistMutation = useMutation({
     mutationFn: (body) => ADD_WISHLIST(body),
@@ -109,9 +134,10 @@ const ProductDetail = () => {
 
   const removeAllItemFromCart = async () => {
     try {
+      const deviceToken = getDeviceToken();
       const response =
         detail == null || detail == undefined
-          ? await DELETE_ALLCART_ITEMS_WITHOUT_LOGIN(getDeviceToken())
+          ? await DELETE_ALLCART_ITEMS_WITHOUT_LOGIN(deviceToken)
           : await DELETE_ALLCART_ITEMS();
       if (response?.status === 200) {
         Swal.fire({
@@ -124,7 +150,9 @@ const ProductDetail = () => {
         });
         queryClient.invalidateQueries({ queryKey: ["cart-list-user"] });
         dispatch(clearCart(null));
-        localStorage.removeItem("persist:cart");
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("persist:cart");
+        }
 
         Cookies.remove("cartItems");
       }
@@ -137,21 +165,26 @@ const ProductDetail = () => {
   const { data: relatedProductData, refetch: relatedReftch } = useQuery({
     queryKey: ["related-product", { categoryId }, page],
     queryFn: async () => {
+      if (!isValidObjectId) {
+        throw new Error("Invalid product ID");
+      }
       const res =
         detail?.roleId == constant?.USER
-          ? await SIMILAR_PRODUCT_LIST_AUTH(id, page)
-          : await SIMILAR_PRODUCT_LIST_WITHOUT_AUTH(id, page);
+          ? await SIMILAR_PRODUCT_LIST_AUTH(sanitizedId, page)
+          : await SIMILAR_PRODUCT_LIST_WITHOUT_AUTH(sanitizedId, page);
       setMeta(res?.data?._meta);
       return res?.data?.data ?? "";
     },
+    enabled: isValidObjectId, // Only run query if ID is valid
   });
 
   const { mutate, error, isPending } = useMutation({
     mutationFn: (payload) => {
       if (detail === null || detail === undefined) {
+        const deviceToken = getDeviceToken();
         const updatedPayload = {
           ...payload,
-          deviceToken: getDeviceToken(), // Include the deviceToken in the payload
+          deviceToken: deviceToken, // Include the deviceToken in the payload
         };
         return ADD_CART_API_WITHOUT_LOGIN(updatedPayload);
       } else {
@@ -162,7 +195,7 @@ const ProductDetail = () => {
       dispatch(
         addToCart({
           ...resp?.data?.data,
-          cartProductId: id,
+          cartProductId: sanitizedId,
           quantity: 1,
           size: values?.size,
           color: values?.color,
@@ -259,7 +292,7 @@ const ProductDetail = () => {
         });
 
       let body = {
-        productId: id,
+        productId: sanitizedId,
         quantity: 1,
         size: values?.size,
         color: values?.color,
@@ -293,16 +326,20 @@ const ProductDetail = () => {
   const handleShow = () => setShow(true);
 
   const { data: getreview, refetch: reviewRefetch } = useQuery({
-    queryKey: ["getreview-list", id, page],
+    queryKey: ["getreview-list", sanitizedId, page],
     queryFn: async () => {
+      if (!isValidObjectId) {
+        throw new Error("Invalid product ID");
+      }
       const res =
         detail?.roleId == constant?.USER
-          ? await REVIEW_LIST(page, id)
-          : await WITHOUTAUTH_REVIEW_LIST(page, id);
+          ? await REVIEW_LIST(page, sanitizedId)
+          : await WITHOUTAUTH_REVIEW_LIST(page, sanitizedId);
       setMeta(res?.data?._meta);
 
       return res?.data?.data ?? "";
     },
+    enabled: isValidObjectId, // Only run query if ID is valid
   });
 
   //Add review
@@ -369,7 +406,7 @@ const ProductDetail = () => {
       let formData = new FormData();
       formData.append("review", values?.review);
       formData.append("rating", values?.rating);
-      formData.append("productId", id);
+      formData.append("productId", sanitizedId);
 
       if (values?.imagePreview) {
         values?.imagePreview.forEach((file) => {
@@ -484,11 +521,61 @@ const ProductDetail = () => {
     }
   };
 
-  let language = localStorage.getItem("language");
+  let language = isClient ? localStorage.getItem("language") : null;
   const Home = trans("home");
   const specifications = trans("specifications");
   const description = trans("description");
   const offerContent = trans("offerContent");
+  
+  // Handle invalid product ID
+  if (!isValidObjectId) {
+    return (
+      <>
+        {detail?.roleId == constant?.USER ? (
+          <UserLogInHeader refetchAPI={() => {}} />
+        ) : (
+          <Header refetchAPI={() => {}} />
+        )}
+        <Container className="d-flex justify-content-center align-items-center company-list-card">
+          <Row>
+            <Col className="text-center">
+              <h4>Invalid Product ID</h4>
+              <p>The product ID provided is not valid. Please check the URL and try again.</p>
+              <button
+                className="btn btn-theme m-2"
+                onClick={() => router.push("/")}
+              >
+                Go Back to Home
+              </button>
+            </Col>
+          </Row>
+        </Container>
+        <Footer />
+      </>
+    );
+  }
+
+  // Show loading state during hydration
+  if (!isClient) {
+    return (
+      <>
+        {detail?.roleId == constant?.USER ? (
+          <UserLogInHeader refetchAPI={() => {}} />
+        ) : (
+          <Header refetchAPI={() => {}} />
+        )}
+        <Container className="d-flex justify-content-center align-items-center company-list-card">
+          <Row>
+            <Col className="text-center">
+              <h4>Loading...</h4>
+            </Col>
+          </Row>
+        </Container>
+        <Footer />
+      </>
+    );
+  }
+  
   return (
     <>
       {detail?.roleId == constant?.USER ? (
@@ -1678,4 +1765,29 @@ const ProductDetail = () => {
   );
 };
 
-export default ProductDetail;
+// Error boundary wrapper
+const ProductDetailWithErrorBoundary = () => {
+  try {
+    return <ProductDetail />;
+  } catch (error) {
+    console.error("ProductDetail Error:", error);
+    return (
+      <Container className="d-flex justify-content-center align-items-center company-list-card">
+        <Row>
+          <Col className="text-center">
+            <h4>Something went wrong</h4>
+            <p>Please refresh the page or try again later.</p>
+            <button
+              className="btn btn-theme m-2"
+              onClick={() => window.location.reload()}
+            >
+              Refresh Page
+            </button>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+};
+
+export default ProductDetailWithErrorBoundary;

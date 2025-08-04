@@ -12,6 +12,9 @@ const { CONST } = require("../../../helpers/constant");
 const { USER } = require("../../userService/model/userModel");
 const { COMPANY_MODEL } = require("../../company/model/model");
 const { CALSSIFICATION } = require("../../classification/model/model");
+const { CLASS_MODEL } = require("../../class/model/class.model");
+const { CATEGORY_MODEL } = require("../../category/model/category.model");
+const ORDER = require("../../order/model/order.model");
 
 const {
   setResponseObject,
@@ -57,9 +60,10 @@ const product = {};
  * @param {*} next
  */
 product.add = async (req, res, next) => {
+  console.log(req.body);
   try {
     if (!fs.existsSync(dir)) {
-      !fs.mkdirSync(dir, {
+      fs.mkdirSync(dir, {
         recursive: true,
       });
     }
@@ -95,7 +99,7 @@ product.add = async (req, res, next) => {
         if (req?.files?.productImg) {
           const arr = [];
           req.files.productImg.map((e) => {
-            let url = process.env.IMAGE_BASE_URL + e.path.replace(/\s+/g, "");
+            let url = process.env.IMAGE_BASE_URL + e.path.replace(/\s+/g, "").replace(/\\/g, "/");
             let type = e.mimetype;
             url = url.replace(/\/\.\.\//g, "/");
             arr.push({
@@ -173,13 +177,78 @@ product.add = async (req, res, next) => {
           return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`); // Rearrange to 'YYYY-MM-DD'
         }
 
-        if (
-          data.isDelivered &&
-          (data.isDelivered == "" ||
-            data.isDelivered == "undefined" ||
-            data.isDelivered == "null")
-        ) {
-          data.isDelivered = true;
+        // Handle isDelivered field conversion to boolean
+        if (data.isDelivered !== undefined) {
+          if (typeof data.isDelivered === 'string') {
+            const trimmedValue = data.isDelivered.trim().toLowerCase();
+            if (trimmedValue === 'true' || trimmedValue === '1') {
+              data.isDelivered = true;
+            } else if (trimmedValue === 'false' || trimmedValue === '0' || trimmedValue === '') {
+              data.isDelivered = false;
+            } else {
+              data.isDelivered = true; // default to true for any other string value
+            }
+          } else if (typeof data.isDelivered === 'boolean') {
+            // Already a boolean, keep as is
+          } else {
+            data.isDelivered = true; // default value
+          }
+        } else {
+          data.isDelivered = true; // default value when undefined
+        }
+
+        // Validate classId if provided
+        if (data.classId) {
+          const classExists = await CLASS_MODEL.findOne({
+            _id: data.classId,
+            stateId: { $ne: CONST.DELETED },
+          });
+          
+          if (!classExists) {
+            await setResponseObject(
+              req,
+              false,
+              "Class not found or deleted"
+            );
+            next();
+            return;
+          }
+        }
+
+        // Validate classification if provided
+        if (data.classification) {
+          const classificationExists = await CALSSIFICATION.findOne({
+            _id: data.classification,
+            stateId: { $ne: CONST.DELETED },
+          });
+          
+          if (!classificationExists) {
+            await setResponseObject(
+              req,
+              false,
+              "Classification not found or deleted"
+            );
+            next();
+            return;
+          }
+        }
+
+        // Validate categoryId if provided
+        if (data.categoryId) {
+          const categoryExists = await CATEGORY_MODEL.findOne({
+            _id: data.categoryId,
+            stateId: { $ne: CONST.DELETED },
+          });
+          
+          if (!categoryExists) {
+            await setResponseObject(
+              req,
+              false,
+              "Category not found or deleted"
+            );
+            next();
+            return;
+          }
         }
 
         const addProduct = await PRODUCT_MODEL.create(data);
@@ -245,7 +314,7 @@ product.add = async (req, res, next) => {
 product.update = async (req, res, next) => {
   try {
     if (!fs.existsSync(dir)) {
-      !fs.mkdirSync(dir, {
+      fs.mkdirSync(dir, {
         recursive: true,
       });
     }
@@ -265,6 +334,7 @@ product.update = async (req, res, next) => {
         "Product already exist with this name"
       );
       next();
+      return;
     }
     upload(req, res, async (err) => {
       if (err) {
@@ -273,12 +343,25 @@ product.update = async (req, res, next) => {
       } else {
         const data = req.body;
         data.updatedBy = req.userId;
-        if (
-          data.isDelivered === undefined ||
-          data.isDelivered === null ||
-          data.isDelivered === ""
-        ) {
-          data.isDelivered = true;
+        
+        // Handle isDelivered field conversion to boolean
+        if (data.isDelivered !== undefined) {
+          if (typeof data.isDelivered === 'string') {
+            const trimmedValue = data.isDelivered.trim().toLowerCase();
+            if (trimmedValue === 'true' || trimmedValue === '1') {
+              data.isDelivered = true;
+            } else if (trimmedValue === 'false' || trimmedValue === '0' || trimmedValue === '') {
+              data.isDelivered = false;
+            } else {
+              data.isDelivered = true; // default to true for any other string value
+            }
+          } else if (typeof data.isDelivered === 'boolean') {
+            // Already a boolean, keep as is
+          } else {
+            data.isDelivered = true; // default value
+          }
+        } else {
+          data.isDelivered = true; // default value when undefined
         }
 
         if (data.couponValidity) {
@@ -303,7 +386,7 @@ product.update = async (req, res, next) => {
           const previousImages = findproduct.productImg;
           const arr = [];
           req.files.productImg.map(async (e) => {
-            let url = process.env.IMAGE_BASE_URL + e.path.replace(/\s+/g, "");
+            let url = process.env.IMAGE_BASE_URL + e.path.replace(/\s+/g, "").replace(/\\/g, "/");
             let type = e.mimetype;
             url = url.replace(/\/\.\.\//g, "/");
             arr.push({
@@ -395,6 +478,60 @@ product.update = async (req, res, next) => {
           data.stateId = CONST.PENDING;
         }
 
+        // Validate classId if provided
+        if (data.classId) {
+          const classExists = await CLASS_MODEL.findOne({
+            _id: data.classId,
+            stateId: { $ne: CONST.DELETED },
+          });
+          
+          if (!classExists) {
+            await setResponseObject(
+              req,
+              false,
+              "Class not found or deleted"
+            );
+            next();
+            return;
+          }
+        }
+
+        // Validate classification if provided
+        if (data.classification) {
+          const classificationExists = await CALSSIFICATION.findOne({
+            _id: data.classification,
+            stateId: { $ne: CONST.DELETED },
+          });
+          
+          if (!classificationExists) {
+            await setResponseObject(
+              req,
+              false,
+              "Classification not found or deleted"
+            );
+            next();
+            return;
+          }
+        }
+
+        // Validate categoryId if provided
+        if (data.categoryId) {
+          const categoryExists = await CATEGORY_MODEL.findOne({
+            _id: data.categoryId,
+            stateId: { $ne: CONST.DELETED },
+          });
+          
+          if (!categoryExists) {
+            await setResponseObject(
+              req,
+              false,
+              "Category not found or deleted"
+            );
+            next();
+            return;
+          }
+        }
+
         const updateProduct = await PRODUCT_MODEL.findByIdAndUpdate(
           { _id: req.params.id },
           data,
@@ -462,7 +599,7 @@ product.list = async (req, res, next) => {
         };
         break;
 
-      case "1":
+      case "2":
         filter = {
           stateId: CONST.INACTIVE,
         };
@@ -708,13 +845,14 @@ product.list = async (req, res, next) => {
         },
       },
     ]);
-    if (productList && productList[0].data.length) {
+    if (productList && productList[0] && productList[0].data && productList[0].data.length > 0) {
+      const totalCount = productList[0].count && productList[0].count[0] ? productList[0].count[0].count : 0;
       await setResponseObject(
         req,
         true,
         "Product list found successfully",
         productList[0].data,
-        productList[0].count[0].count,
+        totalCount,
         pageNo,
         pageLimit
       );
@@ -971,6 +1109,38 @@ product.detail = async (req, res, next) => {
         $unwind: { path: "$classification", preserveNullAndEmptyArrays: true },
       },
       {
+        $lookup: {
+          from: "classes",
+          let: { id: "$classId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                name: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arbicName", "$name"],
+                    },
+                    else: "$name",
+                  },
+                },
+                arbicName: 1,
+              },
+            },
+          ],
+          as: "class",
+        },
+      },
+      {
+        $unwind: { path: "$class", preserveNullAndEmptyArrays: true },
+      },
+      {
         $project: {
           _id: 1,
           productName: {
@@ -1062,6 +1232,7 @@ product.detail = async (req, res, next) => {
           totalQuantityInCart: 1,
           dynamicquestions: 1,
           classification: 1,
+          class: 1,
           wishlist: 1,
           isWishlist: 1,
           averageRating: {
@@ -1368,6 +1539,14 @@ product.pendingProduct = async (req, res, next) => {
             $options: "i",
           },
         },
+        {
+          "classDetails.name": {
+            $regex: req.query.search
+              ? req.query.search.replace(new RegExp("\\\\", "g"), "\\\\").trim()
+              : "",
+            $options: "i",
+          },
+        },
       ];
     }
 
@@ -1580,6 +1759,87 @@ product.pendingProduct = async (req, res, next) => {
       },
       {
         $lookup: {
+          from: "categories",
+          let: { id: "$categoryId" }, // foreign key
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] }, // primary key (auths)
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: 1,
+                arabicCategory: 1,
+              },
+            },
+          ],
+          as: "categoryDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$categoryDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "subcategories",
+          let: { id: "$subcategoryId" }, // foreign key
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] }, // primary key (auths)
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                subcategory: 1,
+                arabicSubcategory: 1,
+              },
+            },
+          ],
+          as: "subCategoryDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$subCategoryDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "classes",
+          let: { id: "$classId" }, // foreign key
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] }, // primary key (auths)
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                arbicName: 1,
+              },
+            },
+          ],
+          as: "classDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$classDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
           from: "dynamicquestions",
           let: { id: "$_id" }, // foreign key
           pipeline: [
@@ -1627,11 +1887,18 @@ product.pendingProduct = async (req, res, next) => {
           productCode: true,
           categoryDetails: {
             _id: true,
-            categoryName: true,
+            category: true,
+            arabicCategory: true,
           },
           subCategoryDetails: {
             _id: true,
-            subcategoryName: true,
+            subcategory: true,
+            arabicSubcategory: true,
+          },
+          classDetails: {
+            _id: true,
+            name: true,
+            arbicName: true,
           },
           isAssign: true,
           createdBy: 1,
@@ -1667,13 +1934,14 @@ product.pendingProduct = async (req, res, next) => {
       },
     ]);
 
-    if (productList && productList[0].data.length) {
+    if (productList && productList[0] && productList[0].data && productList[0].data.length > 0) {
+      const totalCount = productList[0].count && productList[0].count[0] ? productList[0].count[0].count : 0;
       await setResponseObject(
         req,
         true,
         "Product list found successfully",
         productList[0].data,
-        productList[0].count[0].count,
+        totalCount,
         pageNo,
         pageLimit
       );
@@ -2198,7 +2466,7 @@ product.importCsv = async (req, res, next) => {
  * @param {*} res
  * @param {*} next
  */
-product.userProduct = async (req, res, next) => {
+product.userProduct = async (req, _, next) => {
   try {
     let language = req.headers["language"] ? req.headers["language"] : "EN";
     let country = req.headers["country"] ? req.headers["country"] : "Kuwait";
@@ -2212,24 +2480,25 @@ product.userProduct = async (req, res, next) => {
       req.query.categoryId ||
       req.query.subcategoryId
     ) {
+      const orConditions = [];
+      if (req.query.companyId) {
+        orConditions.push({ company: new mongoose.Types.ObjectId(req.query.companyId) });
+      }
+      if (req.query.categoryId) {
+        orConditions.push({ categoryId: new mongoose.Types.ObjectId(req.query.categoryId) });
+      }
+      if (req.query.subcategoryId) {
+        orConditions.push({ subcategoryId: new mongoose.Types.ObjectId(req.query.subcategoryId) });
+      }
+      
       filter.push({
         $match: {
-          $or: [
-            { company: new mongoose.Types.ObjectId(req.query.companyId) },
-            {
-              categoryId: new mongoose.Types.ObjectId(req.query.categoryId),
-            },
-            {
-              subcategoryId: new mongoose.Types.ObjectId(
-                req.query.subcategoryId
-              ),
-            },
-          ],
+          $or: orConditions,
         },
       });
     }
 
-    if (req.query.classificationArr) {
+    if (req.query.classificationArr && req.query.classificationArr.trim() !== "") {
       filter.push({
         $match: {
           classification: {
@@ -2241,7 +2510,7 @@ product.userProduct = async (req, res, next) => {
       });
     }
 
-    if (req.query.companyArr) {
+    if (req.query.companyArr && req.query.companyArr.trim() !== "") {
       filter.push({
         $match: {
           company: {
@@ -2249,6 +2518,30 @@ product.userProduct = async (req, res, next) => {
               .split(",")
               .map((i) => new mongoose.Types.ObjectId(i)),
           }, // Using the array directly
+        },
+      });
+    }
+
+    if (req.query.categoryArr && req.query.categoryArr.trim() !== "") {
+      filter.push({
+        $match: {
+          categoryId: {
+            $in: req.query.categoryArr
+              .split(",")
+              .map((i) => new mongoose.Types.ObjectId(i)),
+          },
+        },
+      });
+    }
+
+    if (req.query.subCategoryArr && req.query.subCategoryArr.trim() !== "") {
+      filter.push({
+        $match: {
+          subcategoryId: {
+            $in: req.query.subCategoryArr
+              .split(",")
+              .map((i) => new mongoose.Types.ObjectId(i)),
+          },
         },
       });
     }
@@ -2507,7 +2800,6 @@ product.userProduct = async (req, res, next) => {
         },
       ];
     }
-
     if (req.query.classification && req.query.classificationCompany) {
       filter.push({
         $match: {
@@ -2774,13 +3066,14 @@ product.userProduct = async (req, res, next) => {
       },
     ]);
 
-    if (productList && productList[0].data.length) {
+    if (productList && productList[0] && productList[0].data && productList[0].data.length > 0) {
+      const totalCount = productList[0].count && productList[0].count[0] ? productList[0].count[0].count : 0;
       await setResponseObject(
         req,
         true,
         "Product list found successfully",
         productList[0].data,
-        productList[0].count[0].count,
+        totalCount,
         pageNo,
         pageLimit
       );
@@ -3049,13 +3342,14 @@ product.userProducts = async (req, res, next) => {
       },
     ]);
 
-    if (productList && productList[0].data.length) {
+    if (productList && productList[0] && productList[0].data && productList[0].data.length > 0) {
+      const totalCount = productList[0].count && productList[0].count[0] ? productList[0].count[0].count : 0;
       await setResponseObject(
         req,
         true,
         "Product list found successfully",
         productList[0].data,
-        productList[0].count[0].count,
+        totalCount,
         pageNo,
         pageLimit
       );
@@ -3363,13 +3657,14 @@ product.searchProductList = async (req, res, next) => {
       },
     ]);
 
-    if (productList && productList[0].data.length) {
+    if (productList && productList[0] && productList[0].data && productList[0].data.length > 0) {
+      const totalCount = productList[0].count && productList[0].count[0] ? productList[0].count[0].count : 0;
       await setResponseObject(
         req,
         true,
         "Product list found successfully",
         productList[0].data,
-        productList[0].count[0].count,
+        totalCount,
         pageNo,
         pageLimit
       );
@@ -3572,7 +3867,7 @@ product.sellerGraphProduct = async (req, res, next) => {
  */
 product.venderDashboard = async (req, res, next) => {
   try {
-    const products = await PRODUCT.find({ createdBy: req.userId });
+    const products = await PRODUCT_MODEL.find({ createdBy: req.userId });
 
     const productArr = [];
     products.map((e) => {
@@ -4450,13 +4745,14 @@ product.newArrival = async (req, res, next) => {
       },
     ]);
 
-    if (productList && productList[0].data.length) {
+    if (productList && productList[0] && productList[0].data && productList[0].data.length > 0) {
+      const totalCount = productList[0].count && productList[0].count[0] ? productList[0].count[0].count : 0;
       await setResponseObject(
         req,
         true,
         "Product list found successfully",
         productList[0].data,
-        productList[0].count[0].count,
+        totalCount,
         pageNo,
         pageLimit
       );
@@ -4466,6 +4762,1277 @@ product.newArrival = async (req, res, next) => {
       next();
     }
   } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Get products by company*/
+product.getByCompany = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+    let pageNo = parseInt(req.query.pageNo) || 1;
+    let pageLimit = parseInt(req.query.pageLimit) || 10;
+
+    let searchFilter = {};
+    if (req.query.search && req.query.search !== "undefined") {
+      searchFilter.$or = [
+        {
+          productName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
+            $options: "i",
+          },
+        },
+        {
+          productArabicName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    const products = await PRODUCT_MODEL.aggregate([
+      {
+        $match: {
+          company: new mongoose.Types.ObjectId(req.params.companyId),
+          stateId: CONST.ACTIVE,
+        },
+      },
+      {
+        $match: searchFilter,
+      },
+      {
+        $lookup: {
+          from: "companies",
+          let: { id: "$company" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                companyName: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$companyArabicName", "$companyName"],
+                    },
+                    else: "$companyName",
+                  },
+                },
+              },
+            },
+          ],
+          as: "companyDetails",
+        },
+      },
+      {
+        $unwind: { path: "$companyDetails", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          productName: {
+            $cond: {
+              if: { $eq: [language, "AR"] },
+              then: {
+                $ifNull: ["$productArabicName", "$productName"],
+              },
+              else: "$productName",
+            },
+          },
+          productImg: 1,
+          price: 1,
+          mrpPrice: 1,
+          discount: 1,
+          averageRating: 1,
+          company: 1,
+          companyDetails: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $facet: {
+          data: [{ $skip: pageLimit * (pageNo - 1) }, { $limit: pageLimit }],
+          count: [{ $count: "count" }],
+        },
+      },
+    ]);
+
+    if (products && products[0].data.length) {
+      await setResponseObject(
+        req,
+        true,
+        "Products found successfully",
+        products[0].data,
+        products[0].count[0].count,
+        pageNo,
+        pageLimit
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "No products found", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Get products by category*/
+product.getByCategory = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+    let pageNo = parseInt(req.query.pageNo) || 1;
+    let pageLimit = parseInt(req.query.pageLimit) || 10;
+
+    let searchFilter = {};
+    if (req.query.search && req.query.search !== "undefined") {
+      searchFilter.$or = [
+        {
+          productName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
+            $options: "i",
+          },
+        },
+        {
+          productArabicName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    const products = await PRODUCT_MODEL.aggregate([
+      {
+        $match: {
+          categoryId: new mongoose.Types.ObjectId(req.params.categoryId),
+          stateId: CONST.ACTIVE,
+        },
+      },
+      {
+        $match: searchFilter,
+      },
+      {
+        $lookup: {
+          from: "categories",
+          let: { id: "$categoryId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arabicCategory", "$category"],
+                    },
+                    else: "$category",
+                  },
+                },
+              },
+            },
+          ],
+          as: "categoryDetails",
+        },
+      },
+      {
+        $unwind: { path: "$categoryDetails", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          productName: {
+            $cond: {
+              if: { $eq: [language, "AR"] },
+              then: {
+                $ifNull: ["$productArabicName", "$productName"],
+              },
+              else: "$productName",
+            },
+          },
+          productImg: 1,
+          price: 1,
+          mrpPrice: 1,
+          discount: 1,
+          averageRating: 1,
+          categoryId: 1,
+          categoryDetails: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $facet: {
+          data: [{ $skip: pageLimit * (pageNo - 1) }, { $limit: pageLimit }],
+          count: [{ $count: "count" }],
+        },
+      },
+    ]);
+
+    if (products && products[0].data.length) {
+      await setResponseObject(
+        req,
+        true,
+        "Products found successfully",
+        products[0].data,
+        products[0].count[0].count,
+        pageNo,
+        pageLimit
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "No products found", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Get products by classification*/
+product.getByClassification = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+    let pageNo = parseInt(req.query.pageNo) || 1;
+    let pageLimit = parseInt(req.query.pageLimit) || 10;
+
+    let searchFilter = {};
+    if (req.query.search && req.query.search !== "undefined") {
+      searchFilter.$or = [
+        {
+          productName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
+            $options: "i",
+          },
+        },
+        {
+          productArabicName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    const products = await PRODUCT_MODEL.aggregate([
+      {
+        $match: {
+          classification: new mongoose.Types.ObjectId(req.params.classificationId),
+          stateId: CONST.ACTIVE,
+        },
+      },
+      {
+        $match: searchFilter,
+      },
+      {
+        $lookup: {
+          from: "classifications",
+          let: { id: "$classification" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                name: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arbicName", "$name"],
+                    },
+                    else: "$name",
+                  },
+                },
+              },
+            },
+          ],
+          as: "classificationDetails",
+        },
+      },
+      {
+        $unwind: { path: "$classificationDetails", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          productName: {
+            $cond: {
+              if: { $eq: [language, "AR"] },
+              then: {
+                $ifNull: ["$productArabicName", "$productName"],
+              },
+              else: "$productName",
+            },
+          },
+          productImg: 1,
+          price: 1,
+          mrpPrice: 1,
+          discount: 1,
+          averageRating: 1,
+          classification: 1,
+          classificationDetails: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $facet: {
+          data: [{ $skip: pageLimit * (pageNo - 1) }, { $limit: pageLimit }],
+          count: [{ $count: "count" }],
+        },
+      },
+    ]);
+
+    if (products && products[0].data.length) {
+      await setResponseObject(
+        req,
+        true,
+        "Products found successfully",
+        products[0].data,
+        products[0].count[0].count,
+        pageNo,
+        pageLimit
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "No products found", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Get products by class*/
+product.getByClass = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+    let pageNo = parseInt(req.query.pageNo) || 1;
+    let pageLimit = parseInt(req.query.pageLimit) || 10;
+
+    // Validate classId if provided
+    if (req.params.classId) {
+      const classExists = await CLASS_MODEL.findOne({
+        _id: req.params.classId,
+        stateId: { $ne: CONST.DELETED },
+      });
+      
+      if (!classExists) {
+        await setResponseObject(
+          req,
+          false,
+          "Class not found or deleted"
+        );
+        next();
+        return;
+      }
+    }
+
+    let searchFilter = {};
+    if (req.query.search && req.query.search !== "undefined") {
+      searchFilter.$or = [
+        {
+          productName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
+            $options: "i",
+          },
+        },
+        {
+          productArabicName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    const products = await PRODUCT_MODEL.aggregate([
+      {
+        $match: {
+          classId: new mongoose.Types.ObjectId(req.params.classId),
+          stateId: CONST.ACTIVE,
+        },
+      },
+      {
+        $match: searchFilter,
+      },
+      {
+        $lookup: {
+          from: "classes",
+          let: { id: "$classId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                name: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arbicName", "$name"],
+                    },
+                    else: "$name",
+                  },
+                },
+              },
+            },
+          ],
+          as: "classDetails",
+        },
+      },
+      {
+        $unwind: { path: "$classDetails", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          productName: {
+            $cond: {
+              if: { $eq: [language, "AR"] },
+              then: {
+                $ifNull: ["$productArabicName", "$productName"],
+              },
+              else: "$productName",
+            },
+          },
+          productImg: 1,
+          price: 1,
+          mrpPrice: 1,
+          discount: 1,
+          averageRating: 1,
+          classId: 1,
+          classDetails: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $facet: {
+          data: [{ $skip: pageLimit * (pageNo - 1) }, { $limit: pageLimit }],
+          count: [{ $count: "count" }],
+        },
+      },
+    ]);
+
+    if (products && products[0].data.length) {
+      await setResponseObject(
+        req,
+        true,
+        "Products found successfully",
+        products[0].data,
+        products[0].count[0].count,
+        pageNo,
+        pageLimit
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "No products found", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Get products by subcategory*/
+product.getBySubcategory = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+    let pageNo = parseInt(req.query.pageNo) || 1;
+    let pageLimit = parseInt(req.query.pageLimit) || 10;
+
+    let searchFilter = {};
+    if (req.query.search && req.query.search !== "undefined") {
+      searchFilter.$or = [
+        {
+          productName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
+            $options: "i",
+          },
+        },
+        {
+          productArabicName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    const products = await PRODUCT_MODEL.aggregate([
+      {
+        $match: {
+          subcategoryId: new mongoose.Types.ObjectId(req.params.subcategoryId),
+          stateId: CONST.ACTIVE,
+        },
+      },
+      {
+        $match: searchFilter,
+      },
+      {
+        $lookup: {
+          from: "subcategories",
+          let: { id: "$subcategoryId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                subcategory: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arabicSubcategory", "$subcategory"],
+                    },
+                    else: "$subcategory",
+                  },
+                },
+              },
+            },
+          ],
+          as: "subcategoryDetails",
+        },
+      },
+      {
+        $unwind: { path: "$subcategoryDetails", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          productName: {
+            $cond: {
+              if: { $eq: [language, "AR"] },
+              then: {
+                $ifNull: ["$productArabicName", "$productName"],
+              },
+              else: "$productName",
+            },
+          },
+          productImg: 1,
+          price: 1,
+          mrpPrice: 1,
+          discount: 1,
+          averageRating: 1,
+          subcategoryId: 1,
+          subcategoryDetails: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $facet: {
+          data: [{ $skip: pageLimit * (pageNo - 1) }, { $limit: pageLimit }],
+          count: [{ $count: "count" }],
+        },
+      },
+    ]);
+
+    if (products && products[0].data.length) {
+      await setResponseObject(
+        req,
+        true,
+        "Products found successfully",
+        products[0].data,
+        products[0].count[0].count,
+        pageNo,
+        pageLimit
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "No products found", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Filter products by multiple criteria*/
+product.filterProducts = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+    let country = req.headers["country"] ? req.headers["country"] : "Kuwait";
+    let pageNo = parseInt(req.query.pageNo) || 1;
+    let pageLimit = parseInt(req.query.pageLimit) || 10;
+
+    console.log("Filter Parameters:", {
+      classId: req.query.classId,
+      companyId: req.query.companyId,
+      classificationId: req.query.classificationId,
+      minPrice: req.query.minPrice,
+      maxPrice: req.query.maxPrice,
+      minDiscount: req.query.minDiscount,
+      maxDiscount: req.query.maxDiscount,
+      country: country
+    });
+
+    // Build dynamic match filter based on query parameters
+    let matchFilter = { stateId: CONST.ACTIVE };
+
+    // Add filters based on query parameters
+    if (req.query.companyId) {
+      matchFilter.company = new mongoose.Types.ObjectId(req.query.companyId);
+    }
+    if (req.query.categoryId) {
+      matchFilter.categoryId = new mongoose.Types.ObjectId(req.query.categoryId);
+    }
+    if (req.query.subcategoryId) {
+      matchFilter.subcategoryId = new mongoose.Types.ObjectId(req.query.subcategoryId);
+    }
+    if (req.query.classificationId) {
+      matchFilter.classification = new mongoose.Types.ObjectId(req.query.classificationId);
+    }
+    if (req.query.classId) {
+      matchFilter.classId = new mongoose.Types.ObjectId(req.query.classId);
+    }
+
+    // Debug: Check what products exist with your criteria before state filter
+    const debugProducts = await PRODUCT_MODEL.find({
+      company: req.query.companyId ? new mongoose.Types.ObjectId(req.query.companyId) : undefined,
+      classification: req.query.classificationId ? new mongoose.Types.ObjectId(req.query.classificationId) : undefined,
+      classId: req.query.classId ? new mongoose.Types.ObjectId(req.query.classId) : undefined
+    }).select('_id productName stateId price discount quantity');
+    
+    console.log("Debug - Products found before state filter:", debugProducts);
+
+    // Build price filter
+    let priceFilter = {};
+    if (req.query.minPrice && req.query.maxPrice) {
+      priceFilter = {
+        $or: [
+          {
+            $and: [
+              { price: { $gte: parseFloat(req.query.minPrice) } },
+              { price: { $lte: parseFloat(req.query.maxPrice) } },
+            ],
+          },
+          {
+            $and: [
+              { size: { $ne: [] } },
+              {
+                $expr: {
+                  $and: [
+                    {
+                      $gte: [
+                        { $arrayElemAt: ["$size.price", 0] },
+                        parseFloat(req.query.minPrice),
+                      ],
+                    },
+                    {
+                      $lte: [
+                        { $arrayElemAt: ["$size.price", 0] },
+                        parseFloat(req.query.maxPrice),
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+    } else if (req.query.maxPrice) {
+      priceFilter = {
+        $or: [
+          { price: { $lte: parseFloat(req.query.maxPrice) } },
+          {
+            $and: [
+              { size: { $ne: [] } },
+              {
+                $expr: {
+                  $lte: [
+                    { $arrayElemAt: ["$size.price", 0] },
+                    parseFloat(req.query.maxPrice),
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+    } else if (req.query.minPrice) {
+      priceFilter = {
+        $or: [
+          { price: { $gte: parseFloat(req.query.minPrice) } },
+          {
+            $and: [
+              { size: { $ne: [] } },
+              {
+                $expr: {
+                  $gte: [
+                    { $arrayElemAt: ["$size.price", 0] },
+                    parseFloat(req.query.minPrice),
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+    }
+
+    // Build discount filter
+    let discountFilter = {};
+    if (req.query.minDiscount && req.query.maxDiscount) {
+      discountFilter = {
+        $or: [
+          {
+            $and: [
+              { discount: { $gte: parseFloat(req.query.minDiscount) } },
+              { discount: { $lte: parseFloat(req.query.maxDiscount) } },
+            ],
+          },
+          {
+            $and: [
+              { size: { $ne: [] } },
+              {
+                $expr: {
+                  $and: [
+                    {
+                      $gte: [
+                        { $arrayElemAt: ["$size.discount", 0] },
+                        parseFloat(req.query.minDiscount),
+                      ],
+                    },
+                    {
+                      $lte: [
+                        { $arrayElemAt: ["$size.discount", 0] },
+                        parseFloat(req.query.maxDiscount),
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+    } else if (req.query.maxDiscount) {
+      discountFilter = {
+        $or: [
+          { discount: { $lte: parseFloat(req.query.maxDiscount) } },
+          {
+            $and: [
+              { size: { $ne: [] } },
+              {
+                $expr: {
+                  $lte: [
+                    { $arrayElemAt: ["$size.discount", 0] },
+                    parseFloat(req.query.maxDiscount),
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+    } else if (req.query.minDiscount) {
+      discountFilter = {
+        $or: [
+          { discount: { $gte: parseFloat(req.query.minDiscount) } },
+          {
+            $and: [
+              { size: { $ne: [] } },
+              {
+                $expr: {
+                  $gte: [
+                    { $arrayElemAt: ["$size.discount", 0] },
+                    parseFloat(req.query.minDiscount),
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+    }
+
+    console.log("Initial match filter:", matchFilter);
+    console.log("Price filter:", priceFilter);
+    console.log("Discount filter:", discountFilter);
+
+    // Search filter
+    let searchFilter = {};
+    if (req.query.search && req.query.search !== "undefined") {
+      const escapeRegex = (text) => {
+        return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      };
+
+      const searchTerm = escapeRegex(
+        req.query.search.replace(new RegExp("\\\\", "g"), "\\\\").trim()
+      );
+
+      searchFilter.$or = [
+        {
+          productName: {
+            $regex: searchTerm,
+            $options: "i",
+          },
+        },
+        {
+          productArabicName: {
+            $regex: searchTerm,
+            $options: "i",
+          },
+        },
+        {
+          "companyDetails.company": {
+            $regex: searchTerm,
+            $options: "i",
+          },
+        },
+        {
+          "companyDetails.arabicCompany": {
+            $regex: searchTerm,
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    // Build aggregate pipeline with debug steps
+    let pipeline = [
+      { $match: matchFilter },
+      // Add debug stage to see what's left after initial match
+      {
+        $addFields: {
+          debug_step: "after_initial_match"
+        }
+      },
+      {
+        $lookup: {
+          from: "companies",
+          let: { id: "$company" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: CONST.ACTIVE,
+                country: country
+              },
+            },
+            {
+              $lookup: {
+                from: "branches",
+                let: { companyId: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: { $eq: ["$$companyId", "$companyId"] },
+                      stateId: CONST.ACTIVE,
+                    },
+                  },
+                ],
+                as: "activeBranches",
+              },
+            },
+            // Make this optional - don't require branches for now
+            {
+              $project: {
+                _id: 1,
+                company: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arabicCompany", "$company"],
+                    },
+                    else: "$company",
+                  },
+                },
+                arabicCompany: 1,
+                logo: 1,
+                coverImg: 1,
+                activeBranches: 1,
+                branchCount: { $size: "$activeBranches" }
+              },
+            },
+          ],
+          as: "companyDetails",
+        },
+      },
+      {
+        $unwind: { path: "$companyDetails", preserveNullAndEmptyArrays: true },
+      },
+      // Debug: Check if company lookup is working
+      {
+        $addFields: {
+          debug_company_exists: { $cond: [{ $ifNull: ["$companyDetails", false] }, "yes", "no"] },
+          debug_branch_count: { $ifNull: ["$companyDetails.branchCount", 0] }
+        }
+      },
+      // Only filter by company existence, not branches for now
+      {
+        $match: { companyDetails: { $exists: true } },
+      },
+      // Skip the quantity grouping for now to isolate the issue
+    ];
+
+    // Add price filter if provided
+    if (Object.keys(priceFilter).length > 0) {
+      pipeline.push({ $match: priceFilter });
+    }
+
+    // Add discount filter if provided
+    if (Object.keys(discountFilter).length > 0) {
+      pipeline.push({ $match: discountFilter });
+    }
+
+    // Continue with the rest of the pipeline
+    pipeline.push(
+      {
+        $lookup: {
+          from: "wishlists",
+          let: { id: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$productId"] },
+                createdBy: new mongoose.Types.ObjectId(req.userId),
+                isWishlist: true,
+              },
+            },
+          ],
+          as: "wishlist",
+        },
+      },
+      {
+        $addFields: {
+          isWishlist: {
+            $cond: { if: { $size: "$wishlist" }, then: true, else: false },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          let: { id: "$categoryId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arabicCategory", "$category"],
+                    },
+                    else: "$category",
+                  },
+                },
+              },
+            },
+          ],
+          as: "categoryDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "subcategories",
+          let: { id: "$subcategoryId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                subcategory: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arabicSubcategory", "$subcategory"],
+                    },
+                    else: "$subcategory",
+                  },
+                },
+              },
+            },
+          ],
+          as: "subcategoryDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "classifications",
+          let: { id: "$classification" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                name: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arbicName", "$name"],
+                    },
+                    else: "$name",
+                  },
+                },
+              },
+            },
+          ],
+          as: "classificationDetails",
+        },
+      },
+      {
+        $lookup: {
+          from: "classes",
+          let: { id: "$classId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                name: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arbicName", "$name"],
+                    },
+                    else: "$name",
+                  },
+                },
+              },
+            },
+          ],
+          as: "classDetails",
+        },
+      },
+      {
+        $unwind: { path: "$categoryDetails", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: "$subcategoryDetails", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: "$classificationDetails", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: "$classDetails", preserveNullAndEmptyArrays: true },
+      }
+    );
+
+    // Add search filter if provided
+    if (Object.keys(searchFilter).length > 0) {
+      pipeline.push({ $match: searchFilter });
+    }
+
+    // Add final projection and sorting
+    pipeline.push(
+      {
+        $project: {
+          _id: 1,
+          productName: {
+            $cond: {
+              if: { $eq: [language, "AR"] },
+              then: {
+                $ifNull: ["$productArabicName", "$productName"],
+              },
+              else: "$productName",
+            },
+          },
+          productArabicName: 1,
+          description: {
+            $cond: {
+              if: { $eq: [language, "AR"] },
+              then: {
+                $ifNull: ["$arabicDescription", "$description"],
+              },
+              else: "$description",
+            },
+          },
+          arabicDescription: 1,
+          productImg: { $slice: ["$productImg", 1] },
+          price: 1,
+          mrpPrice: 1,
+          pickupCost: 1,
+          size: 1,
+          discount: 1,
+          quantity: 1,
+          order: 1,
+          isDelivered: 1,
+          company: 1,
+          categoryId: 1,
+          subcategoryId: 1,
+          classification: 1,
+          classId: 1,
+          companyDetails: 1,
+          categoryDetails: 1,
+          subcategoryDetails: 1,
+          classificationDetails: 1,
+          classDetails: 1,
+          isWishlist: 1,
+          averageRating: {
+            averageRating: { $ifNull: ["$averageRating", 0] },
+          },
+          createdAt: 1,
+          // Include debug fields to see what's happening
+          debug_step: 1,
+          debug_company_exists: 1,
+          debug_branch_count: 1
+        },
+      },
+      {
+        $addFields: {
+          effectivePrice: {
+            $cond: {
+              if: { $ne: ["$price", null] },
+              then: "$price",
+              else: { $arrayElemAt: ["$size.price", 0] },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          sortKey: {
+            $cond: {
+              if: { $gt: ["$order", 0] },
+              then: { $toInt: { $ifNull: ["$order", 0] } },
+              else: Number.MAX_SAFE_INTEGER,
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          sortKey: 1,
+          createdAt: -1,
+        },
+      },
+      {
+        $facet: {
+          data: [{ $skip: pageLimit * (pageNo - 1) }, { $limit: pageLimit }],
+          count: [{ $count: "count" }],
+        },
+      }
+    );
+
+    // Debug: Check company details before pipeline
+    if (req.query.companyId) {
+      const companyDebug = await COMPANY_MODEL.findById(req.query.companyId);
+      console.log("Company debug:", companyDebug ? {
+        _id: companyDebug._id,
+        company: companyDebug.company,
+        stateId: companyDebug.stateId,
+        country: companyDebug.country
+      } : "Company not found");
+    }
+
+    const products = await PRODUCT_MODEL.aggregate(pipeline);
+
+    console.log("Final pipeline result count:", products[0]?.data?.length || 0);
+    
+    // Debug: Show first result if any
+    if (products[0]?.data?.length > 0) {
+      console.log("First result debug fields:", {
+        debug_step: products[0].data[0].debug_step,
+        debug_company_exists: products[0].data[0].debug_company_exists,
+        debug_branch_count: products[0].data[0].debug_branch_count,
+        productName: products[0].data[0].productName
+      });
+    }
+
+    if (products && products[0].data.length) {
+      await setResponseObject(
+        req,
+        true,
+        "Products found successfully",
+        products[0].data,
+        products[0].count[0].count,
+        pageNo,
+        pageLimit
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "No products found", []);
+      next();
+    }
+  } catch (error) {
+    console.error("Filter products error:", error);
     await setResponseObject(req, false, error.message, "");
     next();
   }

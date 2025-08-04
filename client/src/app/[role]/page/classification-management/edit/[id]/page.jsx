@@ -22,7 +22,8 @@ import useSlider from "../../../../../../../hooks/useSlider";
 
 import {
   EDIT_CLASSIFICATION_API,
-  GET_CLASSIFICATION_DETAIL_API
+  GET_CLASSIFICATION_DETAIL_API,
+  GET_CATEGORY_LIST_HOME
 } from "../../../../../../../services/APIServices";
 import { toastAlert } from "../../../../../../../utils/SweetAlert";
 import { getLinkHref, restrictAlpha } from "../../../../../../../utils/helper";
@@ -34,6 +35,15 @@ const Edit = () => {
   const isSlider = useSlider();
   const detail = useDetails();
   const queryClient = useQueryClient();
+
+  // Fetch categories for dropdown
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const resp = await GET_CATEGORY_LIST_HOME();
+      return resp?.data?.data || [];
+    },
+  });
 
   const { mutate, error, isPending } = useMutation({
     mutationFn: (payload) => EDIT_CLASSIFICATION_API(id, payload),
@@ -61,6 +71,7 @@ const Edit = () => {
         ...values,
         name: resp?.data?.data?.name,
         arbicName: resp?.data?.data?.arbicName,
+        categoryId: resp?.data?.data?.categoryId?._id || resp?.data?.data?.categoryId || "",
         order: resp?.data?.data?.order,
       });
       return resp?.data?.data;
@@ -82,6 +93,7 @@ const Edit = () => {
     initialValues: {
       name: "",
       arbicName: "",
+      categoryId: "",
       order: "",
     },
 
@@ -100,12 +112,17 @@ const Edit = () => {
         .required()
         .label("Classification Name (in arabic)")
         .trim(),
+      categoryId: yup
+        .string()
+        .required()
+        .label("Category"),
     }),
 
     onSubmit: async (values) => {
       const body = {
         name: values?.name,
         arbicName: values?.arbicName,
+        categoryId: values?.categoryId,
         order: values?.order,
       };
       mutate(body);
@@ -198,6 +215,36 @@ const Edit = () => {
                         )}
                       </Form.Group>
                     </Col>
+
+                    <Col md={6} className="mx-auto">
+                      <Form.Group className="mb-4">
+                        <Form.Label>
+                          Category
+                          <span className="text-danger">*</span>
+                        </Form.Label>
+                        <Form.Select
+                          className="form-control"
+                          name="categoryId"
+                          onChange={handleChange}
+                          value={values?.categoryId}
+                        >
+                          <option value="">Select Category</option>
+                          {categories?.map((category) => (
+                            <option key={category?._id} value={category?._id}>
+                              {category?.category}
+                            </option>
+                          ))}
+                        </Form.Select>
+                        {touched?.categoryId && errors?.categoryId ? (
+                          <span className="error">
+                            {touched?.categoryId && errors?.categoryId}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </Form.Group>
+                    </Col>
+
                     <Col lg={6}>
                       <Form.Group className="mb-4 position-relative">
                         <Form.Label>Priority Order</Form.Label>
