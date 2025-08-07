@@ -48,7 +48,6 @@
   font-size: 30px;
 }
 
-
 .section-image-box.style-one {
   position: relative;
   min-height: 570px;
@@ -73,7 +72,7 @@
   width: 82px;
   height: 495px;
   border-radius: 40px 0px 0px 0px;
-  background-color: #FFFAF3;
+  background-color: #fffaf3;
 }
 
 .section-image-box.style-one .image-two {
@@ -101,7 +100,7 @@
 .sub-title {
   font-size: 16px;
   line-height: 26px;
-  color: #DA2A2C;
+  color: #da2a2c;
   margin: 0 10px;
   font-weight: bold;
 }
@@ -155,7 +154,7 @@
   font-size: 60px;
   font-weight: 600;
   line-height: 60px;
-  color: #DA2A2C;
+  color: #da2a2c;
 }
 
 .section-image-box.style-one .experience-box .text .duration {
@@ -166,26 +165,23 @@
 
 .form-control {
   height: 55px;
-
 }
 
-
-.translated-rtl{
+.translated-rtl {
   .multi-range-slider {
     direction: ltr;
-  }  
+  }
 }
 
-
-  .product-image{
-      .pro-first {
-          height: 357px;
-          display: block;
-          overflow: hidden;
-          img{
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-      }
+.product-image {
+  .pro-first {
+    height: 357px;
+    display: block;
+    overflow: hidden;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
+  }
+}
