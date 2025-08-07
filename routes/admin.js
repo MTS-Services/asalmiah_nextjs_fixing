@@ -25,42 +25,41 @@ const {
   _emailLogs,
   _loginActivity,
 
-  _smsLogs
-} = require("../app/errorLogs/controller/logsController");
-const _user = require("../app/userService/controller/userController");
+  _smsLogs,
+} = require('../app/errorLogs/controller/logsController');
+const _user = require('../app/userService/controller/userController');
 
-const _contact = require("../app/contactUs/controller/contactUs.controller");
-const _smtp = require("../app/smtp/controller/smtp.controller");
-const _backup = require("../app/backup/controller/backup.controller");
-const _category = require("../app/category/controller/category.controller");
-const _class = require("../app/class/controller/class.controller");
-const _subcategory = require("../app/subCategory/controller/subCategory.controller");
-const _company = require("../app/company/controller/controller");
-const _deliveryCompany = require("../app/companyDelivery/controller/controller");
-const _branch = require("../app/branch/controller/controller");
-const _product = require("../app/product/controller/product.controller");
-const _promocode = require("../app/promoCode/controller/controller");
-const _banner = require("../app/banner/controller/banner.controller");
-const _order = require("../app/order/controller/order.controller");
-const _testimonial = require("../app/testimonial/controller/testimonial.controller");
-const _contactInfo = require("../app/contactInfo/controller/controller");
-const _payment = require("../app/payment/controller/payment.controller");
-const _dynamic = require("../app/dynamicQuestion/controller/controller");
-const _classification = require("../app/classification/controller/controller");
-const _permission = require("../app/permission/controller/controller");
-const _review = require("../app/review/controller/review.controller");
-const _notification = require("../app/notification/controller/notification.controller");
-const _coupon = require("../app/coupon/controller/controller");
-const _offer = require("../app/offer/controller/controller");
-const offer = require("../app/offer/controller/controller");
-const _refundRequest = require("../app/redundRequest/controller/controller");
-const _statementAccount = require("../app/statementAccount/controller/controller");
-const _spinner = require("../app/spinner/controller/spinner.controller");
-const _cashback = require("../app/cashBack/controller/controller");
-const _dynamicLabeling = require("../app/dynamicLabeling/controller/controller");
-const _twillio = require("../app/twillio/controller/twillio.controller");
-const _version = require("../app/versionService/versionController/versionController");
-
+const _contact = require('../app/contactUs/controller/contactUs.controller');
+const _smtp = require('../app/smtp/controller/smtp.controller');
+const _backup = require('../app/backup/controller/backup.controller');
+const _category = require('../app/category/controller/category.controller');
+const _class = require('../app/class/controller/class.controller');
+const _subcategory = require('../app/subCategory/controller/subCategory.controller');
+const _company = require('../app/company/controller/controller');
+const _deliveryCompany = require('../app/companyDelivery/controller/controller');
+const _branch = require('../app/branch/controller/controller');
+const _product = require('../app/product/controller/product.controller');
+const _promocode = require('../app/promoCode/controller/controller');
+const _banner = require('../app/banner/controller/banner.controller');
+const _order = require('../app/order/controller/order.controller');
+const _testimonial = require('../app/testimonial/controller/testimonial.controller');
+const _contactInfo = require('../app/contactInfo/controller/controller');
+const _payment = require('../app/payment/controller/payment.controller');
+const _dynamic = require('../app/dynamicQuestion/controller/controller');
+const _classification = require('../app/classification/controller/controller');
+const _permission = require('../app/permission/controller/controller');
+const _review = require('../app/review/controller/review.controller');
+const _notification = require('../app/notification/controller/notification.controller');
+const _coupon = require('../app/coupon/controller/controller');
+const _offer = require('../app/offer/controller/controller');
+const offer = require('../app/offer/controller/controller');
+const _refundRequest = require('../app/redundRequest/controller/controller');
+const _statementAccount = require('../app/statementAccount/controller/controller');
+const _spinner = require('../app/spinner/controller/spinner.controller');
+const _cashback = require('../app/cashBack/controller/controller');
+const _dynamicLabeling = require('../app/dynamicLabeling/controller/controller');
+const _twillio = require('../app/twillio/controller/twillio.controller');
+const _version = require('../app/versionService/versionController/versionController');
 
 //   _smsLogs,
 // } = require('../app/errorLogs/controller/logsController');
@@ -95,7 +94,6 @@ const _version = require("../app/versionService/versionController/versionControl
 // const _dynamicLabeling = require('../app/dynamicLabeling/controller/controller');
 // const _twillio = require('../app/twillio/controller/twillio.controller');
 // const _version = require('../app/versionService/versionController/versionController');
-
 
 /* User Management */
 router.group('/user', (admin) => {
@@ -205,18 +203,20 @@ router.group('/category', (category) => {
   category.delete('/delete/:id', _category.delete);
 });
 
-
 /* Class Management  */
-router.group("/class", (classRoute) => {
-  classRoute.post("/add", _class.add);
-  classRoute.get("/list", _class.list);
-  classRoute.get("/detail/:id", _class.detail);
-  classRoute.put("/update/:id", _class.update);
-  classRoute.put("/updateState/:id", _class.updateState);
-  classRoute.delete("/delete/:id", _class.delete);
-  classRoute.get("/dropDownClass", _class.dropDownClass);
-  classRoute.get("/activeList", _class.activeList);
-  classRoute.get("/classification/:classificationId", _class.getClassesByClassification);
+router.group('/class', (classRoute) => {
+  classRoute.post('/add', _class.add);
+  classRoute.get('/list', _class.list);
+  classRoute.get('/detail/:id', _class.detail);
+  classRoute.put('/update/:id', _class.update);
+  classRoute.put('/updateState/:id', _class.updateState);
+  classRoute.delete('/delete/:id', _class.delete);
+  classRoute.get('/dropDownClass', _class.dropDownClass);
+  classRoute.get('/activeList', _class.activeList);
+  classRoute.get(
+    '/classification/:classificationId',
+    _class.getClassesByClassification
+  );
 });
 /* Sub category Management  */
 router.group('/subcategory', (subcategory) => {
@@ -352,26 +352,25 @@ router.group('/dynamic', (dynamic) => {
 
 /* Classification Management  */
 
-router.group("/classification", (classification) => {
-  classification.post("/add", _classification.add);
-  classification.get("/list", _classification.list);
-  classification.get("/detail/:id", _classification.detail);
-  classification.put("/update/:id", _classification.update);
-  classification.put("/updateState/:id", _classification.updateState);
-  classification.delete("/delete/:id", _classification.delete);
-  classification.get("/dropDown", _classification.activeList);
-  classification.get("/category/:categoryId", _classification.getByCategory);
+router.group('/classification', (classification) => {
+  classification.post('/add', _classification.add);
+  classification.get('/list', _classification.list);
+  classification.get('/detail/:id', _classification.detail);
+  classification.put('/update/:id', _classification.update);
+  classification.put('/updateState/:id', _classification.updateState);
+  classification.delete('/delete/:id', _classification.delete);
+  classification.get('/dropDown', _classification.activeList);
+  classification.get('/category/:categoryId', _classification.getByCategory);
 
-// router.group('/classification', (classification) => {
-//   classification.post('/add', _classification.add);
-//   classification.get('/list', _classification.list);
-//   classification.get('/detail/:id', _classification.detail);
-//   classification.put('/update/:id', _classification.update);
-//   classification.put('/updateState/:id', _classification.updateState);
-//   classification.delete('/delete/:id', _classification.delete);
-//   classification.get('/dropDown', _classification.activeList);
-
-// });
+  // router.group('/classification', (classification) => {
+  //   classification.post('/add', _classification.add);
+  //   classification.get('/list', _classification.list);
+  //   classification.get('/detail/:id', _classification.detail);
+  //   classification.put('/update/:id', _classification.update);
+  //   classification.put('/updateState/:id', _classification.updateState);
+  //   classification.delete('/delete/:id', _classification.delete);
+  //   classification.get('/dropDown', _classification.activeList);
+});
 
 /* Review Management  */
 router.group('/review', (review) => {
