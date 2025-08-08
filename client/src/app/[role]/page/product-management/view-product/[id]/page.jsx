@@ -398,12 +398,6 @@ const ProductDetail = ({ params }) => {
                                     </td>
                                   </tr>
                                   <tr>
-                                    <th>Class</th>
-                                    <td>
-                                      {productDetails?.class?.name ?? "-"}
-                                    </td>
-                                  </tr>
-                                  <tr>
                                     <th>Company Name</th>
                                     <td>
                                       {productDetails?.companyDetails?.company}

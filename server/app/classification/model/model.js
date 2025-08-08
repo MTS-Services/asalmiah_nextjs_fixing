@@ -20,9 +20,9 @@ let classification = new SCHEMA(
     arbicName: {
       type: String,
     },
-    categoryId: {
+    classId: {
       type: mongoose.Types.ObjectId,
-      ref: "category",
+      ref: "class",
     },
     order: {
       type: Number,

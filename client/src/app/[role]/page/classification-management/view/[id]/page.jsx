@@ -89,9 +89,9 @@ const View = () => {
                   </tr>
                   <tr>
                     <td>
-                      <b>Category</b>
+                      <b>Class</b>
                     </td>
-                    <td>{categoryview?.category?.category || "N/A"}</td>
+                    <td>{categoryview?.classId?.name || "N/A"}</td>
                   </tr>
                   <tr>
                     <td>

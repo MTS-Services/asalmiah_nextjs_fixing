@@ -264,6 +264,7 @@ router.group('/branch', (branch) => {
 /* Product Management  */
 router.group('/product', (product) => {
   product.post('/add', _product.add);
+  product.get('/list', _product.list);
   product.put('/edit/:id', _product.update);
   product.get('/pendingProduct', _product.pendingProduct);
   product.get('/detail/:id', _product.detail);
@@ -371,7 +372,7 @@ router.group("/classification", (classification) => {
 //   classification.delete('/delete/:id', _classification.delete);
 //   classification.get('/dropDown', _classification.activeList);
 
-// });
+ });
 
 /* Review Management  */
 router.group('/review', (review) => {
