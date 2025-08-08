@@ -75,6 +75,12 @@ const View = () => {
                 <Table bordered>
                   <tr>
                     <td>
+                      <b>Category</b>
+                    </td>
+                    <td>{classview?.categoryDetails?.category || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td>
                       <b>Class Name</b>
                     </td>
                     <td>{classview?.name}</td>

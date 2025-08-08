@@ -18,13 +18,16 @@ import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
+import { AsyncPaginate } from "react-select-async-paginate";
 import useSlider from "../../../../../../../hooks/useSlider";
 
 import {
   EDIT_CLASS_API,
-  GET_CLASS_DETAIL_API
+  GET_CLASS_DETAIL_API,
+  GET_SEARCH_CATEGORY_API,
 } from "../../../../../../../services/APIServices";
 import { toastAlert } from "../../../../../../../utils/SweetAlert";
+import { constant, Paginations, customReactSelectStyles } from "../../../../../../../utils/constants";
 import { getLinkHref, restrictAlpha } from "../../../../../../../utils/helper";
 import useDetails from "../../../../../../../hooks/useDetails";
 
@@ -57,11 +60,18 @@ const Edit = () => {
         return null;
       }
       const resp = await GET_CLASS_DETAIL_API(id);
+      console.log("resp", resp);
       setValues({
         ...values,
         name: resp?.data?.data?.name,
         arbicName: resp?.data?.data?.arbicName,
         order: resp?.data?.data?.order,
+        categoryId: resp?.data?.data?.categoryId 
+          ? {
+              label: resp?.data?.data?.category?.category,
+              value: resp?.data?.data?.category?._id,
+            }
+          : "",
       });
       return resp?.data?.data;
     },
@@ -83,6 +93,7 @@ const Edit = () => {
       name: "",
       arbicName: "",
       order: "",
+      categoryId: "",
     },
 
     validationSchema: yup.object().shape({
@@ -100,6 +111,11 @@ const Edit = () => {
         .required()
         .label("Class Name (in arabic)")
         .trim(),
+      categoryId: yup
+        .object()
+        .required()
+        .label("Category")
+        .nullable(),
     }),
 
     onSubmit: async (values) => {
@@ -107,10 +123,32 @@ const Edit = () => {
         name: values?.name,
         arbicName: values?.arbicName,
         order: values?.order,
+        categoryId: values?.categoryId?.value,
       };
       mutate(body);
     },
   });
+
+  const searchCategoryList = async (search, loadedOptions, { page }) => {
+    let resp = await GET_SEARCH_CATEGORY_API(
+      page,
+      Paginations.PER_PAGE,
+      constant?.ACTIVE,
+      search
+    );
+    let array = await resp?.data?.data;
+
+    return {
+      options: array?.map((i) => ({
+        label: i?.category,
+        value: i?._id,
+      })),
+      hasMore: resp?.data?.data?.length > 0 ? true : false,
+      additional: {
+        page: page + 1,
+      },
+    };
+  };
 
   return (
     <>
@@ -152,6 +190,35 @@ const Edit = () => {
               <div className="card-body">
                 <form onSubmit={handleSubmit}>
                   <Row>
+                    <Col md={6} className="mx-auto">
+                      <Form.Group className="mb-4">
+                        <Form.Label>
+                          Category
+                          <span className="text-danger">*</span>
+                        </Form.Label>
+                        <AsyncPaginate
+                          className="async-paginate-select"
+                          value={values?.categoryId}
+                          loadOptions={searchCategoryList}
+                          onChange={(e) => setFieldValue("categoryId", e)}
+                          placeholder="Select Category"
+                          additional={{
+                            page: 1,
+                          }}
+                          debounceTimeout={1000}
+                          defaultOptions={true}
+                          classNamePrefix="select"
+                          styles={customReactSelectStyles}
+                        />
+                        {touched?.categoryId && errors?.categoryId ? (
+                          <span className="error">
+                            {touched?.categoryId && errors?.categoryId}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </Form.Group>
+                    </Col>
                     <Col md={6} className="mx-auto">
                       <Form.Group className="mb-4">
                         <Form.Label>
