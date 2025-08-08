@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Col, Container, Row } from 'react-bootstrap';
 import Slider from 'react-slick';
-import { GET_BANNER_USER_API } from '../../../../services/APIServices';
 import ImageComponent from '../../../../utils/ImageComponent';
+import { GET_BANNER_USER_API } from '../../../../services/APIServices';
 
 const HomeBanner = () => {
   const router = useRouter();
@@ -19,6 +19,8 @@ const HomeBanner = () => {
       return resp?.data?.data ?? [];
     },
   });
+
+  console.log(bannerList);
 
   const settings = {
     dots: true,

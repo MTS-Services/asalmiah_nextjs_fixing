@@ -142,7 +142,7 @@ const TestFilter = ({
                         : 'outline-danger'
                     }
                     onClick={() => handleCategoryClick(category)}
-                    className='rounded-pill fs-6 fw-bold text-nowrap'
+                    className='rounded-pill btn-sm fw-medium'
                   >
                     {checkLanguage(category.category, category.arabicCompany)}
                   </Button>
@@ -189,7 +189,7 @@ const TestFilter = ({
                         : 'outline-primary'
                     }
                     onClick={() => handleClassificationClick(cls)}
-                    className='rounded-pill fs-6 fw-bold text-nowrap'
+                    className='btn btn-sm fw-medium'
                   >
                     {checkLanguage(cls.name, cls.arbicName)}
                   </Button>

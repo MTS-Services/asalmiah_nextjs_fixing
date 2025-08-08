@@ -1,16 +1,17 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import 'bootstrap/dist/css/bootstrap.css';
 import Cookies from 'js-cookie';
 import { SessionProvider } from 'next-auth/react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from '../../redux/store.js';
 import { toastAlert } from '../../utils/SweetAlert';
+import 'bootstrap/dist/css/bootstrap.css';
 import './globals.scss';
 import './responsive.scss';
 import './rtl.scss';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

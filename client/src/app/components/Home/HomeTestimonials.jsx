@@ -32,7 +32,7 @@ const HomeTestimonials = ({ testimonialRef }) => {
             <Container>
               <Row>
                 <Col md={6} className='mx-auto'>
-                  <Image src={testimonial1} className='w-100' />
+                  <Image alt='image' src={testimonial1} className='w-100' />
                   <h3>What Our Customers Says!</h3>
 
                   <svg

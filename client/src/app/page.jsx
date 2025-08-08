@@ -31,26 +31,32 @@ import HomeTestimonials from './components/Home/HomeTestimonials';
 
 import CategoryModal from './components/CategoryModal';
 import TopFilter from './components/TestFilter';
-import { Col, Container, Row } from 'react-bootstrap';
+import { Col, Container, Offcanvas, Row } from 'react-bootstrap';
 import Filter from './components/Filter';
 import useCountryState from '../../hooks/useCountryState';
+import Link from 'next/link';
+import { FaFilter, FaList } from 'react-icons/fa';
+import HomeHero from './components/Home/HomeHero';
+import { BiFilter } from 'react-icons/bi';
+import { IoGrid } from 'react-icons/io5';
 
 const Home = ({ params }) => {
   // =========================================
   // ✅ EXISTING STATE
   // =========================================
-  const [categoryArr, setCategoryArr] = useState([]);
   const [classificationArr, setClassificationArr] = useState([]);
-  const [companyArr, setCompanyArr] = useState([]);
   const [subCategoryArr, setSubCategoryArr] = useState([]);
+  const [categoryArr, setCategoryArr] = useState([]);
+  const [companyArr, setCompanyArr] = useState([]);
+
   const selectedCountry = useCountryState();
 
   // =========================================
   // ✅ RANGE STATE
   // =========================================
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(1000000);
   const [minDiscount, setMinDiscount] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(1000000);
   const [maxDiscount, setMaxDiscount] = useState(100);
 
   // =========================================
@@ -66,7 +72,7 @@ const Home = ({ params }) => {
 
   const [subCategoryId, setSubCategoryId] = useState();
   const [show1, setShow1] = useState(false);
-
+  const [search, setSearch] = useState('');
   const handleShow = () => setShow(true);
   const handleClose1 = () => setShow1(false);
 
@@ -143,6 +149,10 @@ const Home = ({ params }) => {
 
       <Container>
         <Row>
+          <HomeHero />
+        </Row>
+
+        <Row>
           <aside className='left-sidebar '>
             <TopFilter
               refetch={refetch}
@@ -160,26 +170,48 @@ const Home = ({ params }) => {
       <Container>
         <Row>
           <Col lg={3}>
-            <Filter
-              refetch={refetch}
-              setCategoryArr={setCategoryArr}
-              setClassificationArr={setClassificationArr}
-              classificationArr={classificationArr}
-              selectedCountry={selectedCountry}
-              categoryArr={categoryArr}
-              setCompanyArr={setCompanyArr}
-              setSubCategoryArr={setSubCategoryArr}
-              companyArr={companyArr}
-              subCategoryArr={subCategoryArr}
-              minPrice={minPrice}
-              maxPrice={maxPrice}
-              setMinPrice={setMinPrice}
-              setMaxPrice={setMaxPrice}
-              setMinDiscount={setMinDiscount}
-              setMaxDiscount={setMaxDiscount}
-              minDiscount={minDiscount}
-              maxDiscount={maxDiscount}
-            />
+            <aside className='d-none d-lg-block'>
+              <Filter
+                refetch={refetch}
+                setCategoryArr={setCategoryArr}
+                setClassificationArr={setClassificationArr}
+                classificationArr={classificationArr}
+                selectedCountry={selectedCountry}
+                categoryArr={categoryArr}
+                setCompanyArr={setCompanyArr}
+                setSubCategoryArr={setSubCategoryArr}
+                companyArr={companyArr}
+                subCategoryArr={subCategoryArr}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                setMinPrice={setMinPrice}
+                setMaxPrice={setMaxPrice}
+                setMinDiscount={setMinDiscount}
+                setMaxDiscount={setMaxDiscount}
+                minDiscount={minDiscount}
+                maxDiscount={maxDiscount}
+              />
+            </aside>
+            {/* View All Products Button */}
+
+            <div className='d-flex align-items-center justify-content-center gap-3 '>
+              <div
+                className='btn btn-theme filter_btn d-block d-lg-none'
+                onClick={handleShow}
+              >
+                <BiFilter size={16} />
+                <small className='ms-2'>Filter</small>
+              </div>
+
+              <div className=''>
+                <Link
+                  href='/product-list'
+                  className='btn btn-outline-danger btn-lg'
+                >
+                  View All Products
+                </Link>
+              </div>
+            </div>
           </Col>
 
           <Col lg={9}>
@@ -188,6 +220,7 @@ const Home = ({ params }) => {
           </Col>
         </Row>
       </Container>
+
       {/* Banner Section */}
       <HomeBanner />
 
@@ -197,6 +230,22 @@ const Home = ({ params }) => {
           setCategoryId(category);
           handleShow(true);
         }}
+      /> */}
+
+      {/* Category Modal */}
+      {/* <CategoryModal
+        show={show}
+        onHide={handleClose}
+        categoryId={categoryId}
+        onSubCategoryClick={(subCategory) => {
+          setSubCategoryId(subCategory);
+          handleClose();
+          handleShow1(true);
+        }}
+        page={page}
+        setPage={setPage}
+        meta={meta}
+        setMeta={setMeta}
       /> */}
 
       {/* Offers Section */}
@@ -217,21 +266,40 @@ const Home = ({ params }) => {
       {/* Footer */}
       <Footer testimonialLists={0} />
 
-      {/* Category Modal */}
-      <CategoryModal
-        show={show}
-        onHide={handleClose}
-        categoryId={categoryId}
-        onSubCategoryClick={(subCategory) => {
-          setSubCategoryId(subCategory);
-          handleClose();
-          handleShow1(true);
-        }}
-        page={page}
-        setPage={setPage}
-        meta={meta}
-        setMeta={setMeta}
-      />
+      {/*********************** Filter Off Canvas *******************************/}
+      <Offcanvas show={show} onHide={handleClose}>
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>Filter Menu</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <aside className='left-sidebar'>
+            <span className='filter-text'>
+              <FaFilter size='20' />
+              <b className='mt-2 m-2'>Filter</b>
+            </span>
+            <Filter
+              refetch={refetch}
+              setCategoryArr={setCategoryArr}
+              setClassificationArr={setClassificationArr}
+              classificationArr={classificationArr}
+              selectedCountry={selectedCountry}
+              categoryArr={categoryArr}
+              setCompanyArr={setCompanyArr}
+              setSubCategoryArr={setSubCategoryArr}
+              companyArr={companyArr}
+              subCategoryArr={subCategoryArr}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              setMinPrice={setMinPrice}
+              setMaxPrice={setMaxPrice}
+              setMinDiscount={setMinDiscount}
+              setMaxDiscount={setMaxDiscount}
+              minDiscount={minDiscount}
+              maxDiscount={maxDiscount}
+            />
+          </aside>
+        </Offcanvas.Body>
+      </Offcanvas>
     </>
   );
 };
