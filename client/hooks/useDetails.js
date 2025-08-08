@@ -8,7 +8,7 @@
   Unauthorized copying of this file, via any medium is strictly prohibited.
  * 
  */
-import { useSelector } from "react-redux";
+import { useSelector } from 'react-redux';
 
 const useDetails = () => {
   return useSelector((state) => state?.auth?.data);

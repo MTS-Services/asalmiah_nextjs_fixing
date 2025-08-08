@@ -1,38 +1,37 @@
-import { useRouter } from "next/navigation";
-import { Col, Container, Row } from "react-bootstrap";
-import ImageComponent from "../../../utils/ImageComponent";
+import { useRouter } from 'next/navigation';
+import { Col, Container, Row } from 'react-bootstrap';
+import ImageComponent from '../../../utils/ImageComponent';
 
 export default function OfferListComponent({ OfferLists }) {
   /*************OFFER LIST **************/
-
-  let router = useRouter()
+  console.log(OfferLists);
+  let router = useRouter();
   return (
     <>
-
       <Container>
-        <Row >
-          {OfferLists?.length !== 0 ? (
-            OfferLists?.slice(0, 1)?.map((data) => {
-              return (
-                <>
-                  <Col
-                    md={6}
-                    onClick={() =>
-                      router.push(`/product-list?companyId=${data?.company}`)
-                    }
-                    className="cursor-pointer"
-                  >
-                    <div className="productcard1 position-relative mb-3">
-                      <ImageComponent
-                        data={data?.image}
-                        ShimmerClassName={"h-100"}
-                        className="w-100"
-                        alt="Image"
-                        width={50}
-                        height={50}
-                        dynamicLabellingState={true}
-                      />
-                      {/* <div className="position-absolute"> */}
+        <Row>
+          {OfferLists?.length !== 0
+            ? OfferLists?.slice(0, 1)?.map((data) => {
+                return (
+                  <>
+                    <Col
+                      md={6}
+                      onClick={() =>
+                        router.push(`/product-list?companyId=${data?.company}`)
+                      }
+                      className='cursor-pointer'
+                    >
+                      <div className='productcard1 position-relative mb-3'>
+                        <ImageComponent
+                          data={data?.image}
+                          ShimmerClassName={'h-100'}
+                          className='w-100'
+                          alt='Image'
+                          width={50}
+                          height={50}
+                          dynamicLabellingState={true}
+                        />
+                        {/* <div className="position-absolute"> */}
                         {/* <h3>
                     {" "}
                     {checkLanguage(data?.title, data?.arabicTitle)}
@@ -45,15 +44,13 @@ export default function OfferListComponent({ OfferLists }) {
                               : ""}
                           </h5>
                         )} */}
-                      {/* </div> */}
-                    </div>
-                  </Col>
-                </>
-              );
-            })
-          ) : (
-            ""
-          )}
+                        {/* </div> */}
+                      </div>
+                    </Col>
+                  </>
+                );
+              })
+            : ''}
 
           <Col md={6}>
             <Row>
@@ -65,24 +62,24 @@ export default function OfferListComponent({ OfferLists }) {
                       onClick={() =>
                         router.push(`/product-list?companyId=${data?.company}`)
                       }
-                      className="cursor-pointer"
+                      className='cursor-pointer'
                     >
-                      <div className="productcard2 position-relative mb-3">
+                      <div className='productcard2 position-relative mb-3'>
                         <ImageComponent
                           data={data?.image}
-                          className="w-100 mb-3"
-                          alt="Image"
+                          className='w-100 mb-3'
+                          alt='Image'
                           width={50}
                           height={50}
                           dynamicLabellingState={true}
                         />
 
                         {/* <div className="position-absolute"> */}
-                          {/* <h3>
+                        {/* <h3>
                       {" "}
                       {checkLanguage(data?.title, data?.arabicTitle)}
                     </h3> */}
-                          {/* {data?.discount && (
+                        {/* {data?.discount && (
                             <h5>
                               {" "}
                               {data?.discount
@@ -105,21 +102,21 @@ export default function OfferListComponent({ OfferLists }) {
                       onClick={() =>
                         router.push(`/product-list?companyId=${data?.company}`)
                       }
-                      className="cursor-pointer"
+                      className='cursor-pointer'
                     >
-                      <div className="productcard3 position-relative mb-3">
+                      <div className='productcard3 position-relative mb-3'>
                         <ImageComponent
                           data={data?.image}
-                          className="w-100 mb-3"
-                          alt="Image"
+                          className='w-100 mb-3'
+                          alt='Image'
                           width={50}
                           height={50}
                           dynamicLabellingState={true}
                         />
 
                         {/* <div className="position-absolute"> */}
-                          {/* <h3>{data?.title ?? ""}</h3> */}
-                          {/* {data?.discount && (
+                        {/* <h3>{data?.title ?? ""}</h3> */}
+                        {/* {data?.discount && (
                             <h5>
                               {" "}
                               {data?.discount
@@ -142,21 +139,21 @@ export default function OfferListComponent({ OfferLists }) {
                       onClick={() =>
                         router.push(`/product-list?companyId=${data?.company}`)
                       }
-                      className="cursor-pointer"
+                      className='cursor-pointer'
                     >
-                      <div className="productcard3 position-relative mb-3">
+                      <div className='productcard3 position-relative mb-3'>
                         <ImageComponent
                           data={data?.image}
-                          className="w-100 mb-3"
-                          alt="Image"
+                          className='w-100 mb-3'
+                          alt='Image'
                           width={50}
                           height={285}
                           dynamicLabellingState={true}
                         />
 
                         {/* <div className="position-absolute"> */}
-                          {/* <h3>{data?.title ?? ""}</h3> */}
-                          {/* {data?.discount && (
+                        {/* <h3>{data?.title ?? ""}</h3> */}
+                        {/* {data?.discount && (
                             <h5>
                               {" "}
                               {data?.discount
