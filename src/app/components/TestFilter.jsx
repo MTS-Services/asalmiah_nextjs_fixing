@@ -1,79 +1,98 @@
+/**
+@copyright    : Mak Tech Solution < https://www.maktechsolution.com >
+@author       : Nayem Islam < https://github.com/Nayem707 >
+@Updated_Date : 7/8/2025
+**/
+
 'use client';
 
-import { useRef, useState } from 'react';
-import { Container, Row, Col, Button, Spinner, Alert } from 'react-bootstrap';
+import { useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Container, Row, Col, Button, Spinner, Alert } from 'react-bootstrap';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
+
 import {
   GET_FILTER_CLASSIFICATION_API,
-  USER_COMPANYLIST,
+  USER_CATEGORYLIST,
 } from '../../../services/APIServices';
+
 import { checkLanguage } from '../../../utils/helper';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
+
 import '../components/testFilter.scss';
 
 const TestFilter = ({
-  companyArr,
-  setCompanyArr,
+  categoryArr,
+  setCategoryArr,
   classificationArr,
   setClassificationArr,
+  refetch,
 }) => {
-  const [activeCompany, setActiveCompany] = useState(null); // Track selected company
-
-  // Fetch company list
+  const scrollRef = useRef(null);
+  // ===============================================
+  // 📋 CATEGORY = FETCH & USE TS_QUERY
+  // ===============================================
   const {
-    data: companyList = [],
-    isLoading: companyLoading,
-    isError: companyError,
+    data: categoryList = [],
+    isLoading: categoryLoading,
+    isError: categoryError,
   } = useQuery({
-    queryKey: ['company-list'],
+    queryKey: ['category-list'],
     queryFn: async () => {
-      const resp = await USER_COMPANYLIST();
+      const resp = await USER_CATEGORYLIST();
       return resp?.data?.data ?? [];
     },
   });
 
-  // Fetch classification list
+  // ===============================================
+  // 📋 CLASSIFICATION_LIST = FETCH & USE TS_QUERY
+  // ===============================================
   const {
     data: classificationList = [],
     isLoading: classificationLoading,
     isError: classificationError,
   } = useQuery({
-    queryKey: ['classification-filter-list'],
+    queryKey: ['classification-filter-list', categoryArr[0]],
     queryFn: async () => {
-      const resp = await GET_FILTER_CLASSIFICATION_API();
+      if (categoryArr.length === 0) return [];
+      // Fetch classifications based on selected category
+      const resp = await GET_FILTER_CLASSIFICATION_API(categoryArr[0]);
       return resp?.data?.data ?? [];
     },
+    enabled: categoryArr.length > 0,
   });
 
-  // Handle company click (select & show its classifications)
-  const handleCompanyClick = (company) => {
-    if (activeCompany?.id === company._id) {
-      // Deselect if already selected
-      setActiveCompany(null);
-      setCompanyArr([]);
+  // =========================================
+  // 📁 HANDLE_CATEGORY
+  // =========================================
+  const handleCategoryClick = (category) => {
+    if (categoryArr.includes(category._id)) {
+      setCategoryArr([]);
+      setClassificationArr([]);
     } else {
-      // Select new company
-      setActiveCompany(company);
-      setCompanyArr([company._id]); // Radio-style selection
+      setCategoryArr([category._id]);
+      // Clear classifications when changing category
+      setClassificationArr([]);
+      // Trigger refetch if needed
+      if (refetch) refetch();
     }
   };
 
-  // Handle classification selection
+  // =========================================
+  // 📁 HANDLE_CLASSIFICATION_LIST
+  // =========================================
   const handleClassificationClick = (classification) => {
     const id = classification._id;
-    if (classificationArr.includes(id)) {
-      setClassificationArr(classificationArr.filter((i) => i !== id));
-    } else {
-      setClassificationArr([...classificationArr, id]);
-    }
+    const newClassifications = classificationArr.includes(id)
+      ? classificationArr.filter((i) => i !== id)
+      : [...classificationArr, id];
+
+    setClassificationArr(newClassifications);
+    if (refetch) refetch();
   };
 
-  // Filter classifications by selected company (if needed)
-  // Or just show all — depends on your backend logic
-  const filteredClassifications = classificationList;
-
-  const scrollRef = useRef(null);
-
+  // =========================================
+  // 🚀SCROLL_DIRECTION
+  // =========================================
   const scroll = (direction) => {
     if (scrollRef.current) {
       const scrollAmount = 150;
@@ -85,92 +104,83 @@ const TestFilter = ({
   };
 
   return (
-    <Container fluid className='px-0'>
-      {/* === 1. COMPANIES ROW (Horizontal Scrollable Tabs) === */}
-      <Row className='mb-3 align-items-center position-relative'>
+    <Container>
+      {/* CATEGORIES SECTION */}
+      <Row className='mt-4'>
         <Col>
-          <h6 className='fw-bold mb-2 p-t-10 text-capitalize'>Companies</h6>
-
-          {companyLoading ? (
+          {categoryLoading ? (
             <div className='text-center my-3'>
               <Spinner animation='border' size='sm' variant='primary' /> Loading
-              companies...
+              categories...
             </div>
-          ) : companyError ? (
-            <Alert variant='danger' className='py-2'>
-              Failed to load companies.
+          ) : categoryError ? (
+            <Alert variant='danger' className='py-2 text-center'>
+              Failed to load categories.
             </Alert>
           ) : (
-            <div className='position-relative'>
-              {/* Scroll Buttons */}
+            <div className='position-relative d-flex align-items-center'>
+              {/* Left Scroll Button */}
               <Button
                 variant='light'
-                className='scroll-btn left'
+                className='scroll-btn left d-flex align-items-center justify-content-center p-0'
                 onClick={() => scroll('left')}
               >
-                <FaChevronLeft />
+                <FaChevronLeft size={14} />
               </Button>
 
+              {/* Scrollable Category Buttons (Centered Content) */}
               <div
                 ref={scrollRef}
-                className='company-scroll d-flex gap-2 pb-2 px-2'
-                style={{
-                  overflowX: 'auto',
-                  overflowY: 'hidden',
-                  whiteSpace: 'nowrap',
-                  WebkitOverflowScrolling: 'touch',
-                  scrollBehavior: 'smooth',
-                }}
+                className='company-scroll d-flex gap-2 pb-2 px-3 mx-auto flex-nowrap overflow-auto hide-scrollbar'
               >
-                {companyList.map((company) => (
+                {categoryList.map((category) => (
                   <Button
-                    key={company._id}
+                    key={category._id}
                     variant={
-                      companyArr.includes(company._id)
+                      categoryArr.includes(category._id)
                         ? 'danger'
                         : 'outline-danger'
                     }
-                    onClick={() => handleCompanyClick(company)}
-                    style={{
-                      whiteSpace: 'nowrap',
-                      borderRadius: '20px',
-                      fontSize: '0.85rem',
-                      padding: '0px 12px',
-                      fontWeight: 500,
-                      flex: '0 0 auto',
-                    }}
+                    onClick={() => handleCategoryClick(category)}
+                    className='rounded-pill btn-sm fw-medium'
                   >
-                    {checkLanguage(company.company, company.arabicCompany)}
+                    {checkLanguage(category.category, category.arabicCompany)}
                   </Button>
                 ))}
               </div>
 
+              {/* Right Scroll Button */}
               <Button
                 variant='light'
-                className='scroll-btn right'
+                className='scroll-btn right d-flex align-items-center justify-content-center p-0'
                 onClick={() => scroll('right')}
               >
-                <FaChevronRight />
+                <FaChevronRight size={14} />
               </Button>
             </div>
           )}
         </Col>
       </Row>
 
-      {/* === 2. CLASSIFICATIONS ROW (Only if company selected) === */}
-      {activeCompany && !classificationLoading && !classificationError && (
+      {/* CLASSIFICATIONS SECTION (only shows when a category is selected) */}
+      {categoryArr.length > 0 && (
         <Row className='mb-4'>
-          <Col>
-            <h6 className='fw-bold mb-2 text-capitalize'>Categories</h6>
-            <div
-              className='d-flex flex-wrap gap-2 p-3 bg-light border-top'
-              style={{
-                borderRadius: '8px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-              }}
-            >
-              {filteredClassifications.length > 0 ? (
-                filteredClassifications.map((cls) => (
+          <Col className='text-center'>
+            <div className='d-flex flex-wrap justify-content-center gap-2'>
+              {classificationLoading ? (
+                <div className='text-center w-100'>
+                  <Spinner animation='border' size='sm' />
+                </div>
+              ) : classificationError ? (
+                <Alert
+                  variant='warning'
+                  className='py-2 w-100 mx-auto'
+                  style={{ maxWidth: '300px' }}
+                >
+                  Could not load classifications.
+                </Alert>
+              ) : classificationList.length > 0 ? (
+                classificationList.map((cls) => (
                   <Button
                     key={cls._id}
                     variant={
@@ -179,44 +189,17 @@ const TestFilter = ({
                         : 'outline-primary'
                     }
                     onClick={() => handleClassificationClick(cls)}
-                    style={{
-                      borderRadius: '20px',
-                      fontSize: '0.85rem',
-                      padding: '0px 12px',
-                      fontWeight: classificationArr.includes(cls._id)
-                        ? '600'
-                        : '500',
-                    }}
+                    className='btn btn-sm fw-medium'
                   >
                     {checkLanguage(cls.name, cls.arbicName)}
                   </Button>
                 ))
               ) : (
-                <small className='text-muted'>No categories available</small>
+                <small className='text-muted text-center w-100 mt-3'>
+                  No classifications available
+                </small>
               )}
             </div>
-          </Col>
-        </Row>
-      )}
-
-      {/* === Loading/Error for Classification === */}
-      {classificationLoading && (
-        <Row>
-          <Col>
-            <div className='text-center my-3'>
-              <Spinner animation='border' size='sm' variant='primary' /> Loading
-              categories...
-            </div>
-          </Col>
-        </Row>
-      )}
-
-      {classificationError && (
-        <Row>
-          <Col>
-            <Alert variant='warning' className='py-2'>
-              Could not load categories.
-            </Alert>
           </Col>
         </Row>
       )}

@@ -3,7 +3,6 @@ import { store } from '../redux/store';
 import URL from '../utils/config';
 import { Paginations } from '../utils/constants';
 
-
 const http = axios.create({
   baseURL: URL,
 });
@@ -43,6 +42,25 @@ paymentHttp.interceptors.request.use(
   }
 );
 
+/****************************Test PRODUCTS*******************************/
+
+export const GET_PRODUCTLIST = async (
+  classId,
+  companyId,
+  classificationId,
+  pageNo
+) => {
+  return await http.get(`/product/filter`, {
+    params: {
+      classId: classId,
+      companyId: companyId,
+      classificationId: classificationId,
+      pageNo: pageNo || 1,
+    },
+  });
+};
+
+/****************************Test PRODUCTS*******************************/
 /****************************AUTHENTICATION*******************************/
 
 export const loginAPI = async (body) => {
@@ -665,49 +683,49 @@ export const GET_USERS_COMPANY_SUBCATEGORY_LIST_HOME = async (
   });
 };
 
-export const GET_PRODUCTLIST = async (
-  search,
-  categoryId,
-  subcategoryId,
-  companyId,
-  categoryArr,
-  classificationArr,
-  subCategoryArr,
-  companyArr,
-  pageNo,
-  // company,
-  // category,
-  // discount
-  minPrice,
-  maxPrice,
-  sort,
-  minDiscount,
-  maxDiscount
-) => {
-  return await http.get(`/product/userProducts`, {
-    params: {
-      search: search,
-      categoryId: categoryId,
-      subcategoryId: subcategoryId,
-      companyId: companyId,
-      categoryArr: categoryArr,
-      classificationArr: classificationArr,
-      subCategoryArr: subCategoryArr,
-      companyArr: companyArr,
-      pageNo: pageNo,
-      pageLimit: Paginations.PRODUCT_PER_PAGE,
-      // company: company,
-      // category: category,
-      // discount: discount,
-      minPrice: minPrice,
-      maxPrice: maxPrice,
+// export const GET_PRODUCTLIST = async (
+//   search,
+//   categoryId,
+//   subcategoryId,
+//   companyId,
+//   categoryArr,
+//   classificationArr,
+//   subCategoryArr,
+//   companyArr,
+//   pageNo,
+//   // company,
+//   // category,
+//   // discount
+//   minPrice,
+//   maxPrice,
+//   sort,
+//   minDiscount,
+//   maxDiscount
+// ) => {
+//   return await http.get(`/product/userProducts`, {
+//     params: {
+//       search: search,
+//       categoryId: categoryId,
+//       subcategoryId: subcategoryId,
+//       companyId: companyId,
+//       categoryArr: categoryArr,
+//       classificationArr: classificationArr,
+//       subCategoryArr: subCategoryArr,
+//       companyArr: companyArr,
+//       pageNo: pageNo,
+//       pageLimit: Paginations.PRODUCT_PER_PAGE,
+//       // company: company,
+//       // category: category,
+//       // discount: discount,
+//       minPrice: minPrice,
+//       maxPrice: maxPrice,
 
-      sort: sort,
-      minDiscount: minDiscount,
-      maxDiscount: maxDiscount,
-    },
-  });
-};
+//       sort: sort,
+//       minDiscount: minDiscount,
+//       maxDiscount: maxDiscount,
+//     },
+//   });
+// };
 
 export const GET_PRODUCTLIST_AUTH = async (
   search,
@@ -834,6 +852,15 @@ export const SIMILAR_PRODUCT_LIST_AUTH = async (id, page) => {
 
 export const USER_CATEGORYLIST = async (page) => {
   return await http.get(`/category/list`, {
+    params: {
+      pageNo: page,
+      pageLimit: Paginations?.PER_PAGE,
+    },
+  });
+};
+
+export const USER_COMPANY_LIST = async (page) => {
+  return await http.get(`/company/list`, {
     params: {
       pageNo: page,
       pageLimit: Paginations?.PER_PAGE,
@@ -1397,6 +1424,10 @@ export const GET_USERS_CLASSIFICATION_API = async (id) => {
   return await http.get(`/classification/companyClassification/${id}`);
 };
 
+export const GET_CLASS_DROPDOWN = async (id) => {
+  return await http.get(`/class/dropDownClass`);
+};
+
 export const GET_CLASSIFICATION_PRODUCTLIST = async (
   classification,
   classificationCompany,
@@ -1484,8 +1515,8 @@ export const UPDATE_PERMISSIONS = async (id, body) => {
   return await http.post(`/admin/role/update/${id}`, body);
 };
 
-export const GET_FILTER_CLASSIFICATION_API = async () => {
-  return await http.get(`/classification/activeClassification`);
+export const GET_FILTER_CLASSIFICATION_API = async (catId) => {
+  return await http.get(`/classification/category/${catId}`);
 };
 
 export const GET_REVIEW_API = async (page, productId) => {

@@ -1,91 +1,95 @@
 /**
-@copyright : ToXSL Technologies Pvt. Ltd. < www.toxsl.com >
-@author     : Shiv Charan Panjeta < shiv@toxsl.com >
- 
+@copyright : Mak Tech Solution < www.maktechsolution.com >
+@author     : Nayem Islam < inaeem707@gmail.com >
+
 All Rights Reserved.
-Proprietary and confidential :  All information contained herein is, and remains
-the property of ToXSL Technologies Pvt. Ltd. and its partners.
-Unauthorized copying of this file, via any medium is strictly prohibited.
+Proprietary and confidential: All information contained herein is, and remains
+the property of Mak Tech Solution and its partners.
+Unauthorized copying of this file, via any medium, is strictly prohibited.
 */
+
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import MultiRangeSlider from 'multi-range-slider-react';
-import { Form } from 'react-bootstrap';
-import { useDispatch } from 'react-redux';
 import { searchQuery } from '../../../redux/features/searchQuery';
+import { FaFilter } from 'react-icons/fa';
+import { useQuery } from '@tanstack/react-query';
+import { useDispatch } from 'react-redux';
+import { Form } from 'react-bootstrap';
+
 import {
-  GET_FILTER_CLASSIFICATION_API,
-  USER_COMPANYLIST,
+  GET_CLASS_DROPDOWN,
+  USER_COMPANY_LIST,
 } from '../../../services/APIServices';
 import { checkLanguage, formatCurrency } from '../../../utils/helper';
 
 const Filter = (props) => {
   const {
-    selectedCountry,
-    refetch,
     companyArr,
     setCompanyArr,
-    setCategoryArr,
-    categoryArr,
     setClassificationArr,
-    classificationArr,
-    subCategoryArr,
-    setSubCategoryArr,
-    setSearch,
-    minPrice,
     setMinPrice,
-    maxPrice,
     setMaxPrice,
-    minDiscount,
     setMinDiscount,
-    maxDiscount,
     setMaxDiscount,
+    selectedCountry,
+    maxDiscount,
+    minDiscount,
+    minPrice,
+    maxPrice,
   } = props;
 
-  // const { data: categoryList } = useQuery({
-  //   queryKey: ['category-list'],
-  //   queryFn: async () => {
-  //     const resp = await GET_CATEGORY_LIST_HOME();
-  //     return resp?.data?.data ?? [];
-  //   },
-  // });
+  const language = localStorage.getItem('language');
+  let dispatch = useDispatch();
 
-  const { data: classificationListFilter } = useQuery({
-    queryKey: ['classification-filter-list'],
+  // ================================
+  // 📋 CATEGORY LIST QUERY-CALL
+  // ================================
+  const { data: categoryList } = useQuery({
+    queryKey: ['category-list'],
     queryFn: async () => {
-      const resp = await GET_FILTER_CLASSIFICATION_API();
+      const resp = await GET_CATEGORY_LIST_HOME();
       return resp?.data?.data ?? [];
     },
   });
 
+  // ================================
+  // 📋 SUB_CATEGORY LIST QUERY-CALL
+  // ================================
   // const { data: subcategoryList } = useQuery({
-  //   queryKey: ["subcategory-list"],
+  //   queryKey: ['subcategory-list'],
   //   queryFn: async () => {
   //     const resp = await GET_SUB_CATEGORY_LIST_HOME();
   //     return resp?.data?.data ?? [];
   //   },
   // });
 
-  let dispatch = useDispatch();
-
+  // ================================
+  // 📋 COMPNAY LIST QUERY-CALL
+  // ================================
   const { data: companyList } = useQuery({
     queryKey: ['company-list'],
     queryFn: async () => {
-      const resp = await USER_COMPANYLIST();
+      const resp = await USER_COMPANY_LIST();
+
+      return resp?.data?.data ?? [];
+    },
+  });
+  // ================================
+  // 📋 CLSSIFICATION QUERY-CALL
+  // =================================
+  const { data: classListFilter } = useQuery({
+    queryKey: ['class-list'],
+    queryFn: async () => {
+      const resp = await GET_CLASS_DROPDOWN();
+
       return resp?.data?.data ?? [];
     },
   });
 
-  const language = localStorage.getItem('language');
-  // const { data: categoryList } = useQuery({
-  //   queryKey: ["category-list"],
-  //   queryFn: async () => {
-  //     const resp = await GET_CATEGORY_LIST_HOME();
-  //     return resp?.data?.data ?? [];
-  //   },
-  // });
-
+  // ================================
+  // 📁 HANDLE INPUT
+  // ================================
   const handleInput = (e) => {
     setMinPrice(e.minValue);
     setMaxPrice(e.maxValue);
@@ -95,13 +99,20 @@ const Filter = (props) => {
     setMinDiscount(e.minValue);
     setMaxDiscount(e.maxValue);
   };
+
   return (
     <>
-      <div className='left-sidebar-innr '>
-        <div className='collection-list'>
-          <h6 className='text-capitalize mt-4 mb-4 fw-bold'>Companies</h6>
+      <div className='left-sidebar-innr'>
+        {/****************** COMPANY CAT: ******************/}
+        <article className='collection-list'>
+          <h6 className='text-capitalize mt-4 mb-4 fw-bold'>Company</h6>
 
-          <ul className={companyList?.length >= 10 ? 'mb-4 scroller' : 'mb-4'}>
+          <ul
+            className={`mb-4 ${
+              companyList?.length >= 10 ? 'overflow-auto' : ''
+            }`}
+            style={{ maxHeight: companyList?.length >= 10 ? '200px' : 'auto' }}
+          >
             {companyList?.map((items) => {
               return (
                 <div key={items?._id}>
@@ -113,7 +124,7 @@ const Filter = (props) => {
                       type='checkbox'
                       id={items._id}
                       label={checkLanguage(
-                        items?.company,
+                        items?.category,
                         items?.arabicCompany
                       )}
                       checked={companyArr.includes(items._id)}
@@ -130,61 +141,35 @@ const Filter = (props) => {
                         }
                       }}
                     />
+                    <span className='text-capitalize'>
+                      {checkLanguage(items?.company, items?.arabicCompany)}
+                    </span>
                   </li>
                 </div>
               );
             })}
           </ul>
-        </div>
+        </article>
 
-        {/* <div className="collection-list border-top">
-          <h6 className="text-capitalize mt-4 mb-2 fw-bold">categories</h6>
-
-          <ul className="mb-4 ">
-            {categoryList && categoryList.length > 0
-              ? categoryList.map((items, i) => (
-                <li className="d-flex align-items-center mb-3 gap-2" key={i}>
-                  <Form.Check
-                    type="checkbox"
-                    id={items._id}
-                    label={items?.category}
-                    checked={categoryArr.includes(items._id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setCategoryArr((prevCategory) => [
-                          ...prevCategory,
-                          items._id,
-                        ]);
-                      } else {
-                        setCategoryArr((prevCategory) =>
-                          prevCategory.filter((id) => id !== items._id)
-                        );
-                      }
-                    }}
-                  />
-                </li>
-              ))
-              : ""}
-          </ul>
-        </div> */}
-
-        <div className='collection-list border-top'>
-          <h6 className='text-capitalize mt-4 mb-4  fw-bold'>classification</h6>
+        {/****************** CLASS CAT: ********************/}
+        <article className='collection-list border-top'>
+          <h6 className='text-capitalize mt-4 mb-4 fw-bold'>class</h6>
 
           <ul
-            className={
-              classificationListFilter?.length >= 10 ? 'mb-4 scroller' : 'mb-4'
-            }
+            className={`mb-4 ${
+              classListFilter?.length >= 10 ? 'overflow-auto' : ''
+            }`}
+            style={{
+              maxHeight: classListFilter?.length >= 10 ? '200px' : 'auto',
+            }}
           >
-            {classificationListFilter && classificationListFilter.length > 0
-              ? classificationListFilter.map((items, i) => (
+            {classListFilter && classListFilter.length > 0
+              ? classListFilter.map((items, i) => (
                   <li className='d-flex align-items-center mb-3 gap-2' key={i}>
                     <Form.Check
                       type='checkbox'
                       id={items._id}
-                      // label={items?.name}
                       label={checkLanguage(items?.name, items?.arbicName)}
-                      checked={classificationArr.includes(items._id)}
                       onChange={(e) => {
                         if (e.target.checked) {
                           setClassificationArr((prevClassification) => [
@@ -202,39 +187,11 @@ const Filter = (props) => {
                 ))
               : ''}
           </ul>
-        </div>
+        </article>
 
-        {/* <div className="collection-list border-top">
-          <h6 className="text-capitalize mt-4 mb-2 fw-bold">Sub Categories</h6>
-          <ul className="mb-4 ">
-            {subcategoryList && subcategoryList.length > 0
-              ? subcategoryList.map((items, i) => (
-                  <li className="d-flex align-items-center mb-3 gap-2" key={i}>
-                    <Form.Check
-                      type="checkbox"
-                      id={items._id}
-                      label={items?.subcategory}
-                      checked={subCategoryArr.includes(items._id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSubCategoryArr((prevCategory) => [
-                            ...prevCategory,
-                            items._id,
-                          ]);
-                        } else {
-                          setSubCategoryArr((prevCategory) =>
-                            prevCategory.filter((id) => id !== items._id)
-                          );
-                        }
-                      }}
-                    />
-                  </li>
-                ))
-              : ""}
-          </ul>
-        </div> */}
-        <div className='collection-list border-top'>
-          <h6 className='text-capitalize mt-4 mb-4  fw-bold'>
+        {/****************** PRIZE RANGE ***************/}
+        <article className='border-top collection-list'>
+          <h6 className='text-capitalize mt-4 mb-4 fw-bold'>
             Price range{' '}
             {` (${
               formatCurrency('', selectedCountry) +
@@ -248,7 +205,7 @@ const Filter = (props) => {
           </h6>
           <MultiRangeSlider
             min={0}
-            max={1000000}
+            max={1000}
             step={0}
             minValue={minPrice}
             maxValue={maxPrice}
@@ -256,10 +213,11 @@ const Filter = (props) => {
               handleInput(e);
             }}
           />
-        </div>
+        </article>
 
+        {/****************** DISCOUNT RANGE ******************/}
         <div className='collection-list border-top mb-3'>
-          <h6 className='text-capitalize mt-4 mb-4  fw-bold'>
+          <h6 className='text-capitalize mt-4 mb-4 fw-bold'>
             Discount range{' '}
             {` (${minDiscount + '%' + ' - ' + maxDiscount + '%'})`}
           </h6>
@@ -273,9 +231,10 @@ const Filter = (props) => {
           />
         </div>
 
-        <div className='d-flex gap-1 justify-content-center'>
+        {/****************** APPLY BUTTON **************/}
+        {/* <div className='d-flex gap-2 justify-content-center'>
           <button
-            className='btn-theme btn'
+            className='btn btn-primary'
             title='Filter'
             onClick={(e) => {
               e.preventDefault();
@@ -286,7 +245,7 @@ const Filter = (props) => {
           </button>
 
           <button
-            className='btn-theme btn'
+            className='btn btn-outline-secondary'
             title='Reset Filter'
             onMouseUpCapture={(e) => {
               e.preventDefault();
@@ -308,7 +267,7 @@ const Filter = (props) => {
           >
             Clear
           </button>
-        </div>
+        </div> */}
       </div>
     </>
   );

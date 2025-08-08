@@ -1,19 +1,19 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useFormik } from "formik";
-import Cookies from "js-cookie";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
-import { Col, Form, Modal, Row } from "react-bootstrap";
-import { MdCancel } from "react-icons/md";
-import OTPInput from "react-otp-input";
-import { useDispatch } from "react-redux";
-import Swal from "sweetalert2";
-import * as yup from "yup";
-import "../(customer)/cart/page.scss";
-import useCartSlice from "../../../hooks/useCartSlice";
-import useDetails from "../../../hooks/useDetails";
-import { clearCart } from "../../../redux/features/cartSlice";
-import { userDetails } from "../../../redux/features/userSlice";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useFormik } from 'formik';
+import Cookies from 'js-cookie';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { Col, Form, Modal, Row } from 'react-bootstrap';
+import { MdCancel } from 'react-icons/md';
+import OTPInput from 'react-otp-input';
+import { useDispatch } from 'react-redux';
+import Swal from 'sweetalert2';
+import * as yup from 'yup';
+import '../(customer)/cart/page.scss';
+import useCartSlice from '../../../hooks/useCartSlice';
+import useDetails from '../../../hooks/useDetails';
+import { clearCart } from '../../../redux/features/cartSlice';
+import { userDetails } from '../../../redux/features/userSlice';
 import {
   checkVerify,
   createUserOrder,
@@ -25,46 +25,46 @@ import {
   USER_CART,
   USER_CART_WITHOUT_LOGIN,
   verifyOTPByLogin,
-} from "../../../services/APIServices";
-import { toastAlert } from "../../../utils/SweetAlert";
+} from '../../../services/APIServices';
+import { toastAlert } from '../../../utils/SweetAlert';
 import {
   FORMAT_NUMBER,
   formatCurrency,
   getDeviceToken,
   getStartAndEndDate,
-} from "../../../utils/helper";
+} from '../../../utils/helper';
 
-import useCountryState from "../../../hooks/useCountryState";
-import Loading from "../user/loading";
+import useCountryState from '../../../hooks/useCountryState';
+import Loading from '../user/loading';
 const CartPriceDetails = forwardRef(
   ({ selectedAddressId, branchList, cartCoupon }, ref) => {
     const searchParams = useSearchParams();
-    let paymentType = localStorage.getItem("paymentType");
-    const address = localStorage.getItem("addressId");
-    const tapId = searchParams?.get("tap_id");
+    let paymentType = localStorage.getItem('paymentType');
+    const address = localStorage.getItem('addressId');
+    const tapId = searchParams?.get('tap_id');
     let queryClient = useQueryClient();
     let cart = useCartSlice();
     const details = useDetails();
     let router = useRouter();
     let pathName = usePathname();
     let dispatch = useDispatch();
-    const selectedCountry = useCountryState()
+    const selectedCountry = useCountryState();
     const [show, setShow] = useState(false);
-    let promoCodeState = localStorage.getItem("promocode");
-    let branchId = localStorage.getItem("branchId");
-    let couponBranchId = localStorage.getItem("couponBranchId");
-    let keyId = localStorage.getItem("keyId");
-    let paymentCardId = localStorage.getItem("paymentCardId");
-    let scheduleDate = localStorage.getItem("date");
-    let walletAmount = localStorage.getItem("walletAmount");
+    let promoCodeState = localStorage.getItem('promocode');
+    let branchId = localStorage.getItem('branchId');
+    let couponBranchId = localStorage.getItem('couponBranchId');
+    let keyId = localStorage.getItem('keyId');
+    let paymentCardId = localStorage.getItem('paymentCardId');
+    let scheduleDate = localStorage.getItem('date');
+    let walletAmount = localStorage.getItem('walletAmount');
 
-    let walletUse = localStorage.getItem("walletUse");
+    let walletUse = localStorage.getItem('walletUse');
 
-    let promoMsgStore = localStorage.getItem("promoMsg");
+    let promoMsgStore = localStorage.getItem('promoMsg');
     const [promoCode, setPromoCode] = useState();
 
     const [promoRemove, setPromoRemove] = useState(false);
-    const [selectedOption, setSelectedOption] = useState("");
+    const [selectedOption, setSelectedOption] = useState('');
     const [otpVerifyModal, setOTPverifyModal] = useState(false);
 
     const handleClose = () => setShow(false);
@@ -76,21 +76,21 @@ const CartPriceDetails = forwardRef(
       refetch,
       isPending: cartPending,
     } = useQuery({
-      queryKey: ["cart-list-user", !cartCoupon ? promoCodeState : "", keyId],
+      queryKey: ['cart-list-user', !cartCoupon ? promoCodeState : '', keyId],
       queryFn: async () => {
         if (cartCoupon) {
-          setPromoCode("");
-          localStorage.removeItem("promocode");
+          setPromoCode('');
+          localStorage.removeItem('promocode');
           const resp =
             details == null || details == undefined
-              ? await USER_CART_WITHOUT_LOGIN(keyId, "", getDeviceToken())
+              ? await USER_CART_WITHOUT_LOGIN(keyId, '', getDeviceToken())
               : await USER_CART(keyId);
           if (promoRemove == true) {
-            toastAlert("success", "Promocode removed successfully");
+            toastAlert('success', 'Promocode removed successfully');
           }
           if (resp?.data?.data?.cartList?.at(0)?.userDetails?.walletDetails) {
             localStorage.setItem(
-              "walletAmount",
+              'walletAmount',
               resp?.data?.data?.cartList?.at(0)?.userDetails?.walletDetails
                 ?.amount
             );
@@ -103,37 +103,37 @@ const CartPriceDetails = forwardRef(
                 ? await PROMOCODE_USER_CART_WITHOUT_LOGIN(
                     promoCode || promoCodeState,
                     keyId,
-                    "",
+                    '',
                     getDeviceToken()
                   )
                 : await PROMOCODE_USER_CART(promoCode || promoCodeState, keyId);
 
             if (promoMsgStore) {
-              toastAlert("success", "Promocode applied successfully");
-              localStorage.removeItem("promoMsg");
+              toastAlert('success', 'Promocode applied successfully');
+              localStorage.removeItem('promoMsg');
             }
             if (resp?.data?.data?.cartList?.at(0)?.userDetails?.walletDetails) {
               localStorage.setItem(
-                "walletAmount",
+                'walletAmount',
                 resp?.data?.data?.cartList?.at(0)?.userDetails?.walletDetails
                   ?.amount
               );
             }
             return resp?.data?.data ?? [];
           } catch (error) {
-            setPromoCode("");
-            toastAlert("error", error?.response?.data?.message);
-            localStorage.removeItem("promocode");
+            setPromoCode('');
+            toastAlert('error', error?.response?.data?.message);
+            localStorage.removeItem('promocode');
             // if (error?.response?.status === 400) {
             // If promo code returns 400, fall back to fetching user's cart
             const resp =
               details == null || details == undefined
-                ? await USER_CART_WITHOUT_LOGIN(keyId, "", getDeviceToken())
+                ? await USER_CART_WITHOUT_LOGIN(keyId, '', getDeviceToken())
                 : await USER_CART(keyId);
 
             if (resp?.data?.data?.cartList?.at(0)?.userDetails?.walletDetails) {
               localStorage.setItem(
-                "walletAmount",
+                'walletAmount',
                 resp?.data?.data?.cartList?.at(0)?.userDetails?.walletDetails
                   ?.amount
               );
@@ -147,14 +147,14 @@ const CartPriceDetails = forwardRef(
         } else {
           const resp =
             details == null || details == undefined
-              ? await USER_CART_WITHOUT_LOGIN(keyId, "", getDeviceToken())
+              ? await USER_CART_WITHOUT_LOGIN(keyId, '', getDeviceToken())
               : await USER_CART(keyId);
           if (promoRemove == true) {
-            toastAlert("success", "Promocode removed successfully");
+            toastAlert('success', 'Promocode removed successfully');
           }
           if (resp?.data?.data?.cartList?.at(0)?.userDetails?.walletDetails) {
             localStorage.setItem(
-              "walletAmount",
+              'walletAmount',
               resp?.data?.data?.cartList?.at(0)?.userDetails?.walletDetails
                 ?.amount
             );
@@ -179,22 +179,22 @@ const CartPriceDetails = forwardRef(
       mutationFn: (body) => createUserOrder(body),
       onSuccess: (res) => {
         // handleSubmit();\
-        setPromoCode("");
-        router.push("/thankyou");
+        setPromoCode('');
+        router.push('/thankyou');
 
-        toastAlert("success", res?.data?.message);
+        toastAlert('success', res?.data?.message);
         dispatch(clearCart(null));
-        localStorage.removeItem("persist:cart");
-        Cookies.remove("cartItems");
-        localStorage.removeItem("branchId");
-        localStorage.removeItem("couponBranchId");
-        localStorage.removeItem("promocode");
-        localStorage.removeItem("date");
-        localStorage.removeItem("keyId");
-        localStorage.removeItem("time");
-        localStorage.removeItem("paymentType");
-        localStorage.removeItem("paymentCardId");
-        localStorage.removeItem("walletUse");
+        localStorage.removeItem('persist:cart');
+        Cookies.remove('cartItems');
+        localStorage.removeItem('branchId');
+        localStorage.removeItem('couponBranchId');
+        localStorage.removeItem('promocode');
+        localStorage.removeItem('date');
+        localStorage.removeItem('keyId');
+        localStorage.removeItem('time');
+        localStorage.removeItem('paymentType');
+        localStorage.removeItem('paymentCardId');
+        localStorage.removeItem('walletUse');
       },
     });
 
@@ -209,8 +209,8 @@ const CartPriceDetails = forwardRef(
         // orderHandleSubmit();
       },
       onError: (err) => {
-        toastAlert("error", err?.response?.data?.message);
-        router.push("/cart");
+        toastAlert('error', err?.response?.data?.message);
+        router.push('/cart');
       },
     });
 
@@ -227,42 +227,42 @@ const CartPriceDetails = forwardRef(
       setFieldTouched,
     } = useFormik({
       initialValues: {
-        amount: "",
+        amount: '',
         productId: [],
       },
       onSubmit: async () => {
         let body;
         let walletResult;
 
-        if (pathName == "/cart") {
+        if (pathName == '/cart') {
           let cartProductCount = cartListing?.cartList?.filter(
             (data) => data?.productDetails?.quantity == 0
           );
 
           if (cartProductCount?.length > 0) {
             return toastAlert(
-              "error",
-              "One of the products in your cart is currently out of stock."
+              'error',
+              'One of the products in your cart is currently out of stock.'
             );
           } else {
-            router.push("/checkout");
+            router.push('/checkout');
 
-            localStorage.removeItem("branchId");
-            localStorage.removeItem("couponBranchId");
-            localStorage.removeItem("date");
-            localStorage.removeItem("keyId");
-            localStorage.removeItem("time");
-            localStorage.removeItem("paymentType");
-            localStorage.removeItem("paymentCardId");
+            localStorage.removeItem('branchId');
+            localStorage.removeItem('couponBranchId');
+            localStorage.removeItem('date');
+            localStorage.removeItem('keyId');
+            localStorage.removeItem('time');
+            localStorage.removeItem('paymentType');
+            localStorage.removeItem('paymentCardId');
           }
         } else if (
-          pathName == "/checkout" &&
+          pathName == '/checkout' &&
           keyId == 1 &&
           !selectedAddressId
         ) {
-          toastAlert("error", "Select your address");
-        } else if (pathName == "/checkout" && keyId == 2 && !branchId) {
-          toastAlert("error", "Kindly! select branch");
+          toastAlert('error', 'Select your address');
+        } else if (pathName == '/checkout' && keyId == 2 && !branchId) {
+          toastAlert('error', 'Kindly! select branch');
         }
         //  else if (pathName == "/checkout" && keyId == 3 && !couponBranchId) {
         //   toastAlert("error", "Kindly! select branch");
@@ -270,28 +270,28 @@ const CartPriceDetails = forwardRef(
         else if (
           // (pathName == "/checkout" && keyId == 1) ||
           // (pathName == "/checkout" && keyId == 2)
-          pathName == "/checkout"
+          pathName == '/checkout'
         ) {
           if (walletAmount > 0 && !walletUse) {
             Swal.fire({
-              title: "Are you sure?",
-              text: "Do you want to use wallet?",
-              icon: "warning",
+              title: 'Are you sure?',
+              text: 'Do you want to use wallet?',
+              icon: 'warning',
               showDenyButton: true,
-              confirmButtonColor: "#000",
-              denyButtonColor: "#d33",
-              confirmButtonText: "Yes",
-              denyButtonText: "No",
+              confirmButtonColor: '#000',
+              denyButtonColor: '#d33',
+              confirmButtonText: 'Yes',
+              denyButtonText: 'No',
               allowOutsideClick: false,
               showCloseButton: true,
             }).then(async (result) => {
               if (result.isConfirmed) {
-                localStorage.setItem("walletUse", true);
+                localStorage.setItem('walletUse', true);
                 if (walletAmount < cartListing?.total) {
                   router.push(`/payment`);
-                  localStorage.setItem("walletAmount", walletAmount);
+                  localStorage.setItem('walletAmount', walletAmount);
                 } else {
-                  if (localStorage.getItem("walletUse")) {
+                  if (localStorage.getItem('walletUse')) {
                     if (walletAmount >= cartListing.total) {
                       walletResult = cartListing?.total; // Wallet amount is enough, return total.
                     } else {
@@ -308,7 +308,7 @@ const CartPriceDetails = forwardRef(
                         paymentType:
                           (walletUse && walletAmount == cartListing.total) ||
                           (walletUse && walletAmount > cartListing.total)
-                            ? ""
+                            ? ''
                             : paymentType,
                         orderType: keyId,
                         charge: cartListing?.charge,
@@ -331,7 +331,7 @@ const CartPriceDetails = forwardRef(
                         paymentType:
                           (walletUse && walletAmount == cartListing.total) ||
                           (walletUse && walletAmount > cartListing.total)
-                            ? ""
+                            ? ''
                             : paymentType,
                         orderType: keyId,
                         branch: branchId ? branchId : null,
@@ -345,7 +345,7 @@ const CartPriceDetails = forwardRef(
                         walletAmount: walletResult
                           ? walletResult
                           : walletUse
-                          ? localStorage.getItem("walletAmount")
+                          ? localStorage.getItem('walletAmount')
                           : 0,
                       };
                     } else {
@@ -355,7 +355,7 @@ const CartPriceDetails = forwardRef(
                         paymentType:
                           (walletUse && walletAmount == cartListing.total) ||
                           (walletUse && walletAmount > cartListing.total)
-                            ? ""
+                            ? ''
                             : paymentType,
                         orderType: keyId,
                         charge: cartListing?.charge,
@@ -367,7 +367,7 @@ const CartPriceDetails = forwardRef(
                         walletAmount: walletResult
                           ? walletResult
                           : walletUse
-                          ? localStorage.getItem("walletAmount")
+                          ? localStorage.getItem('walletAmount')
                           : 0,
                         cashBack: cartListing?.cashBack,
                       };
@@ -378,7 +378,7 @@ const CartPriceDetails = forwardRef(
                       paymentType:
                         (walletUse && walletAmount == cartListing.total) ||
                         (walletUse && walletAmount > cartListing.total)
-                          ? ""
+                          ? ''
                           : paymentType,
                       orderType: keyId,
                       charge: cartListing?.charge,
@@ -389,7 +389,7 @@ const CartPriceDetails = forwardRef(
                       walletAmount: walletResult
                         ? walletResult
                         : walletUse
-                        ? localStorage.getItem("walletAmount")
+                        ? localStorage.getItem('walletAmount')
                         : 0,
                     };
                   } else {
@@ -398,7 +398,7 @@ const CartPriceDetails = forwardRef(
                       paymentType:
                         (walletUse && walletAmount == cartListing.total) ||
                         (walletUse && walletAmount > cartListing.total)
-                          ? ""
+                          ? ''
                           : paymentType,
                       orderType: keyId,
                       charge: cartListing?.charge,
@@ -410,7 +410,7 @@ const CartPriceDetails = forwardRef(
                       walletAmount: walletResult
                         ? walletResult
                         : walletUse
-                        ? localStorage.getItem("walletAmount")
+                        ? localStorage.getItem('walletAmount')
                         : 0,
                       cashBack: cartListing?.cashBack,
                     };
@@ -431,7 +431,7 @@ const CartPriceDetails = forwardRef(
               router.push(`/payment`);
             }
           }
-        } else if (pathName == "/payment" && paymentType == 1 && !tapId) {
+        } else if (pathName == '/payment' && paymentType == 1 && !tapId) {
           let body = {
             amount: walletUse
               ? cartListing?.total - walletAmount
@@ -440,20 +440,20 @@ const CartPriceDetails = forwardRef(
               ?.map((data) => {
                 return data?.productDetails?._id;
               })
-              .join(", "),
+              .join(', '),
             cardId: paymentCardId,
             isCardSave: false,
           };
           if (!paymentCardId) {
             Swal.fire({
-              title: "Are you sure?",
-              text: "You want to save this card!",
-              icon: "warning",
+              title: 'Are you sure?',
+              text: 'You want to save this card!',
+              icon: 'warning',
               showDenyButton: true,
-              confirmButtonColor: "#000",
-              denyButtonColor: "#d33",
-              confirmButtonText: "Yes",
-              denyButtonText: "No",
+              confirmButtonColor: '#000',
+              denyButtonColor: '#d33',
+              confirmButtonText: 'Yes',
+              denyButtonText: 'No',
               allowOutsideClick: false,
               showCloseButton: true,
             }).then(async (result) => {
@@ -472,12 +472,12 @@ const CartPriceDetails = forwardRef(
             mutate(body);
           }
         } else if (
-          (pathName == "/payment" && paymentType == 2) ||
-          (pathName == "/payment" && paymentType == 3) ||
-          (pathName == "/payment" && tapId && paymentType == 1) ||
-          (pathName == "/checkout" && keyId == 3)
+          (pathName == '/payment' && paymentType == 2) ||
+          (pathName == '/payment' && paymentType == 3) ||
+          (pathName == '/payment' && tapId && paymentType == 1) ||
+          (pathName == '/checkout' && keyId == 3)
         ) {
-          if (pathName == "/payment") {
+          if (pathName == '/payment') {
             if (keyId == 1) {
               if (scheduleDate && promoCodeState) {
                 const { startIsoDate, endIsoDate } = getStartAndEndDate();
@@ -487,7 +487,7 @@ const CartPriceDetails = forwardRef(
                   paymentType:
                     (walletUse && walletAmount == cartListing.total) ||
                     (walletUse && walletAmount > cartListing.total)
-                      ? ""
+                      ? ''
                       : paymentType,
                   orderType: keyId,
                   charge: cartListing?.charge,
@@ -502,7 +502,7 @@ const CartPriceDetails = forwardRef(
                   walletAmount: walletResult
                     ? walletResult
                     : walletUse
-                    ? localStorage.getItem("walletAmount")
+                    ? localStorage.getItem('walletAmount')
                     : 0,
                   cashBack: cartListing?.cashBack,
                 };
@@ -514,7 +514,7 @@ const CartPriceDetails = forwardRef(
                   paymentType:
                     (walletUse && walletAmount == cartListing.total) ||
                     (walletUse && walletAmount > cartListing.total)
-                      ? ""
+                      ? ''
                       : paymentType,
                   orderType: keyId,
                   // branch: branchId ? branchId : null,
@@ -528,7 +528,7 @@ const CartPriceDetails = forwardRef(
                   walletAmount: walletResult
                     ? walletResult
                     : walletUse
-                    ? localStorage.getItem("walletAmount")
+                    ? localStorage.getItem('walletAmount')
                     : 0,
                 };
               } else {
@@ -538,7 +538,7 @@ const CartPriceDetails = forwardRef(
                   paymentType:
                     (walletUse && walletAmount == cartListing.total) ||
                     (walletUse && walletAmount > cartListing.total)
-                      ? ""
+                      ? ''
                       : paymentType,
                   orderType: keyId,
                   charge: cartListing?.charge,
@@ -550,7 +550,7 @@ const CartPriceDetails = forwardRef(
                   walletAmount: walletResult
                     ? walletResult
                     : walletUse
-                    ? localStorage.getItem("walletAmount")
+                    ? localStorage.getItem('walletAmount')
                     : 0,
                   cashBack: cartListing?.cashBack,
                 };
@@ -561,7 +561,7 @@ const CartPriceDetails = forwardRef(
                 paymentType:
                   (walletUse && walletAmount == cartListing.total) ||
                   (walletUse && walletAmount > cartListing.total)
-                    ? ""
+                    ? ''
                     : paymentType,
                 orderType: keyId,
                 charge: cartListing?.charge,
@@ -572,7 +572,7 @@ const CartPriceDetails = forwardRef(
                 walletAmount: walletResult
                   ? walletResult
                   : walletUse
-                  ? localStorage.getItem("walletAmount")
+                  ? localStorage.getItem('walletAmount')
                   : 0,
               };
             } else {
@@ -581,7 +581,7 @@ const CartPriceDetails = forwardRef(
                 paymentType:
                   (walletUse && walletAmount == cartListing.total) ||
                   (walletUse && walletAmount > cartListing.total)
-                    ? ""
+                    ? ''
                     : paymentType,
                 orderType: keyId,
                 charge: cartListing?.charge,
@@ -593,7 +593,7 @@ const CartPriceDetails = forwardRef(
                 walletAmount: walletResult
                   ? walletResult
                   : walletUse
-                  ? localStorage.getItem("walletAmount")
+                  ? localStorage.getItem('walletAmount')
                   : 0,
                 cashBack: cartListing?.cashBack,
               };
@@ -626,7 +626,7 @@ const CartPriceDetails = forwardRef(
       isLoading,
       isPending: paymentPending,
     } = useQuery({
-      queryKey: ["payment-status", tapId],
+      queryKey: ['payment-status', tapId],
       queryFn: async ({ queryKey }) => {
         const [_key, tapId] = queryKey;
         if (!tapId) {
@@ -634,15 +634,15 @@ const CartPriceDetails = forwardRef(
         }
         const resp = await PAYMENT_PROCESS_STATUS(tapId);
 
-        if (resp?.data?.data?.status === "CAPTURED" && paymentType) {
+        if (resp?.data?.data?.status === 'CAPTURED' && paymentType) {
           handleSubmit();
         }
 
         return resp?.data?.data;
       },
       throwOnError: (err) => {
-        router.push("/cart");
-        toastAlert("error", err?.response?.data?.message);
+        router.push('/cart');
+        toastAlert('error', err?.response?.data?.message);
       },
     });
 
@@ -657,16 +657,16 @@ const CartPriceDetails = forwardRef(
       mutationFn: ({ body }) => checkVerify(body),
       onSuccess: (res) => {
         setOTPverifyModal(true);
-        toastAlert("success", res?.data?.message);
+        toastAlert('success', res?.data?.message);
       },
     });
 
     const formik = useFormik({
       initialValues: {
-        otp: "",
+        otp: '',
       },
       validationSchema: yup.object().shape({
-        otp: yup.string().required().label("OTP").length(4),
+        otp: yup.string().required().label('OTP').length(4),
       }),
       onSubmit: (values) => {
         let body = {
@@ -681,8 +681,8 @@ const CartPriceDetails = forwardRef(
     const { mutate: verifyOTPMutation } = useMutation({
       mutationFn: (body) => verifyOTPByLogin(body),
       onSuccess: (resp) => {
-        toastAlert("success", resp?.data?.message);
-        Cookies.set("userDetail", JSON.stringify(resp?.data?.data), {
+        toastAlert('success', resp?.data?.message);
+        Cookies.set('userDetail', JSON.stringify(resp?.data?.data), {
           expires: 7,
         });
 
@@ -693,9 +693,9 @@ const CartPriceDetails = forwardRef(
         setOTPverifyModal(false);
       },
       onError: (err) => {
-        toastAlert("error", err?.response?.data?.message);
+        toastAlert('error', err?.response?.data?.message);
         formik.resetForm();
-        setSelectedOption("");
+        setSelectedOption('');
         setShowVerify(false);
 
         setOTPverifyModal(false);
@@ -705,8 +705,8 @@ const CartPriceDetails = forwardRef(
     const { mutate: resendOTPMutation } = useMutation({
       mutationFn: (body) => resendOTPByOrder(body),
       onSuccess: (resp) => {
-        toastAlert("success", resp?.data?.message);
-        setSelectedOption("");
+        toastAlert('success', resp?.data?.message);
+        setSelectedOption('');
         setNewIsActive(true); // Activate the timer after OTP resend
       },
     });
@@ -748,24 +748,27 @@ const CartPriceDetails = forwardRef(
     return (
       <>
         {cartListing?.cartList?.length > 0 ? (
-          <div className="cart-items">
-            <div className="cart-body">
+          <div className='cart-items'>
+            <div className='cart-body'>
               <h6>Price Details ({cartListing?.cartList?.length ?? 0}) </h6>
               <ul>
                 <li>
                   <p>Bag </p>
-                  <span className="notranslate">
+                  <span className='notranslate'>
                     {/* {formatCurrency((cartListing?.total ?? 0) - (cartListing?.charge ?? 0))} */}
-                    {formatCurrency(cartListing?.subTotal,selectedCountry)}
+                    {formatCurrency(cartListing?.subTotal, selectedCountry)}
                   </span>
                 </li>
                 {keyId == 2 || keyId == 3 ? (
-                  ""
+                  ''
                 ) : (
                   <li>
                     <p>Delivery </p>
-                    <span className="notranslate">
-                      {formatCurrency(cartListing?.charge?.toFixed(2) ?? 0,selectedCountry)}{" "}
+                    <span className='notranslate'>
+                      {formatCurrency(
+                        cartListing?.charge?.toFixed(2) ?? 0,
+                        selectedCountry
+                      )}{' '}
                     </span>
                   </li>
                 )}
@@ -774,70 +777,72 @@ const CartPriceDetails = forwardRef(
                 cartListing?.cartList?.at(0)?.promoDetails?.actionType == 1 ? (
                   <li>
                     <p>Promocode Discount (%)</p>
-                    <span className="text-orange">
+                    <span className='text-orange'>
                       -{cartListing?.cartList?.at(0)?.promoDetails?.discount}%
                     </span>
                   </li>
                 ) : (
-                  ""
+                  ''
                 )}
 
                 {cartListing?.cashBack ? (
                   <li>
                     <p>Cashback </p>
-                    <span className="text-orange">
-                      {formatCurrency(cartListing?.cashBack,selectedCountry)}
+                    <span className='text-orange'>
+                      {formatCurrency(cartListing?.cashBack, selectedCountry)}
                     </span>
                   </li>
                 ) : (
-                  ""
+                  ''
                 )}
 
                 {/* {cartListing?.cartList?.at(0)?.promoDetails?.discount ? ( */}
                 <li>
                   <p>Sub Total </p>
-                  <span className="notranslate">
+                  <span className='notranslate'>
                     {/* KD  */}
-                    {formatCurrency(cartListing?.orderTotal?.toFixed(2),selectedCountry)}
+                    {formatCurrency(
+                      cartListing?.orderTotal?.toFixed(2),
+                      selectedCountry
+                    )}
                   </span>
                 </li>
                 {/* ) : (
                 ""
               )} */}
 
-                {pathName == "/payment" && walletUse ? (
+                {pathName == '/payment' && walletUse ? (
                   <li>
                     <p>Wallet Amount </p>
-                    <span className="text-orange notranslate">
-                     -{formatCurrency(walletAmount ?? 0,selectedCountry)}
+                    <span className='text-orange notranslate'>
+                      -{formatCurrency(walletAmount ?? 0, selectedCountry)}
                     </span>
                   </li>
                 ) : (
-                  ""
+                  ''
                 )}
-               
               </ul>
             </div>
 
-            <div className="cart-bottom">
-              <div className="d-flex align-items-center justify-content-between">
-                <h6 className="fw-bold">Total</h6>
+            <div className='cart-bottom'>
+              <div className='d-flex align-items-center justify-content-between'>
+                <h6 className='fw-bold'>Total</h6>
 
-                <p className="fw-bold mb-0 text-black">
-                
+                <p className='fw-bold mb-0 text-black'>
                   {formatCurrency(
-                    pathName == "/payment" && walletUse
+                    pathName == '/payment' && walletUse
                       ? cartListing?.total - walletAmount
-                      : FORMAT_NUMBER(cartListing?.total),selectedCountry
+                      : FORMAT_NUMBER(cartListing?.total),
+                    selectedCountry
                   )}
                 </p>
               </div>
               {/* <span>Taxes and shipping calculated at checkout</span> */}
             </div>
 
-            <div className="coupon-box">
+            <div className='coupon-box'>
               {details == null || details == undefined ? (
-                ""
+                ''
               ) : (
                 <h6>Promocode</h6>
               )}
@@ -875,14 +880,14 @@ const CartPriceDetails = forwardRef(
                   </a>
                 </li> */}
                 {details == null || details == undefined ? (
-                  ""
+                  ''
                 ) : (
                   <li>
-                    <div className="promo-code-input position-relative">
+                    <div className='promo-code-input position-relative'>
                       <input
-                        type="text"
-                        placeholder="Apply Promocode"
-                        value={promoCode || promoCodeState || ""} // Use promoCode if available, otherwise use promoCodeState
+                        type='text'
+                        placeholder='Apply Promocode'
+                        value={promoCode || promoCodeState || ''} // Use promoCode if available, otherwise use promoCodeState
                         onChange={(e) => {
                           const uppercaseValue = e.target.value.toUpperCase();
                           setPromoCode(uppercaseValue); // Update promoCode state as user types
@@ -890,22 +895,22 @@ const CartPriceDetails = forwardRef(
                       />
                       {promoCodeState && (
                         <button
-                          type="button"
-                          className="clear-button"
+                          type='button'
+                          className='clear-button'
                           onClick={() => {
-                            setPromoCode(""); // Clear the promo code state
-                            localStorage.removeItem("promocode");
+                            setPromoCode(''); // Clear the promo code state
+                            localStorage.removeItem('promocode');
                             setPromoRemove(true);
                             // setTimeout(() => {
                             queryClient.invalidateQueries({
-                              queryKey: ["cart-list-user"],
+                              queryKey: ['cart-list-user'],
                             });
                             // }, 100);
                           }}
-                          aria-label="Clear promo code"
+                          aria-label='Clear promo code'
                         >
                           <MdCancel
-                            style={{ color: "#ff0000", fontSize: "1.5rem" }}
+                            style={{ color: '#ff0000', fontSize: '1.5rem' }}
                           />
                         </button>
                       )}
@@ -914,14 +919,17 @@ const CartPriceDetails = forwardRef(
                     cartListing?.cartList?.at(0)?.promoDetails?.actionType ==
                       1 ? (
                       <p>
-                        Note: You can receive a maximum discount of &nbsp;<span className="notranslate">{formatCurrency("", selectedCountry)}</span>
+                        Note: You can receive a maximum discount of &nbsp;
+                        <span className='notranslate'>
+                          {formatCurrency('', selectedCountry)}
+                        </span>
                         {
                           cartListing?.cartList?.at(0)?.promoDetails
                             ?.maxDiscountAmount
                         }
                       </p>
                     ) : (
-                      ""
+                      ''
                     )}
 
                     {!promoCodeState ? (
@@ -929,23 +937,23 @@ const CartPriceDetails = forwardRef(
                         onClick={() => {
                           if (!promoCode) {
                             toastAlert(
-                              "error",
-                              "Please select a promocode to apply."
+                              'error',
+                              'Please select a promocode to apply.'
                             );
                           } else {
-                            localStorage.setItem("promocode", promoCode);
-                            localStorage.setItem("promoMsg", true);
+                            localStorage.setItem('promocode', promoCode);
+                            localStorage.setItem('promoMsg', true);
                             queryClient.invalidateQueries({
-                              queryKey: ["cart-list-user"],
+                              queryKey: ['cart-list-user'],
                             });
                           }
                         }}
-                        className="btn btn-outline-orange rounded w-100 mt-4"
+                        className='btn btn-outline-orange rounded w-100 mt-4'
                       >
                         Apply
                       </button>
                     ) : (
-                      ""
+                      ''
                     )}
                   </li>
                 )}
@@ -957,13 +965,13 @@ const CartPriceDetails = forwardRef(
 
                       if (details === null || details === undefined) {
                         Swal.fire({
-                          title: "You need to login to checkout",
-                          icon: "warning",
+                          title: 'You need to login to checkout',
+                          icon: 'warning',
                           showCancelButton: true,
-                          confirmButtonColor: "#3085d6",
-                          cancelButtonColor: "#d33",
-                          confirmButtonText: "Yes",
-                          cancelButtonText: "Cancel",
+                          confirmButtonColor: '#3085d6',
+                          cancelButtonColor: '#d33',
+                          confirmButtonText: 'Yes',
+                          cancelButtonText: 'Cancel',
                         }).then((result) => {
                           if (result.isConfirmed) {
                             router.push(
@@ -987,7 +995,7 @@ const CartPriceDetails = forwardRef(
                       }
                     }}
                     disabled={resendOTPMutation?.isLoading}
-                    className="btn btn-theme rounded w-100 mt-4 text-capitalize"
+                    className='btn btn-theme rounded w-100 mt-4 text-capitalize'
                   >
                     checkout
                   </button>
@@ -996,7 +1004,7 @@ const CartPriceDetails = forwardRef(
             </div>
           </div>
         ) : (
-          ""
+          ''
         )}
         {isLoading || paymentPending || isPending ? <Loading /> : null}
 
@@ -1012,7 +1020,7 @@ const CartPriceDetails = forwardRef(
                     <div>
                       <label>
                         <input
-                          type="radio"
+                          type='radio'
                           value={1}
                           checked={selectedOption == 1}
                           onChange={() => setSelectedOption(1)}
@@ -1023,7 +1031,7 @@ const CartPriceDetails = forwardRef(
                     <div>
                       <label>
                         <input
-                          type="radio"
+                          type='radio'
                           value={2}
                           checked={selectedOption == 2}
                           onChange={() => setSelectedOption(2)}
@@ -1035,13 +1043,13 @@ const CartPriceDetails = forwardRef(
 
                   <Modal.Footer>
                     <button
-                      className="btn btn-theme mt-3"
+                      className='btn btn-theme mt-3'
                       onClick={handleClose}
                     >
                       Close
                     </button>
                     <button
-                      className="btn btn-theme mt-3"
+                      className='btn btn-theme mt-3'
                       onClick={(e) => {
                         e.preventDefault();
 
@@ -1067,40 +1075,40 @@ const CartPriceDetails = forwardRef(
                     Kindly, verify your account.
                   </h6>
                   <Form>
-                    <Row className="align-items-center">
+                    <Row className='align-items-center'>
                       <Col lg={12}>
-                        <Form.Group className="">
+                        <Form.Group className=''>
                           <OTPInput
                             value={formik?.values?.otp}
-                            onChange={(e) => formik.setFieldValue("otp", e)}
+                            onChange={(e) => formik.setFieldValue('otp', e)}
                             numInputs={4}
                             renderSeparator={<span>-</span>}
-                            inputType="number"
+                            inputType='number'
                             renderInput={(props) => <input {...props} />}
-                            containerStyle={"otp-input"}
+                            containerStyle={'otp-input'}
                           />
-                          <p className="text-danger mt-3 text-center mb-0">
+                          <p className='text-danger mt-3 text-center mb-0'>
                             {formik?.errors.otp}
                           </p>
                         </Form.Group>
                       </Col>
-                      <div className="d-flex align-items-center justify-content-center flex-column gap-3">
+                      <div className='d-flex align-items-center justify-content-center flex-column gap-3'>
                         {newIsActive ? (
                           <span>Resend OTP in {newTimer} seconds</span>
                         ) : (
                           <span
                             onClick={handleClick}
-                            className="fs-5 mt-4 mb-3"
-                            style={{ cursor: "pointer" }}
+                            className='fs-5 mt-4 mb-3'
+                            style={{ cursor: 'pointer' }}
                           >
                             Resend OTP
                           </span>
                         )}
 
                         <button
-                          type="button"
+                          type='button'
                           onClick={formik.handleSubmit}
-                          className="btn btn-theme w-100"
+                          className='btn btn-theme w-100'
                         >
                           Verify
                         </button>
