@@ -131,10 +131,9 @@ router.group("/product", (product) => {
   product.get("/company/:companyId", _product.getByCompany, handleResponse.RESPONSE);
   product.get("/category/:categoryId", _product.getByCategory, handleResponse.RESPONSE);
   product.get("/classification/:classificationId", _product.getByClassification, handleResponse.RESPONSE);
-  product.get("/class/:classId", _product.getByClass, handleResponse.RESPONSE);
   product.get("/subcategory/:subcategoryId", _product.getBySubcategory, handleResponse.RESPONSE);
   
-  // Multi-filter route for filtering by any combination
+  // Multi-filter route for filtering by any combination (supports classId filtering)
   product.get("/filter", _product.filterProducts, handleResponse.RESPONSE);
 
 

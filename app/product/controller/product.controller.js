@@ -12,7 +12,6 @@ const { CONST } = require("../../../helpers/constant");
 const { USER } = require("../../userService/model/userModel");
 const { COMPANY_MODEL } = require("../../company/model/model");
 const { CALSSIFICATION } = require("../../classification/model/model");
-const { CLASS_MODEL } = require("../../class/model/class.model");
 const { CATEGORY_MODEL } = require("../../category/model/category.model");
 const ORDER = require("../../order/model/order.model");
 
@@ -94,6 +93,55 @@ product.add = async (req, res, next) => {
             _id: findUser?.company,
           });
           data.company = findCompany?._id;
+          
+          // Auto-populate categoryId and subcategoryId from company
+          if (findCompany?.categoryId) {
+            data.categoryId = findCompany.categoryId;
+          }
+          if (findCompany?.subcategoryId) {
+            data.subcategoryId = findCompany.subcategoryId;
+          }
+        }
+
+        // If companyId is provided, auto-populate categoryId and subcategoryId
+        if (data.company) {
+          const findCompany = await COMPANY_MODEL.findById({
+            _id: data.company,
+            stateId: { $ne: CONST.DELETED },
+          });
+          
+          if (findCompany) {
+            // Auto-populate if not provided
+            if (findCompany.categoryId && !data.categoryId) {
+              data.categoryId = findCompany.categoryId;
+            }
+            if (findCompany.subcategoryId && !data.subcategoryId) {
+              data.subcategoryId = findCompany.subcategoryId;
+            }
+            
+            // Validate consistency if manually provided
+            if (data.categoryId && findCompany.categoryId && 
+                data.categoryId.toString() !== findCompany.categoryId.toString()) {
+              await setResponseObject(
+                req,
+                false,
+                "Category does not match with the selected company's category"
+              );
+              next();
+              return;
+            }
+            
+            if (data.subcategoryId && findCompany.subcategoryId && 
+                data.subcategoryId.toString() !== findCompany.subcategoryId.toString()) {
+              await setResponseObject(
+                req,
+                false,
+                "Subcategory does not match with the selected company's subcategory"
+              );
+              next();
+              return;
+            }
+          }
         }
 
         if (req?.files?.productImg) {
@@ -195,24 +243,6 @@ product.add = async (req, res, next) => {
           }
         } else {
           data.isDelivered = true; // default value when undefined
-        }
-
-        // Validate classId if provided
-        if (data.classId) {
-          const classExists = await CLASS_MODEL.findOne({
-            _id: data.classId,
-            stateId: { $ne: CONST.DELETED },
-          });
-          
-          if (!classExists) {
-            await setResponseObject(
-              req,
-              false,
-              "Class not found or deleted"
-            );
-            next();
-            return;
-          }
         }
 
         // Validate classification if provided
@@ -478,21 +508,44 @@ product.update = async (req, res, next) => {
           data.stateId = CONST.PENDING;
         }
 
-        // Validate classId if provided
-        if (data.classId) {
-          const classExists = await CLASS_MODEL.findOne({
-            _id: data.classId,
+        // If companyId is provided, auto-populate categoryId and subcategoryId
+        if (data.company) {
+          const findCompany = await COMPANY_MODEL.findById({
+            _id: data.company,
             stateId: { $ne: CONST.DELETED },
           });
           
-          if (!classExists) {
-            await setResponseObject(
-              req,
-              false,
-              "Class not found or deleted"
-            );
-            next();
-            return;
+          if (findCompany) {
+            // Auto-populate if not provided
+            if (findCompany.categoryId && !data.categoryId) {
+              data.categoryId = findCompany.categoryId;
+            }
+            if (findCompany.subcategoryId && !data.subcategoryId) {
+              data.subcategoryId = findCompany.subcategoryId;
+            }
+            
+            // Validate consistency if manually provided
+            if (data.categoryId && findCompany.categoryId && 
+                data.categoryId.toString() !== findCompany.categoryId.toString()) {
+              await setResponseObject(
+                req,
+                false,
+                "Category does not match with the selected company's category"
+              );
+              next();
+              return;
+            }
+            
+            if (data.subcategoryId && findCompany.subcategoryId && 
+                data.subcategoryId.toString() !== findCompany.subcategoryId.toString()) {
+              await setResponseObject(
+                req,
+                false,
+                "Subcategory does not match with the selected company's subcategory"
+              );
+              next();
+              return;
+            }
           }
         }
 
@@ -709,6 +762,41 @@ product.list = async (req, res, next) => {
       },
       {
         $lookup: {
+          from: "companies",
+          let: { id: "$company" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                company: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arabicCompany", "$company"],
+                    },
+                    else: "$company",
+                  },
+                },
+                arabicCompany: 1,
+                logo: 1,
+                coverImg: 1,
+              },
+            },
+          ],
+          as: "companyDetails",
+        },
+      },
+      {
+        $unwind: { path: "$companyDetails", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
           from: "subcategories",
           let: { id: "$subcategoryId" }, // foreign key
           pipeline: [
@@ -727,6 +815,72 @@ product.list = async (req, res, next) => {
           path: "$subCategoryDetails",
           preserveNullAndEmptyArrays: true,
         },
+      },
+      {
+        $lookup: {
+          from: "classifications",
+          let: { id: "$classification" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $lookup: {
+                from: "classes",
+                let: { classId: "$classId" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: { $eq: ["$$classId", "$_id"] },
+                      stateId: { $ne: CONST.DELETED },
+                    },
+                  },
+                  {
+                    $project: {
+                      _id: 1,
+                      className: {
+                        $cond: {
+                          if: { $eq: [language, "AR"] },
+                          then: {
+                            $ifNull: ["$arabicClassName", "$className"],
+                          },
+                          else: "$className",
+                        },
+                      },
+                    },
+                  },
+                ],
+                as: "classDetails",
+              },
+            },
+            {
+              $unwind: { path: "$classDetails", preserveNullAndEmptyArrays: true },
+            },
+            {
+              $project: {
+                _id: 1,
+                name: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arbicName", "$name"],
+                    },
+                    else: "$name",
+                  },
+                },
+                classId: 1,
+                classDetails: 1,
+              },
+            },
+          ],
+          as: "classificationDetails",
+        },
+      },
+      {
+        $unwind: { path: "$classificationDetails", preserveNullAndEmptyArrays: true },
       },
       {
         $lookup: {
@@ -813,7 +967,9 @@ product.list = async (req, res, next) => {
           isDelivered: true,
           createdAt: 1,
           categoryDetails: 1,
+          companyDetails: 1,
           subCategoryDetails: 1,
+          classificationDetails: 1,
           cartDetails: 1,
         },
       },
@@ -1109,38 +1265,6 @@ product.detail = async (req, res, next) => {
         $unwind: { path: "$classification", preserveNullAndEmptyArrays: true },
       },
       {
-        $lookup: {
-          from: "classes",
-          let: { id: "$classId" },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$$id", "$_id"] },
-              },
-            },
-            {
-              $project: {
-                _id: 1,
-                name: {
-                  $cond: {
-                    if: { $eq: [language, "AR"] },
-                    then: {
-                      $ifNull: ["$arbicName", "$name"],
-                    },
-                    else: "$name",
-                  },
-                },
-                arbicName: 1,
-              },
-            },
-          ],
-          as: "class",
-        },
-      },
-      {
-        $unwind: { path: "$class", preserveNullAndEmptyArrays: true },
-      },
-      {
         $project: {
           _id: 1,
           productName: {
@@ -1232,7 +1356,6 @@ product.detail = async (req, res, next) => {
           totalQuantityInCart: 1,
           dynamicquestions: 1,
           classification: 1,
-          class: 1,
           wishlist: 1,
           isWishlist: 1,
           averageRating: {
@@ -1540,7 +1663,7 @@ product.pendingProduct = async (req, res, next) => {
           },
         },
         {
-          "classDetails.name": {
+          "classificationDetails.name": {
             $regex: req.query.search
               ? req.query.search.replace(new RegExp("\\\\", "g"), "\\\\").trim()
               : "",
@@ -1813,30 +1936,55 @@ product.pendingProduct = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: "classes",
-          let: { id: "$classId" }, // foreign key
+          from: "classifications",
+          let: { id: "$classification" },
           pipeline: [
             {
               $match: {
-                $expr: { $eq: ["$$id", "$_id"] }, // primary key (auths)
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
               },
+            },
+            {
+              $lookup: {
+                from: "classes",
+                let: { classId: "$classId" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: { $eq: ["$$classId", "$_id"] },
+                      stateId: { $ne: CONST.DELETED },
+                    },
+                  },
+                  {
+                    $project: {
+                      _id: 1,
+                      className: 1,
+                      arabicClassName: 1,
+                    },
+                  },
+                ],
+                as: "classDetails",
+              },
+            },
+            {
+              $unwind: { path: "$classDetails", preserveNullAndEmptyArrays: true },
             },
             {
               $project: {
                 _id: 1,
                 name: 1,
                 arbicName: 1,
+                classId: 1,
+                classDetails: 1,
               },
             },
           ],
-          as: "classDetails",
+          as: "classificationDetails",
         },
       },
       {
-        $unwind: {
-          path: "$classDetails",
-          preserveNullAndEmptyArrays: true,
-        },
+        $unwind: { path: "$classificationDetails", preserveNullAndEmptyArrays: true },
       },
       {
         $lookup: {
@@ -1895,10 +2043,12 @@ product.pendingProduct = async (req, res, next) => {
             subcategory: true,
             arabicSubcategory: true,
           },
-          classDetails: {
+          classificationDetails: {
             _id: true,
             name: true,
             arbicName: true,
+            classId: true,
+            classDetails: true,
           },
           isAssign: true,
           createdBy: 1,
@@ -2155,6 +2305,14 @@ product.importCsv = async (req, res, next) => {
 
               if (companies) {
                 obj.company = companies._id;
+                
+                // Auto-populate categoryId and subcategoryId from company
+                if (companies.categoryId) {
+                  obj.categoryId = companies.categoryId;
+                }
+                if (companies.subcategoryId) {
+                  obj.subcategoryId = companies.subcategoryId;
+                }
               } else {
                 await setResponseObject(
                   req,
@@ -5142,149 +5300,6 @@ product.getByClassification = async (req, res, next) => {
   }
 };
 
-/*Get products by class*/
-product.getByClass = async (req, res, next) => {
-  try {
-    let language = req.headers["language"] ? req.headers["language"] : "EN";
-    let pageNo = parseInt(req.query.pageNo) || 1;
-    let pageLimit = parseInt(req.query.pageLimit) || 10;
-
-    // Validate classId if provided
-    if (req.params.classId) {
-      const classExists = await CLASS_MODEL.findOne({
-        _id: req.params.classId,
-        stateId: { $ne: CONST.DELETED },
-      });
-      
-      if (!classExists) {
-        await setResponseObject(
-          req,
-          false,
-          "Class not found or deleted"
-        );
-        next();
-        return;
-      }
-    }
-
-    let searchFilter = {};
-    if (req.query.search && req.query.search !== "undefined") {
-      searchFilter.$or = [
-        {
-          productName: {
-            $regex: req.query.search.trim()
-              ? req.query.search.trim()
-              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
-            $options: "i",
-          },
-        },
-        {
-          productArabicName: {
-            $regex: req.query.search.trim()
-              ? req.query.search.trim()
-              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
-            $options: "i",
-          },
-        },
-      ];
-    }
-
-    const products = await PRODUCT_MODEL.aggregate([
-      {
-        $match: {
-          classId: new mongoose.Types.ObjectId(req.params.classId),
-          stateId: CONST.ACTIVE,
-        },
-      },
-      {
-        $match: searchFilter,
-      },
-      {
-        $lookup: {
-          from: "classes",
-          let: { id: "$classId" },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$$id", "$_id"] },
-                stateId: { $ne: CONST.DELETED },
-              },
-            },
-            {
-              $project: {
-                _id: 1,
-                name: {
-                  $cond: {
-                    if: { $eq: [language, "AR"] },
-                    then: {
-                      $ifNull: ["$arbicName", "$name"],
-                    },
-                    else: "$name",
-                  },
-                },
-              },
-            },
-          ],
-          as: "classDetails",
-        },
-      },
-      {
-        $unwind: { path: "$classDetails", preserveNullAndEmptyArrays: true },
-      },
-      {
-        $project: {
-          _id: 1,
-          productName: {
-            $cond: {
-              if: { $eq: [language, "AR"] },
-              then: {
-                $ifNull: ["$productArabicName", "$productName"],
-              },
-              else: "$productName",
-            },
-          },
-          productImg: 1,
-          price: 1,
-          mrpPrice: 1,
-          discount: 1,
-          averageRating: 1,
-          classId: 1,
-          classDetails: 1,
-          createdAt: 1,
-        },
-      },
-      {
-        $sort: { createdAt: -1 },
-      },
-      {
-        $facet: {
-          data: [{ $skip: pageLimit * (pageNo - 1) }, { $limit: pageLimit }],
-          count: [{ $count: "count" }],
-        },
-      },
-    ]);
-
-    if (products && products[0].data.length) {
-      await setResponseObject(
-        req,
-        true,
-        "Products found successfully",
-        products[0].data,
-        products[0].count[0].count,
-        pageNo,
-        pageLimit
-      );
-      next();
-    } else {
-      await setResponseObject(req, true, "No products found", []);
-      next();
-    }
-  } catch (error) {
-    await setResponseObject(req, false, error.message, "");
-    next();
-  }
-};
-
 /*Get products by subcategory*/
 product.getBySubcategory = async (req, res, next) => {
   try {
@@ -5416,16 +5431,19 @@ product.filterProducts = async (req, res, next) => {
     let language = req.headers["language"] ? req.headers["language"] : "EN";
     let country = req.headers["country"] ? req.headers["country"] : "Kuwait";
     let pageNo = parseInt(req.query.pageNo) || 1;
-    let pageLimit = parseInt(req.query.pageLimit) || 10;
+    let pageLimit = parseInt(req.query.pageLimit) || 100;
 
     console.log("Filter Parameters:", {
-      classId: req.query.classId,
       companyId: req.query.companyId,
+      categoryId: req.query.categoryId,
+      subcategoryId: req.query.subcategoryId,
+      classId: req.query.classId,
       classificationId: req.query.classificationId,
       minPrice: req.query.minPrice,
       maxPrice: req.query.maxPrice,
       minDiscount: req.query.minDiscount,
       maxDiscount: req.query.maxDiscount,
+      search: req.query.search,
       country: country
     });
 
@@ -5445,18 +5463,24 @@ product.filterProducts = async (req, res, next) => {
     if (req.query.classificationId) {
       matchFilter.classification = new mongoose.Types.ObjectId(req.query.classificationId);
     }
-    if (req.query.classId) {
-      matchFilter.classId = new mongoose.Types.ObjectId(req.query.classId);
-    }
 
-    // Debug: Check what products exist with your criteria before state filter
-    const debugProducts = await PRODUCT_MODEL.find({
-      company: req.query.companyId ? new mongoose.Types.ObjectId(req.query.companyId) : undefined,
-      classification: req.query.classificationId ? new mongoose.Types.ObjectId(req.query.classificationId) : undefined,
-      classId: req.query.classId ? new mongoose.Types.ObjectId(req.query.classId) : undefined
-    }).select('_id productName stateId price discount quantity');
-    
-    console.log("Debug - Products found before state filter:", debugProducts);
+    // Handle classId filtering - find classifications that belong to this class
+    let classificationIds = [];
+    if (req.query.classId) {
+      const classificationsInClass = await CALSSIFICATION.find({
+        classId: new mongoose.Types.ObjectId(req.query.classId),
+        stateId: { $ne: CONST.DELETED }
+      }).select('_id');
+      
+      classificationIds = classificationsInClass.map(c => c._id);
+      
+      if (classificationIds.length > 0) {
+        matchFilter.classification = { $in: classificationIds };
+      } else {
+        // If no classifications found for this class, return empty result
+        matchFilter._id = new mongoose.Types.ObjectId('000000000000000000000000'); // Non-existent ID
+      }
+    }
 
     // Build price filter
     let priceFilter = {};
@@ -5835,6 +5859,38 @@ product.filterProducts = async (req, res, next) => {
               },
             },
             {
+              $lookup: {
+                from: "classes",
+                let: { classId: "$classId" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: { $eq: ["$$classId", "$_id"] },
+                      stateId: { $ne: CONST.DELETED },
+                    },
+                  },
+                  {
+                    $project: {
+                      _id: 1,
+                      className: {
+                        $cond: {
+                          if: { $eq: [language, "AR"] },
+                          then: {
+                            $ifNull: ["$arabicClassName", "$className"],
+                          },
+                          else: "$className",
+                        },
+                      },
+                    },
+                  },
+                ],
+                as: "classDetails",
+              },
+            },
+            {
+              $unwind: { path: "$classDetails", preserveNullAndEmptyArrays: true },
+            },
+            {
               $project: {
                 _id: 1,
                 name: {
@@ -5846,39 +5902,12 @@ product.filterProducts = async (req, res, next) => {
                     else: "$name",
                   },
                 },
+                classId: 1,
+                classDetails: 1,
               },
             },
           ],
           as: "classificationDetails",
-        },
-      },
-      {
-        $lookup: {
-          from: "classes",
-          let: { id: "$classId" },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$$id", "$_id"] },
-                stateId: { $ne: CONST.DELETED },
-              },
-            },
-            {
-              $project: {
-                _id: 1,
-                name: {
-                  $cond: {
-                    if: { $eq: [language, "AR"] },
-                    then: {
-                      $ifNull: ["$arbicName", "$name"],
-                    },
-                    else: "$name",
-                  },
-                },
-              },
-            },
-          ],
-          as: "classDetails",
         },
       },
       {
@@ -5889,9 +5918,6 @@ product.filterProducts = async (req, res, next) => {
       },
       {
         $unwind: { path: "$classificationDetails", preserveNullAndEmptyArrays: true },
-      },
-      {
-        $unwind: { path: "$classDetails", preserveNullAndEmptyArrays: true },
       }
     );
 
@@ -5938,12 +5964,10 @@ product.filterProducts = async (req, res, next) => {
           categoryId: 1,
           subcategoryId: 1,
           classification: 1,
-          classId: 1,
           companyDetails: 1,
           categoryDetails: 1,
           subcategoryDetails: 1,
           classificationDetails: 1,
-          classDetails: 1,
           isWishlist: 1,
           averageRating: {
             averageRating: { $ifNull: ["$averageRating", 0] },
