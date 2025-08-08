@@ -18,7 +18,7 @@ const numCPUs = os.cpus().length;
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || '8000');
 logger.info(`server running on ${process.env.SERVER_API_URL}:${port}`);
 logger.info(
   `Worker process ${process.pid} and server listening on port ${port}`
