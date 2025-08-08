@@ -15,7 +15,7 @@ import { Pagination } from '../Pagination';
 import ProductCard from '../products/ProductCard';
 
 const HomeProductList = ({ categoryList }) => {
-  const selectedCountry = 'Kuwait'; // Default country for currency formatting
+  const selectedCountry = 'Kuwait';
 
   // Product List States
   const [productPage, setProductPage] = useState(Paginations.DEFAULT_PAGE);
@@ -44,7 +44,6 @@ const HomeProductList = ({ categoryList }) => {
         productClassificationArr[0],
         productPage
       );
-      console.log('Home Product List:', resp?.data?.data);
       setProductMeta(resp?.data?._meta);
       return resp?.data?.data ?? [];
     },
@@ -98,13 +97,6 @@ const HomeProductList = ({ categoryList }) => {
             )}
           </Col>
         </Row>
-
-        {/* View All Products Button */}
-        <div className='text-center mt-5'>
-          <Link href='/product-list' className='btn btn-outline-primary btn-lg'>
-            View All Products
-          </Link>
-        </div>
       </Container>
     </section>
   );

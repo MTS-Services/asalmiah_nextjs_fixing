@@ -25,21 +25,25 @@ const HomeDownloadApp = () => {
                   className='me-3 mb-3'
                   target='_blank'
                 >
-                  <Image src={apple} />
+                  <Image src={apple} alt='image' />
                 </Link>
                 <Link
                   href='https://play.google.com/store/search?q=offarat&c=apps&hl=en_IN'
                   className='mb-3 mt-lg-0 '
                   target='_blank'
                 >
-                  <Image src={googlestore} />
+                  <Image src={googlestore} alt='image' />
                 </Link>
               </div>
             </div>
           </Col>
 
           <Col md={6}>
-            <Image src={downloadimg} className='img-fluid mx-auto d-block' />
+            <Image
+              src={downloadimg}
+              className='img-fluid mx-auto d-block'
+              alt='image'
+            />
           </Col>
         </Row>
       </Container>

@@ -71,7 +71,7 @@ const Filter = (props) => {
     queryKey: ['company-list'],
     queryFn: async () => {
       const resp = await USER_COMPANY_LIST();
-      console.log('company : ', resp?.data?.data);
+
       return resp?.data?.data ?? [];
     },
   });
@@ -82,7 +82,7 @@ const Filter = (props) => {
     queryKey: ['class-list'],
     queryFn: async () => {
       const resp = await GET_CLASS_DROPDOWN();
-      console.log('CLASS : ', resp?.data?.data);
+
       return resp?.data?.data ?? [];
     },
   });

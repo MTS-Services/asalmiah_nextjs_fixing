@@ -27,6 +27,8 @@ import NoDataFound from '../components/no-data-found/page';
 import TestFilter from '../components/TestFilter';
 import Filter from '../components/Filter';
 import ProductCard from '../components/products/ProductCard';
+import { BiFilter } from 'react-icons/bi';
+import Link from 'next/link';
 
 const ProductList = () => {
   let detail = useDetails();
@@ -62,6 +64,7 @@ const ProductList = () => {
   // =========================================
   const [sort, setSort] = useState();
   const [show, setShow] = useState(false);
+
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
@@ -94,7 +97,7 @@ const ProductList = () => {
     },
   });
 
-  let router = useRouter();
+  // let router = useRouter();
 
   // =========================================
   // 📁 RE_FETCH
@@ -129,7 +132,7 @@ const ProductList = () => {
         </Row>
       </Container>
 
-      <Container className='list-main'>
+      <Container className='list-main mb-30'>
         <Row>
           {/**************** LEFT_SIDE_FILTER *********************/}
           <Col lg={3}>
@@ -185,27 +188,18 @@ const ProductList = () => {
                         className='btn btn-theme filter_btn d-block d-lg-none'
                         onClick={handleShow}
                       >
-                        <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          width='16'
-                          height='16'
-                          fill='currentColor'
-                          className='bi bi-funnel'
-                          viewBox='0 0 16 16'
-                        >
-                          <path d='M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z' />
-                        </svg>{' '}
+                        <BiFilter size={16} />
                         <small className='ms-2'>Filter</small>
                       </div>
                       <div className='list-view'>
-                        <a className='active-btn' href='/product-list'>
+                        <Link className='active-btn' href='/product-list'>
                           <IoGrid />
-                        </a>
+                        </Link>
                       </div>
                       <div className='grid-view'>
-                        <a href='/product-grid'>
+                        <Link href='/product-grid'>
                           <FaList />
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </Col>
