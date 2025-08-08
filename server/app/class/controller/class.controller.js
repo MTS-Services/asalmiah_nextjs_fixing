@@ -180,6 +180,31 @@ _class.list = async (req, res, next) => {
       },
       {
         $lookup: {
+          from: "categories",
+          let: { id: { $ifNull: ["$categoryId", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: 1,
+                arabicCategory: 1,
+              },
+            },
+          ],
+          as: "category",
+        },
+      },
+      {
+        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
           from: "permissionschemas",
           let: { id: "$createdBy._id" },
           pipeline: [
@@ -202,6 +227,8 @@ _class.list = async (req, res, next) => {
           _id: "$_id",
           name: { $first: "$name" },
           arbicName: { $first: "$arbicName" },
+          categoryId: { $first: "$categoryId" },
+          category: { $first: "$category" },
           order: { $first: "$order" },
           stateId: { $first: "$stateId" },
           createdAt: { $first: "$createdAt" },
@@ -327,6 +354,80 @@ _class.detail = async (req, res, next) => {
       },
       {
         $unwind: { path: "$updatedBy", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          let: { id: { $ifNull: ["$categoryId", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: 1,
+                arabicCategory: 1,
+                description: 1,
+                arabicDescription: 1,
+                order: 1,
+                stateId: 1,
+                createdAt: 1,
+                updatedAt: 1,
+              },
+            },
+          ],
+          as: "category",
+        },
+      },
+      {
+        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          arbicName: 1,
+          categoryId: 1,
+          category: {
+            _id: "$category._id",
+            category: "$category.category",
+            arabicCategory: "$category.arabicCategory",
+            description: "$category.description",
+            arabicDescription: "$category.arabicDescription",
+            order: "$category.order",
+            stateId: "$category.stateId",
+            createdAt: "$category.createdAt",
+            updatedAt: "$category.updatedAt",
+            displayName: {
+              $cond: {
+                if: { $eq: [language, "AR"] },
+                then: {
+                  $ifNull: ["$category.arabicCategory", "$category.category"],
+                },
+                else: "$category.category",
+              },
+            },
+            displayDescription: {
+              $cond: {
+                if: { $eq: [language, "AR"] },
+                then: {
+                  $ifNull: ["$category.arabicDescription", "$category.description"],
+                },
+                else: "$category.description",
+              },
+            },
+          },
+          order: 1,
+          stateId: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          createdBy: 1,
+          updatedBy: 1,
+        },
       },
     ]);
     
@@ -572,6 +673,14 @@ _class.dropDownClass = async (req, res, next) => {
       };
     }
 
+    // Add category filter if categoryId is provided
+    let categoryFilter = {};
+    if (req.query.categoryId && req.query.categoryId !== "undefined") {
+      categoryFilter = {
+        categoryId: new mongoose.Types.ObjectId(req.query.categoryId),
+      };
+    }
+
     let list = await CLASS_MODEL.aggregate([
       {
         $match: {
@@ -582,7 +691,42 @@ _class.dropDownClass = async (req, res, next) => {
         $match: roleFilter,
       },
       {
+        $match: categoryFilter,
+      },
+      {
         $match: searchFilter,
+      },
+      {
+        $lookup: {
+          from: "categories",
+          let: { id: { $ifNull: ["$categoryId", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arabicCategory", "$category"],
+                    },
+                    else: "$category",
+                  },
+                },
+              },
+            },
+          ],
+          as: "category",
+        },
+      },
+      {
+        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
       },
       {
         $addFields: {
@@ -614,6 +758,8 @@ _class.dropDownClass = async (req, res, next) => {
             },
           },
           arbicName: 1,
+          categoryId: 1,
+          category: 1,
           order: 1,
           stateId: 1,
           createdAt: 1,
@@ -639,22 +785,22 @@ _class.dropDownClass = async (req, res, next) => {
   }
 };
 
-/*Get classes by classification*/
-_class.getClassesByClassification = async (req, res, next) => {
+/*Get classes by category*/
+_class.getClassesByCategory = async (req, res, next) => {
   try {
     let language = req.headers["language"] ? req.headers["language"] : "EN";
     
     const classes = await CLASS_MODEL.aggregate([
       {
         $match: {
-          classificationId: new mongoose.Types.ObjectId(req.params.classificationId),
+          categoryId: new mongoose.Types.ObjectId(req.params.categoryId),
           stateId: { $eq: CONST.ACTIVE },
         },
       },
       {
         $lookup: {
-          from: "classifications",
-          let: { id: { $ifNull: ["$classificationId", ""] } },
+          from: "categories",
+          let: { id: { $ifNull: ["$categoryId", ""] } },
           pipeline: [
             {
               $match: {
@@ -665,23 +811,23 @@ _class.getClassesByClassification = async (req, res, next) => {
             {
               $project: {
                 _id: 1,
-                name: {
+                category: {
                   $cond: {
                     if: { $eq: [language, "AR"] },
                     then: {
-                      $ifNull: ["$arbicName", "$name"],
+                      $ifNull: ["$arabicCategory", "$category"],
                     },
-                    else: "$name",
+                    else: "$category",
                   },
                 },
               },
             },
           ],
-          as: "classification",
+          as: "category",
         },
       },
       {
-        $unwind: { path: "$classification", preserveNullAndEmptyArrays: true },
+        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
       },
       {
         $project: {
@@ -695,7 +841,115 @@ _class.getClassesByClassification = async (req, res, next) => {
               else: "$name",
             },
           },
-          classification: 1,
+          category: 1,
+          order: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $addFields: {
+          sortKey: {
+            $cond: {
+              if: { $gt: ["$order", 0] },
+              then: { $toInt: { $ifNull: ["$order", 0] } },
+              else: Number.MAX_SAFE_INTEGER,
+            },
+          },
+        },
+      },
+      {
+        $sort: { sortKey: 1, createdAt: -1 },
+      },
+    ]);
+
+    if (classes && classes.length > 0) {
+      await setResponseObject(
+        req,
+        true,
+        "Classes found successfully",
+        classes
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "No classes found for this category", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Get classes by classification*/
+_class.getClassesByClassification = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+    
+    // First find the classification to get its classId
+    const { CALSSIFICATION } = require("../../classification/model/model");
+    
+    const classification = await CALSSIFICATION.findOne({
+      _id: new mongoose.Types.ObjectId(req.params.classificationId),
+      stateId: { $ne: CONST.DELETED }
+    });
+
+    if (!classification) {
+      await setResponseObject(req, false, "Classification not found", []);
+      return next();
+    }
+
+    const classes = await CLASS_MODEL.aggregate([
+      {
+        $match: {
+          _id: classification.classId ? new mongoose.Types.ObjectId(classification.classId) : null,
+          stateId: { $eq: CONST.ACTIVE },
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          let: { id: { $ifNull: ["$categoryId", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arabicCategory", "$category"],
+                    },
+                    else: "$category",
+                  },
+                },
+              },
+            },
+          ],
+          as: "category",
+        },
+      },
+      {
+        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: {
+            $cond: {
+              if: { $eq: [language, "AR"] },
+              then: {
+                $ifNull: ["$arbicName", "$name"],
+              },
+              else: "$name",
+            },
+          },
+          category: 1,
           order: 1,
           createdAt: 1,
         },
@@ -714,7 +968,7 @@ _class.getClassesByClassification = async (req, res, next) => {
       );
       next();
     } else {
-      await setResponseObject(req, true, "No classes found", []);
+      await setResponseObject(req, true, "No classes found for this classification", []);
       next();
     }
   } catch (error) {

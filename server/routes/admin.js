@@ -264,6 +264,7 @@ router.group('/branch', (branch) => {
 /* Product Management  */
 router.group('/product', (product) => {
   product.post('/add', _product.add);
+  product.get('/list', _product.list);
   product.put('/edit/:id', _product.update);
   product.get('/pendingProduct', _product.pendingProduct);
   product.get('/detail/:id', _product.detail);
@@ -352,25 +353,48 @@ router.group('/dynamic', (dynamic) => {
 
 /* Classification Management  */
 
-router.group('/classification', (classification) => {
-  classification.post('/add', _classification.add);
-  classification.get('/list', _classification.list);
-  classification.get('/detail/:id', _classification.detail);
-  classification.put('/update/:id', _classification.update);
-  classification.put('/updateState/:id', _classification.updateState);
-  classification.delete('/delete/:id', _classification.delete);
-  classification.get('/dropDown', _classification.activeList);
-  classification.get('/category/:categoryId', _classification.getByCategory);
 
-  // router.group('/classification', (classification) => {
-  //   classification.post('/add', _classification.add);
-  //   classification.get('/list', _classification.list);
-  //   classification.get('/detail/:id', _classification.detail);
-  //   classification.put('/update/:id', _classification.update);
-  //   classification.put('/updateState/:id', _classification.updateState);
-  //   classification.delete('/delete/:id', _classification.delete);
-  //   classification.get('/dropDown', _classification.activeList);
-});
+router.group("/classification", (classification) => {
+  classification.post("/add", _classification.add);
+  classification.get("/list", _classification.list);
+  classification.get("/detail/:id", _classification.detail);
+  classification.put("/update/:id", _classification.update);
+  classification.put("/updateState/:id", _classification.updateState);
+  classification.delete("/delete/:id", _classification.delete);
+  classification.get("/dropDown", _classification.activeList);
+  classification.get("/category/:categoryId", _classification.getByCategory);
+
+// router.group('/classification', (classification) => {
+//   classification.post('/add', _classification.add);
+//   classification.get('/list', _classification.list);
+//   classification.get('/detail/:id', _classification.detail);
+//   classification.put('/update/:id', _classification.update);
+//   classification.put('/updateState/:id', _classification.updateState);
+//   classification.delete('/delete/:id', _classification.delete);
+//   classification.get('/dropDown', _classification.activeList);
+
+ });
+// =======
+// router.group('/classification', (classification) => {
+//   classification.post('/add', _classification.add);
+//   classification.get('/list', _classification.list);
+//   classification.get('/detail/:id', _classification.detail);
+//   classification.put('/update/:id', _classification.update);
+//   classification.put('/updateState/:id', _classification.updateState);
+//   classification.delete('/delete/:id', _classification.delete);
+//   classification.get('/dropDown', _classification.activeList);
+//   classification.get('/category/:categoryId', _classification.getByCategory);
+
+//   // router.group('/classification', (classification) => {
+//   //   classification.post('/add', _classification.add);
+//   //   classification.get('/list', _classification.list);
+//   //   classification.get('/detail/:id', _classification.detail);
+//   //   classification.put('/update/:id', _classification.update);
+//   //   classification.put('/updateState/:id', _classification.updateState);
+//   //   classification.delete('/delete/:id', _classification.delete);
+//   //   classification.get('/dropDown', _classification.activeList);
+// });
+// >>>>>>> main
 
 /* Review Management  */
 router.group('/review', (review) => {

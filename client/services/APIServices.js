@@ -1498,7 +1498,7 @@ export const STATE_UPDATE_CLASS_API = async (id, stateId) => {
 
 export const GET_SEARCH_CLASS_API = async (page, pageLimit, state, search) => {
   return await http.get(
-    `/admin/class/dropDownClass?pageNo=${page}&pageLimit=${pageLimit}&stateId=${state}&search=${search}`
+    `/class/dropDownClass`
   );
 };
 

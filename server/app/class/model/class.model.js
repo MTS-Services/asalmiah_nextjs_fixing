@@ -20,6 +20,10 @@ let classSchema = new SCHEMA(
     arbicName: {
       type: String,
     },
+    categoryId: {
+      type: mongoose.Types.ObjectId,
+      ref: "category",
+    },
     order: {
       type: Number,
     },

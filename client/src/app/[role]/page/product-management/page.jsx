@@ -445,7 +445,6 @@ const Products = () => {
                         </th>
                         <th>Company Name</th>
                         <th>Category Name</th>
-                        <th>Class</th>
                         <th>Product Code</th>
                         <th>Price</th>
                         <th>Discount (%)</th>
@@ -510,14 +509,6 @@ const Products = () => {
                               >
                                 {data?.companyDetails?.categoryDetails
                                   ?.category ?? "-"}
-                              </Link>
-                            </td>
-                            <td>
-                              <Link
-                                href={getLinkHref(detail?.roleId, `/page/class-management/edit/${data?.classDetails?._id}`)}
-                                target="_blank"
-                              >
-                                {data?.classDetails?.name ?? "-"}
                               </Link>
                             </td>
                             <td>{data?.productCode ?? "-"}</td>

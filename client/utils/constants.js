@@ -148,3 +148,45 @@ export const PROVIDERS = {
   GOOGLE: 'google',
   FACEBOOK: 'facebook',
 };
+
+// Custom styles for react-select components
+export const customReactSelectStyles = {
+  control: (provided, state) => ({
+    ...provided,
+    minHeight: '45px',
+    fontSize: '16px',
+    backgroundColor: '#fff',
+    borderColor: state.isFocused ? '#da2a2c' : '#ccc',
+    borderRadius: '6px',
+    boxShadow: state.isFocused ? '0 0 0 1px #da2a2c' : 'none',
+    '&:hover': {
+      borderColor: state.isFocused ? '#da2a2c' : '#ccc',
+    },
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: '#535353',
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected 
+      ? '#da2a2c' 
+      : state.isFocused 
+        ? '#f8f9fa' 
+        : 'white',
+    color: state.isSelected ? 'white' : '#535353',
+    '&:hover': {
+      backgroundColor: state.isSelected ? '#da2a2c' : '#f8f9fa',
+    },
+  }),
+  menu: (provided) => ({
+    ...provided,
+    zIndex: 999,
+    borderRadius: '6px',
+    border: '1px solid #ccc',
+  }),
+  menuPortal: (provided) => ({
+    ...provided,
+    zIndex: 999,
+  }),
+};

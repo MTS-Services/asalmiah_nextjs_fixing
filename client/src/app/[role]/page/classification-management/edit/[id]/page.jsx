@@ -18,14 +18,16 @@ import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
+import { AsyncPaginate } from "react-select-async-paginate";
 import useSlider from "../../../../../../../hooks/useSlider";
 
 import {
   EDIT_CLASSIFICATION_API,
   GET_CLASSIFICATION_DETAIL_API,
-  GET_CATEGORY_LIST_HOME
+  GET_SEARCH_CLASS_API
 } from "../../../../../../../services/APIServices";
 import { toastAlert } from "../../../../../../../utils/SweetAlert";
+import { constant, Paginations } from "../../../../../../../utils/constants";
 import { getLinkHref, restrictAlpha } from "../../../../../../../utils/helper";
 import useDetails from "../../../../../../../hooks/useDetails";
 
@@ -36,14 +38,37 @@ const Edit = () => {
   const detail = useDetails();
   const queryClient = useQueryClient();
 
-  // Fetch categories for dropdown
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const resp = await GET_CATEGORY_LIST_HOME();
-      return resp?.data?.data || [];
-    },
-  });
+  // Load class options for AsyncPaginate
+  const loadClassOptions = async (inputValue, loadedOptions, additional) => {
+    try {
+      const page = additional?.page || 1;
+      const response = await GET_SEARCH_CLASS_API(
+        page,
+        Paginations.SEARCH_LIMIT,
+        constant?.ACTIVE,
+        inputValue
+      );
+      
+      const options = response?.data?.data?.map((classItem) => ({
+        value: classItem._id,
+        label: classItem.name,
+      })) || [];
+
+      return {
+        options,
+        hasMore: response?.data?.data?.length === Paginations.SEARCH_LIMIT,
+        additional: {
+          page: page + 1,
+        },
+      };
+    } catch (error) {
+      console.error("Error loading class options:", error);
+      return {
+        options: [],
+        hasMore: false,
+      };
+    }
+  };
 
   const { mutate, error, isPending } = useMutation({
     mutationFn: (payload) => EDIT_CLASSIFICATION_API(id, payload),
@@ -71,7 +96,8 @@ const Edit = () => {
         ...values,
         name: resp?.data?.data?.name,
         arbicName: resp?.data?.data?.arbicName,
-        categoryId: resp?.data?.data?.categoryId?._id || resp?.data?.data?.categoryId || "",
+        classId: resp?.data?.data?.class?._id || resp?.data?.data?.classId || "",
+        className: resp?.data?.data?.class?.name || "",
         order: resp?.data?.data?.order,
       });
       return resp?.data?.data;
@@ -93,7 +119,8 @@ const Edit = () => {
     initialValues: {
       name: "",
       arbicName: "",
-      categoryId: "",
+      classId: "",
+      className: "",
       order: "",
     },
 
@@ -112,17 +139,17 @@ const Edit = () => {
         .required()
         .label("Classification Name (in arabic)")
         .trim(),
-      categoryId: yup
+      classId: yup
         .string()
         .required()
-        .label("Category"),
+        .label("Class"),
     }),
 
     onSubmit: async (values) => {
       const body = {
         name: values?.name,
         arbicName: values?.arbicName,
-        categoryId: values?.categoryId,
+        classId: values?.classId,
         order: values?.order,
       };
       mutate(body);
@@ -219,28 +246,34 @@ const Edit = () => {
                     <Col md={6} className="mx-auto">
                       <Form.Group className="mb-4">
                         <Form.Label>
-                          Category
+                          Class
                           <span className="text-danger">*</span>
                         </Form.Label>
-                        <Form.Select
-                          className="form-control"
-                          name="categoryId"
-                          onChange={handleChange}
-                          value={values?.categoryId}
-                        >
-                          <option value="">Select Category</option>
-                          {categories?.map((category) => (
-                            <option key={category?._id} value={category?._id}>
-                              {category?.category}
-                            </option>
-                          ))}
-                        </Form.Select>
-                        {touched?.categoryId && errors?.categoryId ? (
+                        <AsyncPaginate
+                          debounceTimeout={300}
+                          placeholder="Select Class"
+                          value={
+                            values?.classId
+                              ? {
+                                  value: values?.classId,
+                                  label: values?.className || "Selected Class",
+                                }
+                              : null
+                          }
+                          loadOptions={loadClassOptions}
+                          onChange={(option) => {
+                            setFieldValue("classId", option?.value || "");
+                            setFieldValue("className", option?.label || "");
+                          }}
+                          onBlur={() => setFieldTouched("classId", true)}
+                          additional={{
+                            page: 1,
+                          }}
+                        />
+                        {touched?.classId && errors?.classId && (
                           <span className="error">
-                            {touched?.categoryId && errors?.categoryId}
+                            {errors?.classId}
                           </span>
-                        ) : (
-                          ""
                         )}
                       </Form.Group>
                     </Col>

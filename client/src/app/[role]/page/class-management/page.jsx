@@ -212,6 +212,7 @@ const ClassManagement = () => {
                   <thead>
                     <tr>
                       <th>Sn.</th>
+                      <th>Category</th>
                       <th
                         onClick={() => handleSortingChange("Class Name")}
                       >
@@ -258,6 +259,7 @@ const ClassManagement = () => {
                         return (
                           <tr key={data?._id}>
                             <td>{serialNumber(page, index)}</td>
+                            <td>{data?.category?.category || "N/A"}</td>
                             <td>{data?.name}</td>
                             <td>{data?.arbicName}</td>
                             <td>{data?.order ?? "-"}</td>
