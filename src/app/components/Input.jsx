@@ -1,11 +1,11 @@
 /**
-@copyright : ToXSL Technologies Pvt. Ltd. < www.toxsl.com >
-@author     : Shiv Charan Panjeta < shiv@toxsl.com >
- 
+@copyright  : Mak Tech Solution < www.maktechsolution.com >
+@author     : Nayem Islam < inaeem707@gmail.com >
+
 All Rights Reserved.
-Proprietary and confidential :  All information contained herein is, and remains
-the property of ToXSL Technologies Pvt. Ltd. and its partners.
-Unauthorized copying of this file, via any medium is strictly prohibited.
+Proprietary and confidential: All information contained herein is, and remains
+the property of Mak Tech Solution and its partners.
+Unauthorized copying of this file, via any medium, is strictly prohibited.
 */
 'use client';
 import React from 'react';
