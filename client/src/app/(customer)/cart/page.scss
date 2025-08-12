@@ -255,7 +255,7 @@
           background-color: transparent;
           border: 1px dashed #262834;
           border-radius: 50%;
-          content: "";
+          content: '';
           height: 100%;
           left: 14px;
           position: absolute;
@@ -266,7 +266,7 @@
         &:after {
           background-color: #262834;
           border-radius: 50%;
-          content: "";
+          content: '';
           height: 15px;
           left: 8px;
           position: absolute;
@@ -317,7 +317,6 @@
 }
 
 // coupons scss start
-
 .coupons-main {
   .coupon__top {
     background: #fff;
@@ -400,115 +399,6 @@
   }
 }
 
-// list page scss start
-.left-sidebar {
-  .search-box {
-    align-items: center;
-    background-color: #f8f8f8;
-    border: 1px solid #eee;
-    border-radius: 6px;
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    padding: 8px;
-    width: 100%;
-
-    input {
-      background-color: transparent;
-      border: none;
-      padding: 6px 4px;
-      width: 100%;
-
-      &:focus-visible {
-        outline: 0;
-        border: 0;
-      }
-    }
-
-    svg {
-      width: 20px;
-      height: 20px;
-      margin-right: 5px;
-    }
-  }
-
-  .left-sidebar-innr {
-    .collection-list {
-      .multi-range-slider {
-        display: flex;
-        position: relative;
-        padding: 20px 10px;
-        flex-direction: column;
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-        box-shadow: none !important;
-        border: none !important;
-      .thumb::before {
-        
-          border: solid 1px #e1e1e1 !important;
-          /* box-shadow: 0px 0px 3px black, inset 0px 0px 5px gray; */
-          border-radius: 50%;
-          z-index: 1;
-          margin: -8px -12px;
-          cursor: pointer;
-          box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px !important;
-      }
-        .ruler {
-          margin: 10px 0px -5px 0px;
-          display: flex;
-          display: none;
-          overflow: hidden;
-        }
-        .bar-inner {
-          background-color: #da2a2c;
-          display: flex;
-          flex-grow: 1;
-          flex-shrink: 1;
-          justify-content: space-between;
-          position: relative;
-         border: none !important;
-          justify-content: space-between;
-          box-shadow: none !important; 
-      }
-         .bar-right, .bar-left {
-        width: 25%;
-        background-color: #e1e1e1;
-        border-radius: 0px 10px 10px 0px;
-        box-shadow: NONE;
-    }
-.thumb .caption * {
-
-
-      background-color: #000 !important;
-    
-  }
-      }
-
-
-      ul {
-        li {
-          display: flex;
-          align-items: baseline;
-          margin: 8px 0;
-          .form-check {
-            display: flex;
-            align-items: center;
-          }
-          input {
-            width: 15px;
-            height: 15px;
-            margin-right: 5px;
-            margin-top: 0px;
-          }
-        }
-      }
-    }
-  
-  }
-}
-
 .top-filter-menu {
   .form-select {
     background-color: #f8f8f8;
@@ -572,13 +462,12 @@
 }
 
 .onhover-show {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    left: 0;
-    width: 100% !important;
-    padding: 0 10px;
-
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  left: 0;
+  width: 100% !important;
+  padding: 0 10px;
 
   ul {
     display: flex;
@@ -608,13 +497,13 @@
     align-items: center;
     justify-content: center;
     background: #bdbdbd4f;
-   
+
     color: #da2a2c;
     border: 1px solid #da2a2c;
     border-radius: 5px;
     &.active-btn {
       color: #fff;
-    
+
       background-color: #da2a2c;
     }
   }
@@ -676,7 +565,7 @@
     &:before {
       border: 2px solid #fff;
       border-radius: 100%;
-      content: "";
+      content: '';
       height: 100%;
       left: 50%;
       opacity: 0;
@@ -772,7 +661,6 @@
   }
 }
 
-
 a.deleteButton {
   svg {
     color: #da2a2c;
@@ -807,20 +695,19 @@ a.deleteButton {
   }
 
   .boxed {
-    input[type="radio"] {
+    input[type='radio'] {
       display: none;
     }
   }
 
   .boxed {
-    input[type="radio"] {
+    input[type='radio'] {
       &:checked + label {
         border: solid 1px #da2a2c;
         background: #da2a2c;
         color: #fff;
       }
     }
-    
   }
 }
 
@@ -848,7 +735,7 @@ a.deleteButton {
     border: 2px solid #eee;
     cursor: pointer;
   }
-  input[type="radio"] {
+  input[type='radio'] {
     display: none;
     &:checked {
       + label {
@@ -868,7 +755,7 @@ a.deleteButton {
     border: 2px solid #eee;
     cursor: pointer;
   }
-  input[type="radio"] {
+  input[type='radio'] {
     display: none;
     &:checked {
       + label {
@@ -982,8 +869,7 @@ a.deleteButton {
     -ms-flex-align: center;
     align-items: center;
     gap: 10px;
-    cursor: pointer
-
+    cursor: pointer;
   }
   .option-wrap {
     margin-left: auto;
@@ -1068,12 +954,12 @@ a.deleteButton {
 }
 
 .radio-box {
-  input[type="radio"] {
+  input[type='radio'] {
     position: absolute;
     opacity: 0;
-    cursor: pointer
+    cursor: pointer;
   }
-  input[type="radio"] + .radio-label {
+  input[type='radio'] + .radio-label {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -1086,8 +972,8 @@ a.deleteButton {
     color: #262834;
     cursor: pointer;
   }
-  input[type="radio"] + .radio-label:before {
-    content: "";
+  input[type='radio'] + .radio-label:before {
+    content: '';
     background: transparent;
     border-radius: 100%;
     border: 2px solid #da2a2c;
@@ -1101,27 +987,27 @@ a.deleteButton {
     -webkit-transition: all 250ms ease;
     transition: all 250ms ease;
   }
-  input[type="radio"]:checked + .radio-label:before {
+  input[type='radio']:checked + .radio-label:before {
     background-color: #da2a2c;
     -webkit-box-shadow: inset 0 0 0 3px #fff;
     box-shadow: inset 0 0 0 3px #fff;
   }
-  input[type="radio"]:disabled + .radio-label:before {
+  input[type='radio']:disabled + .radio-label:before {
     -webkit-box-shadow: inset 0 0 0 3px #fff;
     box-shadow: inset 0 0 0 3px #fff;
     border-color: #da2a2c;
     background: #363636;
   }
 
-  input[type="radio"]:focus + .radio-label:before {
+  input[type='radio']:focus + .radio-label:before {
     outline: none;
     border-color: #da2a2c;
   }
-  input[type="radio"] + .radio-label:empty:before {
+  input[type='radio'] + .radio-label:empty:before {
     margin-right: 0;
   }
 
-  input[type="radio"] + .radio-label {
+  input[type='radio'] + .radio-label {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -1199,7 +1085,7 @@ a.deleteButton {
   .plan {
     cursor: pointer;
     width: 100%;
-    input[type="radio"] {
+    input[type='radio'] {
       position: absolute;
       opacity: 0;
     }
@@ -1239,7 +1125,7 @@ a.deleteButton {
       }
     }
 
-    input[type="radio"]:checked + .plan-content {
+    input[type='radio']:checked + .plan-content {
       border: 2px solid #da2a2c;
       background: #fff6f6;
       -webkit-transition: ease-in 0.3s;
@@ -1253,17 +1139,13 @@ a.deleteButton {
   background-color: #da2a2c;
   border-color: #da2a2c;
 }
-.form-check-input:focus{
+.form-check-input:focus {
   box-shadow: none;
 }
 
 .yellow-star {
   color: #ffc400;
 }
-
-
-
-
 
 .treatment-type-select {
   text-align: center;
@@ -1278,7 +1160,7 @@ a.deleteButton {
   vertical-align: text-bottom;
 }
 
-.treatment-type-select .form-check input[type="radio"]:checked ~ label {
+.treatment-type-select .form-check input[type='radio']:checked ~ label {
   background-color: #da2a2c;
   color: #ffffff;
 }
@@ -1292,16 +1174,20 @@ a.deleteButton {
   color: #da2a2c;
   cursor: pointer;
 }
-.treatment-type-select .form-check-label p{
+.treatment-type-select .form-check-label p {
   margin-bottom: 0;
 }
-.treatment-type-select .form-check input[type="radio"] {
+.treatment-type-select .form-check input[type='radio'] {
   opacity: 0 !important;
   width: 0 !important;
   height: 0 !important;
 }
 
-.treatment-type-select .form-check input[type="radio"]:checked ~ label .sgn-rdo-icn {
+.treatment-type-select
+  .form-check
+  input[type='radio']:checked
+  ~ label
+  .sgn-rdo-icn {
   line-height: 27px;
 }
 .left-sidebar {
