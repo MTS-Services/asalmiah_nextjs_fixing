@@ -1,0 +1,8 @@
+.faq-accordions {
+  .accordion-button:not(.collapsed) {
+    background-color: #da2a2c;
+  }
+}
+.faq-sec {
+  min-height: calc(100vh - 500px);
+}

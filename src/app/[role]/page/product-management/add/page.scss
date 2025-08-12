@@ -1,0 +1,19 @@
+.sketch-picker {
+  position: absolute;
+  z-index: 99;
+  margin-top: 15px;
+}
+.dark-cross-icon {
+  color: #ffffff;
+}
+.select-date {
+  input {
+    width: 100%;
+    padding: 7px;
+    border-radius: 5px;
+    border: 1px solid #c5c5c5;
+  }
+  .react-datepicker-wrapper{
+    display: block !important;
+  }
+}
