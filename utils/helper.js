@@ -1,13 +1,12 @@
 /**
- * @copyright : Toxsl Technologies Pvt. Ltd. < www.ozvid.com >
-  @author     : Shiv Charan Panjeta < shiv@ozvid.com >
-  
-  All Rights Reserved.
-  Proprietary and confidential :  All information contained herein is, and remains
-  the property of Toxsl Technologies Pvt. Ltd. and its partners.
-  Unauthorized copying of this file, via any medium is strictly prohibited.
- * 
- */
+@copyright  : Mak Tech Solution < www.maktechsolution.com >
+@author     : Nayem Islam < inaeem707@gmail.com >
+
+All Rights Reserved.
+Proprietary and confidential: All information contained herein is, and remains
+the property of Mak Tech Solution and its partners.
+Unauthorized copying of this file, via any medium, is strictly prohibited.
+*/
 
 import moment from 'moment';
 import { Spinner } from 'react-bootstrap';
@@ -423,24 +422,23 @@ export const PromoCodeStatus = (state) => {
 };
 
 export function getStartAndEndDate() {
-
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return { startIsoDate: null, endIsoDate: null }; // Return null on server-side
   }
-  
-  let date = localStorage.getItem("date");
-  let timeSlot = localStorage.getItem("time");
+
+  let date = localStorage.getItem('date');
+  let timeSlot = localStorage.getItem('time');
 
   if (!date || !timeSlot) {
     return { startIsoDate: null, endIsoDate: null };
   }
 
-  const [startTime, endTime] = timeSlot?.split(" - ");
+  const [startTime, endTime] = timeSlot?.split(' - ');
 
-//   let date = localStorage.getItem('date');
-//   let timeSlot = localStorage.getItem('time');
+  //   let date = localStorage.getItem('date');
+  //   let timeSlot = localStorage.getItem('time');
 
-//   const [startTime, endTime] = timeSlot?.split(' - ');
+  //   const [startTime, endTime] = timeSlot?.split(' - ');
 
   const startDateObject = new Date(date);
   const [startHours, startMinutes] = startTime?.split(':');
@@ -616,16 +614,14 @@ export const Supplier = (state, lang) => {
 };
 
 export const checkLanguage = (english, arabic) => {
-
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return english; // Default to English on server-side
   }
-  
-  const language = localStorage.getItem("language");
-  if (language == "English") {
 
-//   const language = localStorage.getItem('language');
-//   if (language == 'English') {
+  const language = localStorage.getItem('language');
+  if (language == 'English') {
+    //   const language = localStorage.getItem('language');
+    //   if (language == 'English') {
 
     return english;
   } else if (language == 'Arabic') {
@@ -634,6 +630,7 @@ export const checkLanguage = (english, arabic) => {
     return english;
   }
 };
+
 export function generatePromocode(length = 8) {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let promocode = '';
@@ -711,10 +708,10 @@ export const FORMAT_NUMBER = (value, discount) => {
 
 export const getDeviceToken = () => {
   // Check if localStorage is available (client-side)
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return null; // Return null on server-side
   }
-  
+
   // Check if the device token already exists in local storage
   let deviceToken = localStorage.getItem('deviceToken');
 
