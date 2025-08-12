@@ -12,6 +12,8 @@ import './globals.scss';
 import './responsive.scss';
 import './rtl.scss';
 
+import { GTMProvider, GTMBody } from '../app/components/GTMProvider.jsx';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -58,8 +60,9 @@ const queryClient = new QueryClient({
 export default function RootLayout({ children, session, ...pageProps }) {
   return (
     <html>
-      <title>Offarat</title>
-      <body>
+      <head>
+        <GTMProvider />
+        <title>Offarat</title>
         <link
           rel='stylesheet'
           type='text/css'
@@ -71,6 +74,9 @@ export default function RootLayout({ children, session, ...pageProps }) {
           type='text/css'
           href='https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css'
         />
+      </head>
+      <body>
+        <GTMBody />
 
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
