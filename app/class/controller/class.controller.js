@@ -1,0 +1,980 @@
+/** 
+
+@copyright : Mak tech solutions 
+@author     : Md. shariar hosain sanny 
+
+All Rights Reserved.
+Proprietary and confidential :  All information contained herein is, and remains
+the property of ToXSL Technologies Pvt. Ltd. and its partners.
+Unauthorized copying of this file, via any medium is strictly prohibited.
+*/
+const { CLASS_MODEL } = require("../model/class.model");
+const {
+  setResponseObject,
+  validationData,
+  capitalizeLetter,
+} = require("../../../middleware/commonFunction");
+const mongoose = require("mongoose");
+const { CONST } = require("../../../helpers/constant");
+const { PERMISSION_MODEL } = require("../../permission/model/model");
+const _class = {};
+/*Add class*/
+_class.add = async (req, res, next) => {
+    try {
+        const data = req.body;
+        data.createdBy = req.userId;
+        data.name = capitalizeLetter(data?.name)?.trim();
+        data.arbicName = capitalizeLetter(data?.arbicName)?.trim();
+        
+        const isExists = await CLASS_MODEL.findOne({
+            $and: [
+                { 
+                    name: { 
+                        $regex: new RegExp(`^${data.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i')
+                    } 
+                },
+                { stateId: { $ne: CONST.DELETED } },
+            ],
+        });
+
+        if (isExists) {
+            await setResponseObject(
+                req,
+                false,
+                "Class already exist with name"
+            );
+            return next(); // Use return here to stop execution
+        }
+
+        const result = await CLASS_MODEL.create(data);
+        if (result) {
+            await setResponseObject(
+                req,
+                true,
+                "Class added successfully",
+                result
+            );
+            next();
+        } else {
+            await setResponseObject(req, false, "Class not added");
+            next();
+        }
+    } catch (error) {
+        await setResponseObject(req, false, error.message, "");
+        next();
+    }
+};
+
+/*Get all classes*/
+_class.list = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+    let pageNo = parseInt(req.query.pageNo) || 1;
+    let pageLimit = parseInt(req.query.pageLimit) || 10;
+
+    let searchFilter = {};
+    if (req.query.search && req.query.search !== "undefined") {
+      searchFilter.$or = [
+        {
+          name: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
+            $options: "i",
+          },
+        },
+        {
+          arbicName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\"),
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    let stateFilter = {};
+    switch (req.query.stateId) {
+      case "1":
+        stateFilter = {
+          stateId: CONST.ACTIVE,
+        };
+        break;
+
+      case "2":
+        stateFilter = {
+          stateId: CONST.INACTIVE,
+        };
+        break;
+
+      default:
+        break;
+    }
+
+    let list = await CLASS_MODEL.aggregate([
+      {
+        $match: {
+          stateId: { $ne: CONST.DELETED },
+        },
+      },
+      {
+        $match: searchFilter,
+      },
+      {
+        $match: stateFilter,
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { id: { $ifNull: ["$createdBy", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                email: 1,
+                fullName: 1,
+                firstName: 1,
+                lastName: 1,
+                roleId: 1,
+              },
+            },
+          ],
+          as: "createdBy",
+        },
+      },
+      {
+        $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { id: { $ifNull: ["$updatedBy", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                email: 1,
+                fullName: 1,
+                firstName: 1,
+                lastName: 1,
+                roleId: 1,
+              },
+            },
+          ],
+          as: "updatedBy",
+        },
+      },
+      {
+        $unwind: { path: "$updatedBy", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          let: { id: { $ifNull: ["$categoryId", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: 1,
+                arabicCategory: 1,
+              },
+            },
+          ],
+          as: "category",
+        },
+      },
+      {
+        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: "permissionschemas",
+          let: { id: "$createdBy._id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ["$$id", ["$sellerId", "$promotionId", "$designedId"]],
+                },
+              },
+            },
+          ],
+          as: "permission",
+        },
+      },
+      {
+        $unwind: { path: "$permission", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" },
+          arbicName: { $first: "$arbicName" },
+          categoryId: { $first: "$categoryId" },
+          category: { $first: "$category" },
+          order: { $first: "$order" },
+          stateId: { $first: "$stateId" },
+          createdAt: { $first: "$createdAt" },
+          updatedAt: { $first: "$updatedAt" },
+          createdBy: { $first: "$createdBy" },
+          updatedBy: { $first: "$updatedBy" },
+          permission: { $first: "$permission" },
+        },
+      },
+      {
+        $addFields: {
+          sortKey: {
+            $cond: {
+              if: { $gt: ["$order", 0] },
+              then: { $toInt: { $ifNull: ["$order", 0] } },
+              else: Number.MAX_SAFE_INTEGER,
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          sortKey: 1,
+          createdAt: -1,
+        },
+      },
+      {
+        $facet: {
+          data: [{ $skip: pageLimit * (pageNo - 1) }, { $limit: pageLimit }],
+          count: [{ $count: "count" }],
+        },
+      },
+    ]);
+
+    if (list && list[0].data.length) {
+      await setResponseObject(
+        req,
+        true,
+        "Class list found successfully",
+        list[0].data,
+        list[0].count[0].count,
+        pageNo,
+        pageLimit
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "Class list not found", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*View class details*/
+_class.detail = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+    let findPermision = await PERMISSION_MODEL.findOne({
+      $or: [{ promotionId: req.userId }, { designedId: req.userId }],
+    });
+    if (findPermision) {
+      let parsePermission = findPermision.rolesPrivileges;
+    }
+    
+    const getSingle = await CLASS_MODEL.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(req.params.id),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { id: { $ifNull: ["$createdBy", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                email: 1,
+                fullName: 1,
+                firstName: 1,
+                lastName: 1,
+                roleId: 1,
+              },
+            },
+          ],
+          as: "createdBy",
+        },
+      },
+      {
+        $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { id: { $ifNull: ["$updatedBy", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                email: 1,
+                fullName: 1,
+                firstName: 1,
+                lastName: 1,
+                roleId: 1,
+              },
+            },
+          ],
+          as: "updatedBy",
+        },
+      },
+      {
+        $unwind: { path: "$updatedBy", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          let: { id: { $ifNull: ["$categoryId", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: 1,
+                arabicCategory: 1,
+                description: 1,
+                arabicDescription: 1,
+                order: 1,
+                stateId: 1,
+                createdAt: 1,
+                updatedAt: 1,
+              },
+            },
+          ],
+          as: "category",
+        },
+      },
+      {
+        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          arbicName: 1,
+          categoryId: 1,
+          category: {
+            _id: "$category._id",
+            category: "$category.category",
+            arabicCategory: "$category.arabicCategory",
+            description: "$category.description",
+            arabicDescription: "$category.arabicDescription",
+            order: "$category.order",
+            stateId: "$category.stateId",
+            createdAt: "$category.createdAt",
+            updatedAt: "$category.updatedAt",
+            displayName: {
+              $cond: {
+                if: { $eq: [language, "AR"] },
+                then: {
+                  $ifNull: ["$category.arabicCategory", "$category.category"],
+                },
+                else: "$category.category",
+              },
+            },
+            displayDescription: {
+              $cond: {
+                if: { $eq: [language, "AR"] },
+                then: {
+                  $ifNull: ["$category.arabicDescription", "$category.description"],
+                },
+                else: "$category.description",
+              },
+            },
+          },
+          order: 1,
+          stateId: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          createdBy: 1,
+          updatedBy: 1,
+        },
+      },
+    ]);
+    
+    if (getSingle.length > 0) {
+      await setResponseObject(
+        req,
+        true,
+        "Class found successfully",
+        getSingle[0]
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "Class not found", "");
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Update class*/
+_class.update = async (req, res, next) => {
+  try {
+    const data = req.body;
+    data.updatedBy = req.userId;
+    data.name = capitalizeLetter(data?.name)?.trim();
+    data.arbicName = capitalizeLetter(data?.arbicName)?.trim();
+
+    const updateData = await CLASS_MODEL.findByIdAndUpdate(
+      { _id: req.params.id },
+      data,
+      { new: true }
+    );
+    
+    if (updateData) {
+      await setResponseObject(
+        req,
+        true,
+        "Class updated successfully",
+        updateData
+      );
+      next();
+    } else {
+      await setResponseObject(req, false, "Class not updated");
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Update class state*/
+_class.updateState = async (req, res, next) => {
+    try {
+        const data = req.query;
+        let filter = {};
+        let resp;
+
+        // Convert string values to numbers for comparison
+        const stateId = parseInt(data.stateId);
+
+        switch (stateId) {
+            case CONST.ACTIVE:
+            case 1:
+                filter = {
+                    stateId: CONST.ACTIVE,
+                };
+                resp = "Class activated successfully";
+                break;
+
+            case CONST.INACTIVE:
+            case 2:
+                filter = {
+                    stateId: CONST.INACTIVE,
+                };
+                resp = "Class deactivated successfully";
+                break;
+
+            default:
+                await setResponseObject(req, false, "Invalid state provided");
+                return next();
+        }
+
+        // Add updatedBy field
+        filter.updatedBy = req.userId;
+
+        let updateState = await CLASS_MODEL.findByIdAndUpdate(
+            { _id: req.params.id },
+            {
+                $set: filter,
+            },
+            { new: true }
+        );
+
+        if (updateState) {
+            await setResponseObject(req, true, resp, updateState);
+            next();
+        } else {
+            await setResponseObject(req, false, "Class state not updated");
+            next();
+        }
+    } catch (error) {
+        await setResponseObject(req, false, error.message, "");
+        next();
+    }
+};
+
+/*Delete class*/
+_class.delete = async (req, res, next) => {
+  try {
+    const deleteData = await CLASS_MODEL.findByIdAndUpdate(
+      {
+        _id: req.params.id,
+      },
+      { stateId: CONST.DELETED },
+      { new: true }
+    );
+    
+    if (deleteData) {
+      await setResponseObject(req, true, "Class deleted successfully");
+      next();
+    } else {
+      await setResponseObject(req, false, "Class not deleted");
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Get active classes*/
+_class.activeList = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+    let pageNo = parseInt(req.query.pageNo) || 1;
+    let pageLimit = parseInt(req.query.pageLimit) || 10;
+
+    let searchFilter = {};
+    if (req.query.search && req.query.search !== "undefined") {
+      searchFilter.$or = [
+        {
+          name: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\").trim(),
+            $options: "i",
+          },
+        },
+        {
+          arbicName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\").trim(),
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    let list = await CLASS_MODEL.aggregate([
+      {
+        $match: {
+          stateId: { $eq: CONST.ACTIVE },
+        },
+      },
+      {
+        $match: searchFilter,
+      },
+      {
+        $sort: {
+          order: 1,
+        },
+      },
+      {
+        $facet: {
+          data: [{ $skip: pageLimit * (pageNo - 1) }, { $limit: pageLimit }],
+          count: [{ $count: "count" }],
+        },
+      },
+    ]);
+
+    if (list && list[0].data.length) {
+      await setResponseObject(
+        req,
+        true,
+        "Class list found successfully",
+        list[0].data,
+        list[0].count[0].count,
+        pageNo,
+        pageLimit
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "Class list not found", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Get dropdown class list*/
+_class.dropDownClass = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+
+    let searchFilter = {};
+    if (req.query.search && req.query.search !== "undefined") {
+      searchFilter.$or = [
+        {
+          name: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\").trim(),
+            $options: "i",
+          },
+        },
+        {
+          arbicName: {
+            $regex: req.query.search.trim()
+              ? req.query.search.trim()
+              : "".replace(new RegExp("\\\\", "g"), "\\\\").trim(),
+            $options: "i",
+          },
+        },
+      ];
+    }
+
+    let roleFilter = {};
+    if (
+      req.roleId == CONST.PROMOTION_USER ||
+      req.roleId == CONST.DESIGNED_USER
+    ) {
+      roleFilter = {
+        $and: [
+          { stateId: { $ne: CONST.DELETED } },
+          { createdBy: new mongoose.Types.ObjectId(req.userId) },
+        ],
+      };
+    }
+
+    // Add category filter if categoryId is provided
+    let categoryFilter = {};
+    if (req.query.categoryId && req.query.categoryId !== "undefined") {
+      categoryFilter = {
+        categoryId: new mongoose.Types.ObjectId(req.query.categoryId),
+      };
+    }
+
+    let list = await CLASS_MODEL.aggregate([
+      {
+        $match: {
+          stateId: { $eq: CONST.ACTIVE },
+        },
+      },
+      {
+        $match: roleFilter,
+      },
+      {
+        $match: categoryFilter,
+      },
+      {
+        $match: searchFilter,
+      },
+      {
+        $lookup: {
+          from: "categories",
+          let: { id: { $ifNull: ["$categoryId", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arabicCategory", "$category"],
+                    },
+                    else: "$category",
+                  },
+                },
+              },
+            },
+          ],
+          as: "category",
+        },
+      },
+      {
+        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $addFields: {
+          sortKey: {
+            $cond: {
+              if: { $gt: ["$order", 0] },
+              then: { $toInt: { $ifNull: ["$order", 0] } },
+              else: Number.MAX_SAFE_INTEGER,
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          sortKey: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: {
+            $cond: {
+              if: { $eq: [language, "AR"] },
+              then: {
+                $ifNull: ["$arbicName", "$name"],
+              },
+              else: "$name",
+            },
+          },
+          arbicName: 1,
+          categoryId: 1,
+          category: 1,
+          order: 1,
+          stateId: 1,
+          createdAt: 1,
+        },
+      },
+    ]);
+
+    if (list) {
+      await setResponseObject(
+        req,
+        true,
+        "Class list found successfully",
+        list
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "Class list not found", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Get classes by category*/
+_class.getClassesByCategory = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+    
+    const classes = await CLASS_MODEL.aggregate([
+      {
+        $match: {
+          categoryId: new mongoose.Types.ObjectId(req.params.categoryId),
+          stateId: { $eq: CONST.ACTIVE },
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          let: { id: { $ifNull: ["$categoryId", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arabicCategory", "$category"],
+                    },
+                    else: "$category",
+                  },
+                },
+              },
+            },
+          ],
+          as: "category",
+        },
+      },
+      {
+        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: {
+            $cond: {
+              if: { $eq: [language, "AR"] },
+              then: {
+                $ifNull: ["$arbicName", "$name"],
+              },
+              else: "$name",
+            },
+          },
+          category: 1,
+          order: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $addFields: {
+          sortKey: {
+            $cond: {
+              if: { $gt: ["$order", 0] },
+              then: { $toInt: { $ifNull: ["$order", 0] } },
+              else: Number.MAX_SAFE_INTEGER,
+            },
+          },
+        },
+      },
+      {
+        $sort: { sortKey: 1, createdAt: -1 },
+      },
+    ]);
+
+    if (classes && classes.length > 0) {
+      await setResponseObject(
+        req,
+        true,
+        "Classes found successfully",
+        classes
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "No classes found for this category", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+/*Get classes by classification*/
+_class.getClassesByClassification = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+    
+    // First find the classification to get its classId
+    const { CALSSIFICATION } = require("../../classification/model/model");
+    
+    const classification = await CALSSIFICATION.findOne({
+      _id: new mongoose.Types.ObjectId(req.params.classificationId),
+      stateId: { $ne: CONST.DELETED }
+    });
+
+    if (!classification) {
+      await setResponseObject(req, false, "Classification not found", []);
+      return next();
+    }
+
+    const classes = await CLASS_MODEL.aggregate([
+      {
+        $match: {
+          _id: classification.classId ? new mongoose.Types.ObjectId(classification.classId) : null,
+          stateId: { $eq: CONST.ACTIVE },
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          let: { id: { $ifNull: ["$categoryId", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: { $ne: CONST.DELETED },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                category: {
+                  $cond: {
+                    if: { $eq: [language, "AR"] },
+                    then: {
+                      $ifNull: ["$arabicCategory", "$category"],
+                    },
+                    else: "$category",
+                  },
+                },
+              },
+            },
+          ],
+          as: "category",
+        },
+      },
+      {
+        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: {
+            $cond: {
+              if: { $eq: [language, "AR"] },
+              then: {
+                $ifNull: ["$arbicName", "$name"],
+              },
+              else: "$name",
+            },
+          },
+          category: 1,
+          order: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $sort: { order: 1, createdAt: -1 },
+      },
+    ]);
+
+    if (classes && classes.length > 0) {
+      await setResponseObject(
+        req,
+        true,
+        "Classes found successfully",
+        classes
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "No classes found for this classification", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
+module.exports = _class;
