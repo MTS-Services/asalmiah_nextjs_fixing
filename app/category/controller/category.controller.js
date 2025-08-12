@@ -267,11 +267,11 @@ category.list = async (req, res, next) => {
           _id: 1,
           category: {
             $cond: {
-              if: { $eq: [language, "AR"] }, // Check if language is 'AR'
+              if: { $eq: [language, "AR"] },
               then: {
-                $ifNull: ["$arabicCategory", "$category"], // Use arabicCategory if it exists, otherwise use category
+                $ifNull: ["$arabicCategory", "$category"],
               },
-              else: "$category", // If language is not 'AR', use category
+              else: "$category",
             },
           },
           arabicCategory: 1,
