@@ -169,11 +169,11 @@ export const customReactSelectStyles = {
   }),
   option: (provided, state) => ({
     ...provided,
-    backgroundColor: state.isSelected 
-      ? '#da2a2c' 
-      : state.isFocused 
-        ? '#f8f9fa' 
-        : 'white',
+    backgroundColor: state.isSelected
+      ? '#da2a2c'
+      : state.isFocused
+      ? '#f8f9fa'
+      : 'white',
     color: state.isSelected ? 'white' : '#535353',
     '&:hover': {
       backgroundColor: state.isSelected ? '#da2a2c' : '#f8f9fa',
