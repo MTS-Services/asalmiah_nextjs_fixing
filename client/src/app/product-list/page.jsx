@@ -91,7 +91,7 @@ const ProductList = () => {
         classificationArr[0],
         page
       );
-      console.log('ALL_PRODUCT_LIST', resp?.data?.data);
+
       setMeta(resp?.data?._meta);
       return resp?.data?.data ?? [];
     },
