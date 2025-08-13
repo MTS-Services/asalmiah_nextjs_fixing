@@ -214,6 +214,7 @@ const ProductGrid = () => {
                 />
               </aside>
             </Col>
+
             <Col lg={9}>
               <div>
                 <div className='top-filter-menu mb-5'>
@@ -266,6 +267,7 @@ const ProductGrid = () => {
                     </Col>
                   </Row>
                 </div>
+
                 <div>
                   <Row>
                     {isPending ? (
@@ -540,6 +542,7 @@ const ProductGrid = () => {
                       <NoDataFound />
                     )}
                   </Row>
+
                   {!isPending && Math.ceil(meta?.totalCount / 12) > 1 && (
                     <Pagination
                       pageCount={'YES'}

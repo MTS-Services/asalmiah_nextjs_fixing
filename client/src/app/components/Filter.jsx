@@ -45,13 +45,13 @@ const Filter = (props) => {
   // ================================
   // 📋 CATEGORY LIST QUERY-CALL
   // ================================
-  const { data: categoryList } = useQuery({
-    queryKey: ['category-list'],
-    queryFn: async () => {
-      const resp = await GET_CATEGORY_LIST_HOME();
-      return resp?.data?.data ?? [];
-    },
-  });
+  // const { data: categoryList } = useQuery({
+  //   queryKey: ['category-list'],
+  //   queryFn: async () => {
+  //     const resp = await GET_CATEGORY_LIST_HOME();
+  //     return resp?.data?.data ?? [];
+  //   },
+  // });
 
   // ================================
   // 📋 SUB_CATEGORY LIST QUERY-CALL

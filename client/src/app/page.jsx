@@ -12,6 +12,7 @@ import useDetails from '../../hooks/useDetails';
 
 import {
   GET_CATEGORY_LIST_HOME,
+  GET_PRODUCTLIST,
   GET_USER_OFFERS,
 } from '../../services/APIServices';
 
@@ -91,14 +92,24 @@ const Home = ({ params }) => {
     document.title = offarat;
   }, []);
 
-  // =========================================
-  // 📋 CATEGORY = FETCH & USE TS_QUERY
-  // =========================================
-  const { data: categoryList, refetch } = useQuery({
-    queryKey: ['category-list-home'],
+  // ==========================================
+  // 📋 ALL_PRODUCTS_LIST USE TS_QUERY
+  // ==========================================
+  const {
+    data: allProductList,
+    refetch,
+    isPending,
+  } = useQuery({
+    queryKey: ['product-all-list', companyArr[0], classificationArr[0], page],
     queryFn: async () => {
-      const resp = await GET_CATEGORY_LIST_HOME();
-      console.log(resp?.data?.data);
+      const resp = await GET_PRODUCTLIST(
+        null,
+        companyArr[0],
+        classificationArr[0],
+        page
+      );
+
+      setMeta(resp?.data?._meta);
       return resp?.data?.data ?? [];
     },
   });
@@ -172,19 +183,20 @@ const Home = ({ params }) => {
           <Col lg={3}>
             <aside className='d-none d-lg-block'>
               <Filter
+                selectedCountry={selectedCountry}
                 refetch={refetch}
                 setCategoryArr={setCategoryArr}
+                categoryArr={categoryArr}
                 setClassificationArr={setClassificationArr}
                 classificationArr={classificationArr}
-                selectedCountry={selectedCountry}
-                categoryArr={categoryArr}
                 setCompanyArr={setCompanyArr}
-                setSubCategoryArr={setSubCategoryArr}
                 companyArr={companyArr}
+                setSubCategoryArr={setSubCategoryArr}
                 subCategoryArr={subCategoryArr}
+                setSearch={setSearch}
                 minPrice={minPrice}
-                maxPrice={maxPrice}
                 setMinPrice={setMinPrice}
+                maxPrice={maxPrice}
                 setMaxPrice={setMaxPrice}
                 setMinDiscount={setMinDiscount}
                 setMaxDiscount={setMaxDiscount}
@@ -216,7 +228,10 @@ const Home = ({ params }) => {
 
           <Col lg={9}>
             {/* Product List Section */}
-            <HomeProductList categoryList={categoryList} />
+            <HomeProductList
+              isPending={isPending}
+              allProductList={allProductList}
+            />
           </Col>
         </Row>
       </Container>

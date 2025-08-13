@@ -8,14 +8,12 @@
   Unauthorized copying of this file, via any medium is strictly prohibited.
  * 
  */
-import React, { useState, useEffect, useCallback } from "react";
-import { Button, Form } from "react-bootstrap";
-import { IoSearchOutline } from "react-icons/io5";
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button, Form } from 'react-bootstrap';
+import { IoSearchOutline } from 'react-icons/io5';
 
 const DebounceEffect = ({ onSearch, user }) => {
-  const [search, setSearch] = useState("");
-
-
+  const [search, setSearch] = useState('');
 
   // Debounce function
   const debounce = (func, delay) => {
@@ -37,18 +35,18 @@ const DebounceEffect = ({ onSearch, user }) => {
   // Update debounced search when the search term changes
   useEffect(() => {
     // if (search) {
-      debouncedSearch(search);
+    debouncedSearch(search);
     // }
   }, [search, debouncedSearch]);
   if (user) {
     return (
       <>
-        <div className="search-box">
+        <div className='search-box'>
           <Form.Control
-            type="text"
-            className="h-100"
+            type='text'
+            className='h-100'
             value={search}
-            placeholder="Search"
+            placeholder='Search'
             onChange={(e) => setSearch(e.target.value)}
             // onKeyDown={(e) => e.key === "Enter" && onSearch(search)}
             // onKeyUp={(e) => e.target.value === "" && onSearch("")}
@@ -61,10 +59,10 @@ const DebounceEffect = ({ onSearch, user }) => {
     return (
       <>
         <Form.Control
-          type="text"
-          className="h-100"
+          type='text'
+          className='h-100'
           value={search}
-          placeholder="Search"
+          placeholder='Search'
           onChange={(e) => setSearch(e.target.value)}
           // onKeyDown={(e) => e.key === "Enter" && onSearch(search)}
           // onKeyUp={(e) => e.target.value === "" && onSearch("")}

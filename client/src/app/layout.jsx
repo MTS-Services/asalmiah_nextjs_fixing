@@ -13,6 +13,7 @@ import './responsive.scss';
 import './rtl.scss';
 
 import { GTMProvider, GTMBody } from '../app/components/GTMProvider.jsx';
+import { Suspense } from 'react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,7 +62,9 @@ export default function RootLayout({ children, session, ...pageProps }) {
   return (
     <html>
       <head>
-        <GTMProvider />
+        <Suspense fallback={null}>
+          <GTMProvider />
+        </Suspense>
         <title>Offarat</title>
         <link
           rel='stylesheet'
@@ -76,8 +79,6 @@ export default function RootLayout({ children, session, ...pageProps }) {
         />
       </head>
       <body>
-        <GTMBody />
-
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <QueryClientProvider client={queryClient}>
@@ -86,6 +87,7 @@ export default function RootLayout({ children, session, ...pageProps }) {
                 session={pageProps?.session}
                 NEXTAUTH_URL={process.env.NEXTAUTH_URL}
               >
+                <GTMBody />
                 {children}
               </SessionProvider>
             </QueryClientProvider>
