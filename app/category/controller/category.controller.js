@@ -209,6 +209,26 @@ category.list = async (req, res, next) => {
       },
       {
         $lookup: {
+          from: "subcategories",
+          let: { id: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$categoryId"] },
+                stateId: CONST.ACTIVE,
+              },
+            },
+          ],
+          as: "subcategories",
+        },
+      },
+      {
+        $match: {
+          "subcategories.0": { $exists: true },
+        },
+      },
+      {
+        $lookup: {
           from: "users",
           let: { id: { $ifNull: ["$createdBy", ""] } },
           pipeline: [

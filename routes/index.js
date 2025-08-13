@@ -165,6 +165,7 @@ router.group("/classification", (classification) => {
 /* Class Management  */
 router.group("/class", (classRoute) => {
   classRoute.get("/dropDownClass", _class.dropDownClass, handleResponse.RESPONSE);
+  classRoute.get("/dropDownClass/:categoryId", _class.getClassesByCategory, handleResponse.RESPONSE);
   classRoute.get("/activeList", _class.activeList, handleResponse.RESPONSE);
   classRoute.get("/classification/:classificationId", _class.getClassesByClassification, handleResponse.RESPONSE);
 });
