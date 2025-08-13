@@ -690,8 +690,11 @@ banner.activeBanner = async (req, res, next) => {
       {
         $match: {
           $or: [
-            { "companyDetails.country": country }, // If company exists, match the country
-            { "companyDetails": { $eq: null } }, // If no company exists, include the banner
+            { company: { $exists: false } },
+            {
+              "companyDetails.stateId": CONST.ACTIVE,
+              "companyDetails.country": country,
+            },
           ],
         },
       },
