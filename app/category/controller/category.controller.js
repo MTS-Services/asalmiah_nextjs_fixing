@@ -21,6 +21,10 @@ const category = {};
 const multer = require("multer");
 const fs = require("fs");
 const { PERMISSION_MODEL } = require("../../permission/model/model");
+//class and classification
+const { classModel } = require("../../class/model/class.model");
+const { classificationModel } = require("../../classification/model/model");
+
 const dir = "../uploads/category";
 
 const storage = multer.diskStorage({
@@ -121,7 +125,6 @@ category.add = async (req, res, next) => {
     next();
   }
 };
-
 /*Get all category*/
 category.list = async (req, res, next) => {
   try {
@@ -223,8 +226,39 @@ category.list = async (req, res, next) => {
         },
       },
       {
+        $lookup: {
+          from: "classes",
+          let: { id: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$categoryId"] },
+                stateId: CONST.ACTIVE,
+              },
+            },
+          ],
+          as: "classes",
+        },
+      },
+      {
+        $lookup: {
+          from: "classifications",
+          let: { classIds: "$classes._id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $in: ["$classId", "$$classIds"] },
+                stateId: CONST.ACTIVE,
+              },
+            },
+          ],
+          as: "classifications",
+        },
+      },
+      // Only show categories that have at least one classification
+      {
         $match: {
-          "subcategories.0": { $exists: true },
+          "classifications.0": { $exists: true },
         },
       },
       {
@@ -301,6 +335,8 @@ category.list = async (req, res, next) => {
           createdAt: 1,
           createdBy: 1,
           updatedBy: 1,
+          subcategoriesCount: { $size: "$subcategories" },
+          classificationsCount: { $size: "$classifications" },
         },
       },
       {
