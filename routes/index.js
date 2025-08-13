@@ -107,6 +107,7 @@ router.group("/company", (company) => {
   company.get("/companyByCategory", _company.companyFilter, handleResponse.RESPONSE);
   company.get("/companyDetails/:id", _company.detail, handleResponse.RESPONSE);
   company.get("/list", _company.list, handleResponse.RESPONSE);
+  company.get("/list/:categoryId", _company.companyList, handleResponse.RESPONSE);
   company.get("/activeCompanyList", _company.activeCompanyList, handleResponse.RESPONSE);
   company.get("/allCompany", _company.allCompany, handleResponse.RESPONSE);
   company.get("/companyByOffer", _company.companyByOffer, handleResponse.RESPONSE);

@@ -583,6 +583,32 @@ company.list = async (req, res, next) => {
   }
 };
 
+/*get all company by category id*/
+
+company.companyList = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+
+    let pageNo = parseInt(req.query.pageNo) || 1;
+    let pageLimit = parseInt(req.query.pageLimit) || 10;
+
+    const { categoryId } = req.params;
+
+    const companies = await COMPANY_MODEL.find({ categoryId });
+
+    if (companies.length) {
+      await setResponseObject(req, true, "Company list found successfully", companies);
+      next();
+    } else {
+      await setResponseObject(req, true, "Company list not found", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
 /*View company */
 company.detail = async (req, res, next) => {
   try {
