@@ -55,7 +55,7 @@ const ProductList = () => {
   const [categoryArr, setCategoryArr] = useState([]);
   const [companyArr, setCompanyArr] = useState([]);
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(1000000);
+  const [maxPrice, setMaxPrice] = useState(1000);
   const [minDiscount, setMinDiscount] = useState(0);
   const [maxDiscount, setMaxDiscount] = useState(100);
 
@@ -80,23 +80,35 @@ const ProductList = () => {
   // ==========================================
   const {
     data: allProductList,
-    refetch,
     isPending,
+    refetch,
   } = useQuery({
-    queryKey: ['product-all-list', companyArr[0], classificationArr[0], page],
+    queryKey: [
+      'product-all-list',
+      companyArr[0],
+      classificationArr[0],
+      minPrice,
+      maxPrice,
+      minDiscount,
+      maxDiscount,
+      page,
+    ],
     queryFn: async () => {
       const resp = await GET_PRODUCTLIST(
         null,
         companyArr[0],
         classificationArr[0],
-        page
+        page, // ← 4th: pageNo
+        minPrice,
+        maxPrice,
+        minDiscount,
+        maxDiscount
       );
-
       setMeta(resp?.data?._meta);
       return resp?.data?.data ?? [];
     },
   });
-
+  console.log('All-products: ', allProductList);
   // let router = useRouter();
 
   // =========================================
@@ -146,16 +158,16 @@ const ProductList = () => {
                 refetch={refetch}
                 setCategoryArr={setCategoryArr}
                 setClassificationArr={setClassificationArr}
+                setSubCategoryArr={setSubCategoryArr}
                 classificationArr={classificationArr}
                 selectedCountry={selectedCountry}
                 categoryArr={categoryArr}
-                setCompanyArr={setCompanyArr}
                 companyArr={companyArr}
-                setSubCategoryArr={setSubCategoryArr}
+                setCompanyArr={setCompanyArr}
                 subCategoryArr={subCategoryArr}
                 minPrice={minPrice}
-                setMinPrice={setMinPrice}
                 maxPrice={maxPrice}
+                setMinPrice={setMinPrice}
                 setMaxPrice={setMaxPrice}
                 setMinDiscount={setMinDiscount}
                 setMaxDiscount={setMaxDiscount}

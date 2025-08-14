@@ -6,8 +6,18 @@ import { CiHeart } from 'react-icons/ci';
 import ImageComponent from '../../../../utils/ImageComponent';
 import { useMutation } from '@tanstack/react-query';
 import { checkLanguage, formatCurrency } from '../../../../utils/helper';
+import { ADD_WISHLIST } from '../../../../services/APIServices';
+import { toastAlert } from '../../../../utils/SweetAlert';
+import Swal from 'sweetalert2';
+// import { Router } from 'next/router';
+// import { useRouter } from 'next/router';
+import { useRouter, usePathname } from 'next/navigation';
 
-const ProductCard = ({ data, selectedCountry }) => {
+const ProductCard = ({ data, selectedCountry, detail, refetch }) => {
+  const router = useRouter();
+  const pathName = usePathname();
+  console.log('card-item: ', data);
+
   const wishlistMutation = useMutation({
     mutationFn: (body) => ADD_WISHLIST(body),
     onSuccess: (resp) => {
@@ -24,26 +34,80 @@ const ProductCard = ({ data, selectedCountry }) => {
             className='pro-first bg-size'
             href={`/product-detail/${data?._id}`}
           >
-            {data?.productImg[0]?.type ? (
+            {/* Product Image or Video */}
+            {data?.productImg?.length > 0 && data?.productImg[0]?.url ? (
               data?.productImg[0]?.type?.includes('image') ? (
                 <ImageComponent
-                  className={'bg-img w-100'}
-                  data={data?.productImg[0]?.url}
-                  alt={'image'}
+                  className='bg-img w-100'
+                  data={data.productImg[0].url}
+                  alt={data?.productName || 'Product Image'}
                 />
               ) : (
                 <video
                   width='100%'
                   height='100%'
-                  src={data?.productImg[0]?.url}
+                  src={data.productImg[0].url}
+                  autoPlay
+                  loop
+                  muted
                 />
               )
             ) : (
               <ImageComponent
-                className={'bg-img w-100'}
-                data={data?.productImg[0]?.url}
-                alt={'image'}
+                className='bg-img w-100'
+                data='/placeholder.png'
+                alt='No product image'
               />
+            )}
+
+            {/* Company Logo + Name Overlay - Bottom Left */}
+            {data?.companyDetails?.logo && (
+              <div
+                className='position-absolute d-flex align-items-center'
+                style={{
+                  bottom: '10px',
+                  left: '10px',
+                  gap: '6px',
+                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                  color: 'white',
+                  borderRadius: '30px',
+                  padding: '6px 6px',
+                  zIndex: 1,
+                  fontSize: '12px',
+                  fontWeight: '500',
+                }}
+              >
+                {/* Circular Logo */}
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    border: '1px solid #fff',
+                  }}
+                >
+                  <ImageComponent
+                    data={data.companyDetails.logo}
+                    alt={checkLanguage(
+                      data.companyDetails.company,
+                      data.companyDetails.arabicCompany
+                    )}
+                    width={28}
+                    height={28}
+                    className='w-100 h-100'
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
+
+                {/* Company Name */}
+                <span className='d-none d-sm-inline'>
+                  {checkLanguage(
+                    data.companyDetails.company,
+                    data.companyDetails.arabicCompany
+                  )}
+                </span>
+              </div>
             )}
           </Link>
         </div>

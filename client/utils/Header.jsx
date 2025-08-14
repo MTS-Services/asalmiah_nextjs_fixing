@@ -19,9 +19,9 @@ import useDetails from '../hooks/useDetails';
 import { clearCart } from '../redux/features/cartSlice';
 import { USER_CART, USER_CART_WITHOUT_LOGIN } from '../services/APIServices';
 import { formatCurrency, getDeviceToken } from './helper';
+import CountryState from '../hooks/useCountryState';
 import { trans } from './trans';
 import { country } from '../redux/features/CountrySlice';
-import CountryState from '../hooks/useCountryState';
 import { FaBars } from 'react-icons/fa6';
 
 import useCountryState from '../hooks/useCountryState';
@@ -101,9 +101,13 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
     },
   };
 
+  // Get language from localStorage, fallback to 'en'
   let language = localStorage.getItem('language');
-  const languageCode = language && language.startsWith('Arabic') ? 'ar' : 'en';
-  const { home: homeText, testimonials: testimonialsTest } =
+  const languageCode =
+    language && language.toLowerCase().includes('arabic') ? 'ar' : 'en';
+
+  // Destructure the translations
+  const { home: homeText, testimonials: testimonialsText } =
     translations[languageCode];
 
   const handleCountryChange = (e) => {
@@ -330,7 +334,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                     href='#'
                     onClick={scrollToTestimonial}
                   >
-                    {testimonialsTest}
+                    {testimonialsText}
                   </Link>
                 )}
               </Nav>
@@ -470,7 +474,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                     handleClose();
                   }}
                 >
-                  {testimonialsTest}
+                  {testimonialsText}
                 </Link>
               )}
             </Nav>

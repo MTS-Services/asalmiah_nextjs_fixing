@@ -141,7 +141,7 @@ const Filter = (props) => {
                         }
                       }}
                     />
-                    <span className='text-capitalize'>
+                    <span className='text-capitalize te'>
                       {checkLanguage(items?.company, items?.arabicCompany)}
                     </span>
                   </li>
@@ -206,7 +206,7 @@ const Filter = (props) => {
           <MultiRangeSlider
             min={0}
             max={1000}
-            step={0}
+            step={1}
             minValue={minPrice}
             maxValue={maxPrice}
             onInput={(e) => {
@@ -216,7 +216,7 @@ const Filter = (props) => {
         </article>
 
         {/****************** DISCOUNT RANGE ******************/}
-        <div className='collection-list border-top mb-3'>
+        <article className='collection-list border-top mb-3'>
           <h6 className='text-capitalize mt-4 mb-4 fw-bold'>
             Discount range{' '}
             {` (${minDiscount + '%' + ' - ' + maxDiscount + '%'})`}
@@ -229,7 +229,7 @@ const Filter = (props) => {
             maxValue={maxDiscount}
             onInput={(e) => handleInputDiscount(e)}
           />
-        </div>
+        </article>
 
         {/****************** APPLY BUTTON **************/}
         {/* <div className='d-flex gap-2 justify-content-center'>
