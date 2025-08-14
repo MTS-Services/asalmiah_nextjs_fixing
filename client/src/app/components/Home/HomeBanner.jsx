@@ -20,7 +20,7 @@ const HomeBanner = () => {
     },
   });
 
-  console.log(bannerList);
+  console.log('bannerList: ', bannerList);
 
   const settings = {
     dots: true,
@@ -33,94 +33,37 @@ const HomeBanner = () => {
   };
 
   return (
-    <section className='hero p-0 mb-4'>
+    <section className='p-0'>
       <div className='slider-container bannerslide'>
-        <Slider {...settings} dots={bannerList?.length > 1 ? true : false}>
-          {bannerList?.length !== 0
-            ? bannerList?.map((data) => {
-                return (
-                  <div className='bannersec' key={data?._id}>
-                    <div
-                      className={'position-absolute right-0 bnnerimg'}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (
-                          data?.productId?.length == 0 &&
-                          !data?.companyDetails
-                        ) {
-                          router.push(`/product-list`);
-                        }
-                        if (data?.productId?.length > 1) {
-                          router.push(
-                            `/product-list?companyId=${data?.company}`
-                          );
-                        } else {
-                          if (data?.productId?.length !== 0) {
-                            router.push(
-                              `/product-detail/${data?.productId?.at(0)?._id}`
-                            );
-                          } else if (data?.company) {
-                            router.push(
-                              `/product-list?companyId=${data?.company}`
-                            );
-                          }
-                        }
-                      }}
-                    >
-                      <ImageComponent
-                        data={data?.bannerImg}
-                        height={100}
-                        width={100}
-                        alt={'image'}
-                      />
-                    </div>
-                    <Container>
-                      <Row className='m-0'>
-                        <Col
-                          md={6}
-                          className='p-0 mx-lg-0 mx-auto text-lg-start text-center d-lg-block d-none'
-                        >
-                          <h1 className='text-capitalize'>{data?.title}</h1>
-                          <p>{data?.description}</p>
-                          <Link
-                            href='#'
-                            onClick={(e) => {
-                              e.preventDefault();
-                              if (
-                                data?.productId?.length == 0 &&
-                                !data?.companyDetails
-                              ) {
-                                router.push(`/product-list`);
-                              }
-                              if (data?.productId?.length > 1) {
-                                router.push(
-                                  `/product-list?companyId=${data?.company}`
-                                );
-                              } else {
-                                if (data?.productId?.length !== 0) {
-                                  router.push(
-                                    `/product-detail/${
-                                      data?.productId?.at(0)?._id
-                                    }`
-                                  );
-                                } else if (data?.company) {
-                                  router.push(
-                                    `/product-list?companyId=${data?.company}`
-                                  );
-                                }
-                              }
-                            }}
-                            className='btn btn-theme'
-                          >
-                            Shop Now
-                          </Link>
-                        </Col>
-                      </Row>
-                    </Container>
-                  </div>
-                );
-              })
-            : ''}
+        <Slider {...settings} dots={bannerList?.length > 1}>
+          {bannerList?.map((data) => (
+            <div className='bannersec' key={data?._id}>
+              <div
+                className='position-relative w-100 h-100 bnnerimg'
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (data?.productId?.length === 0 && !data?.companyDetails) {
+                    router.push(`/product-list`);
+                  } else if (data?.productId?.length > 1) {
+                    router.push(`/product-list?companyId=${data?.company}`);
+                  } else if (data?.productId?.length === 1) {
+                    router.push(`/product-detail/${data?.productId[0]?._id}`);
+                  } else if (data?.company) {
+                    router.push(`/product-list?companyId=${data?.company}`);
+                  }
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <ImageComponent
+                  data={data?.bannerImg}
+                  height={500} // Adjust as needed
+                  width={1000} // Adjust based on your layout
+                  alt={data?.title || 'Banner image'}
+                  className='w-100 h-auto'
+                />
+              </div>
+            </div>
+          ))}
         </Slider>
       </div>
     </section>

@@ -15,10 +15,9 @@ import {
   GET_FILTER_CLASSIFICATION_API,
   USER_CATEGORYLIST,
 } from '../../../services/APIServices';
+import '../components/testFilter.scss';
 
 import { checkLanguage } from '../../../utils/helper';
-
-import '../components/testFilter.scss';
 
 const TestFilter = ({
   categoryArr,
@@ -144,7 +143,7 @@ const TestFilter = ({
                     onClick={() => handleCategoryClick(category)}
                     className='rounded-pill btn-sm fw-medium'
                   >
-                    {checkLanguage(category.category, category.arabicCompany)}
+                    {checkLanguage(category.category, category.arabicCategory)}
                   </Button>
                 ))}
               </div>

@@ -44,11 +44,35 @@ paymentHttp.interceptors.request.use(
 
 /****************************Test PRODUCTS*******************************/
 
+// export const GET_PRODUCTLIST = async (
+//   classId,
+//   companyId,
+//   classificationId,
+//   maxPrice,
+//   minPrice,
+//   minDiscount,
+//   maxDiscount,
+//   pageNo
+// ) => {
+//   return await http.get(`/product/filter`, {
+//     params: {
+//       classId: classId,
+//       companyId: companyId,
+//       classificationId: classificationId,
+//       pageNo: pageNo || 1,
+//     },
+//   });
+// };
+
 export const GET_PRODUCTLIST = async (
   classId,
   companyId,
   classificationId,
-  pageNo
+  pageNo,
+  minPrice = 0,
+  maxPrice = 1000,
+  minDiscount = 0,
+  maxDiscount = 100
 ) => {
   return await http.get(`/product/filter`, {
     params: {
@@ -56,6 +80,10 @@ export const GET_PRODUCTLIST = async (
       companyId: companyId,
       classificationId: classificationId,
       pageNo: pageNo || 1,
+      minPrice, // ✅ Add to params
+      maxPrice, // ✅
+      minDiscount, // ✅
+      maxDiscount, // ✅
     },
   });
 };
@@ -859,7 +887,7 @@ export const USER_CATEGORYLIST = async (page) => {
   });
 };
 
-export const USER_COMPANY_LIST = async (page) => {
+export const USER_COMPANY_LIST = async (page, id) => {
   return await http.get(`/company/list`, {
     params: {
       pageNo: page,
@@ -1497,9 +1525,7 @@ export const STATE_UPDATE_CLASS_API = async (id, stateId) => {
 };
 
 export const GET_SEARCH_CLASS_API = async (page, pageLimit, state, search) => {
-  return await http.get(
-    `/class/dropDownClass`
-  );
+  return await http.get(`/class/dropDownClass`);
 };
 
 export const GET_CLASS_ACTIVE_LIST = async () => {

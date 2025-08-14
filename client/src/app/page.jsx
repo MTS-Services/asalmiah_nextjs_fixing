@@ -97,18 +97,30 @@ const Home = ({ params }) => {
   // ==========================================
   const {
     data: allProductList,
-    refetch,
     isPending,
+    refetch,
   } = useQuery({
-    queryKey: ['product-all-list', companyArr[0], classificationArr[0], page],
+    queryKey: [
+      'product-all-list',
+      companyArr[0],
+      classificationArr[0],
+      minPrice,
+      maxPrice,
+      minDiscount,
+      maxDiscount,
+      page,
+    ],
     queryFn: async () => {
       const resp = await GET_PRODUCTLIST(
         null,
         companyArr[0],
         classificationArr[0],
-        page
+        page, // ← 4th: pageNo
+        minPrice,
+        maxPrice,
+        minDiscount,
+        maxDiscount
       );
-
       setMeta(resp?.data?._meta);
       return resp?.data?.data ?? [];
     },
@@ -160,7 +172,9 @@ const Home = ({ params }) => {
 
       <Container>
         <Row>
-          <HomeHero />
+          {/* <HomeHero /> */}
+          {/* Banner Section */}
+          <HomeBanner />
         </Row>
 
         <Row>
@@ -235,9 +249,6 @@ const Home = ({ params }) => {
           </Col>
         </Row>
       </Container>
-
-      {/* Banner Section */}
-      <HomeBanner />
 
       {/* Categories Section */}
       {/* <HomeCategories
