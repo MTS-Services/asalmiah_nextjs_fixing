@@ -480,6 +480,8 @@ company.list = async (req, res, next) => {
               else: "$description", // Use description otherwise
             },
           },
+          arabicCompany: 1,
+          arabicDescription: 1,
           perCommission: 1,
           couponService: 1,
           deliveryEligible: 1,
@@ -511,6 +513,8 @@ company.list = async (req, res, next) => {
           _id: "$_id",
           company: { $first: "$company" },
           description: { $first: "$description" },
+          arabicCompany: { $first: "$arabicCompany" },
+          arabicDescription: { $first: "$arabicDescription" },
           perCommission: { $first: "$perCommission" },
           couponService: { $first: "$couponService" },
           deliveryEligible: { $first: "$deliveryEligible" },
