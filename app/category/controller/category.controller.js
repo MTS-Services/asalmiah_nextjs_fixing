@@ -376,6 +376,7 @@ category.list = async (req, res, next) => {
 
 
 
+/*Get all category*/
 category.list2 = async (req, res, next) => {
   try {
     let language = req.headers["language"] ? req.headers["language"] : "EN";
@@ -459,26 +460,6 @@ category.list2 = async (req, res, next) => {
       },
       {
         $match: categoryFilter,
-      },
-      {
-        $lookup: {
-          from: "subcategories",
-          let: { id: "$_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$$id", "$categoryId"] },
-                stateId: CONST.ACTIVE,
-              },
-            },
-          ],
-          as: "subcategories",
-        },
-      },
-      {
-        $match: {
-          "subcategories.0": { $exists: true },
-        },
       },
       {
         $lookup: {
@@ -589,7 +570,6 @@ category.list2 = async (req, res, next) => {
     next();
   }
 };
-
 /*View category */
 category.detail = async (req, res, next) => {
   try {
