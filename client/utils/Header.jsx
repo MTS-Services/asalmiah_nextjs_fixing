@@ -372,6 +372,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
               {localStorage.getItem('offarat-contact') ? (
                 <Link
                   href='#'
+                  style={{ textDecoration: 'none' }}
                   onClick={() =>
                     redirectToWhatsApp(localStorage.getItem('offarat-contact'))
                   }
