@@ -36,7 +36,7 @@ const Footer = ({ testimonialLists }) => {
     },
   });
 
-  console.log('socialLink :', socialLink);
+  // console.log('socialLink :', socialLink);
 
   const Home = trans('home');
 

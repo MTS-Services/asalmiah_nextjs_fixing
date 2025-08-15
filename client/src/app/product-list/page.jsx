@@ -14,7 +14,13 @@ import '../(customer)/cart/page.scss';
 import useCountryState from '../../../hooks/useCountryState';
 import useDetails from '../../../hooks/useDetails';
 
-import { GET_PRODUCTLIST } from '../../../services/APIServices';
+import {
+  GET_CLASS_DROPDOWN,
+  GET_FILTER_CLASSIFICATION_API,
+  GET_PRODUCTLIST,
+  USER_CATEGORYLIST,
+  USER_COMPANY_LIST,
+} from '../../../services/APIServices';
 
 import Footer from '../../../utils/Footer';
 import Header from '../../../utils/Header';
@@ -29,6 +35,7 @@ import Filter from '../components/Filter';
 import ProductCard from '../components/products/ProductCard';
 import { BiFilter } from 'react-icons/bi';
 import Link from 'next/link';
+import { object } from 'yup';
 
 const ProductList = () => {
   let detail = useDetails();
@@ -59,6 +66,10 @@ const ProductList = () => {
   const [minDiscount, setMinDiscount] = useState(0);
   const [maxDiscount, setMaxDiscount] = useState(100);
 
+  const [categoryID, setCategoryID] = useState('');
+
+  console.log('categoryID', categoryID);
+
   // =========================================
   // ✅ DEFINE FILTERS
   // =========================================
@@ -67,6 +78,8 @@ const ProductList = () => {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  // let router = useRouter();
 
   // =========================================
   // ✅ CALL USE-EFFECT
@@ -108,8 +121,64 @@ const ProductList = () => {
       return resp?.data?.data ?? [];
     },
   });
-  console.log('All-products: ', allProductList);
-  // let router = useRouter();
+
+  // TOP _ FILTER
+  // ===============================================
+  // 📋 CATEGORY = FETCH & USE TS_QUERY
+  // ===============================================
+  const {
+    data: categoryList = [],
+    isLoading: categoryLoading,
+    isError: categoryError,
+  } = useQuery({
+    queryKey: ['category-list'],
+    queryFn: async () => {
+      const resp = await USER_CATEGORYLIST();
+      return resp?.data?.data ?? [];
+    },
+  });
+
+  // ===============================================
+  // 📋 CLASSIFICATION_LIST = FETCH & USE TS_QUERY
+  // ===============================================
+  const {
+    data: classificationList = [],
+    isLoading: classificationLoading,
+    isError: classificationError,
+  } = useQuery({
+    queryKey: ['classification-filter-list', categoryArr[0]],
+    queryFn: async () => {
+      if (categoryArr.length === 0) return [];
+      // Fetch classifications based on selected category
+      const resp = await GET_FILTER_CLASSIFICATION_API(categoryArr[0]);
+      return resp?.data?.data ?? [];
+    },
+    enabled: categoryArr.length > 0,
+  });
+
+  // LEFT _ SIDE _ FILTER
+  // ================================
+  // 📋 COMPNAY LIST QUERY-CALL
+  // ================================
+  const { data: companyList } = useQuery({
+    queryKey: ['company-list', categoryID],
+    queryFn: async () => {
+      const resp = await USER_COMPANY_LIST(categoryID || null);
+      return resp?.data?.data ?? [];
+    },
+  });
+
+  // ================================
+  // 📋 CLSSIFICATION QUERY-CALL
+  // =================================
+  const { data: classListFilter } = useQuery({
+    queryKey: ['class-list'],
+    queryFn: async () => {
+      const resp = await GET_CLASS_DROPDOWN();
+
+      return resp?.data?.data ?? [];
+    },
+  });
 
   // =========================================
   // 📁 RE_FETCH
@@ -132,6 +201,13 @@ const ProductList = () => {
           {/**************** TOP_FILTER *********************/}
           <header className='left-sidebar mb-5'>
             <TestFilter
+              categoryList={categoryList}
+              categoryError={categoryError}
+              categoryLoading={categoryLoading}
+              onCategoryClick={(id) => setCategoryID(id)}
+              classificationList={classificationList}
+              classificationLoading={classificationLoading}
+              classificationError={classificationError}
               refetch={refetch}
               setCategoryArr={setCategoryArr}
               categoryArr={categoryArr}
@@ -155,6 +231,8 @@ const ProductList = () => {
               </span>
 
               <Filter
+                classListFilter={classListFilter}
+                companyList={companyList}
                 refetch={refetch}
                 setCategoryArr={setCategoryArr}
                 setClassificationArr={setClassificationArr}
