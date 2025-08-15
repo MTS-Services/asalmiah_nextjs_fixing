@@ -887,11 +887,12 @@ export const USER_CATEGORYLIST = async (page) => {
   });
 };
 
-export const USER_COMPANY_LIST = async (page, id) => {
+export const USER_COMPANY_LIST = async (id) => {
   return await http.get(`/company/list`, {
     params: {
-      pageNo: page,
+      pageNo: Paginations?.DEFAULT_PAGE,
       pageLimit: Paginations?.PER_PAGE,
+      categoryId: id || undefined, // only include if category selected
     },
   });
 };
@@ -1693,8 +1694,12 @@ export const GET_COMPANIES_LIST = async (search, page) => {
   });
 };
 
+//=========================================
+// COMPANY
+//=========================================
+
 export const ALL_COMPANIES_LIST = async (search, page) => {
-  return await http.get(`/company/allCompany`, {
+  return await http.get(`/company/list`, {
     params: {
       search: search,
       pageNo: page,

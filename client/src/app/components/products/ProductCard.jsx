@@ -11,12 +11,11 @@ import { toastAlert } from '../../../../utils/SweetAlert';
 import Swal from 'sweetalert2';
 // import { Router } from 'next/router';
 // import { useRouter } from 'next/router';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const ProductCard = ({ data, selectedCountry, detail, refetch }) => {
   const router = useRouter();
   const pathName = usePathname();
-  console.log('card-item: ', data);
 
   const wishlistMutation = useMutation({
     mutationFn: (body) => ADD_WISHLIST(body),
@@ -59,57 +58,59 @@ const ProductCard = ({ data, selectedCountry, detail, refetch }) => {
                 alt='No product image'
               />
             )}
-
-            {/* Company Logo + Name Overlay - Bottom Left */}
-            {data?.companyDetails?.logo && (
+          </Link>
+          {/* Company Logo + Name Overlay - Bottom Left + company-id */}
+          {data?.companyDetails?.logo && (
+            <div
+              onClick={() =>
+                router.push(`/companies/${data?.companyDetails?._id}`)
+              }
+              className='position-absolute d-flex align-items-center'
+              style={{
+                cursor: 'pointer',
+                bottom: '10px',
+                left: '10px',
+                gap: '6px',
+                backgroundColor: 'rgba(15, 1, 1, 0.35)',
+                color: 'white',
+                borderRadius: '30px',
+                padding: '0px 16px 0px 0px',
+                zIndex: 1,
+                fontSize: '12px',
+                fontWeight: '500',
+              }}
+            >
+              {/* Circular Logo */}
               <div
-                className='position-absolute d-flex align-items-center'
                 style={{
-                  bottom: '10px',
-                  left: '10px',
-                  gap: '6px',
-                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                  color: 'white',
-                  borderRadius: '30px',
-                  padding: '6px 6px',
-                  zIndex: 1,
-                  fontSize: '12px',
-                  fontWeight: '500',
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
                 }}
               >
-                {/* Circular Logo */}
-                <div
-                  style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    overflow: 'hidden',
-                    border: '1px solid #fff',
-                  }}
-                >
-                  <ImageComponent
-                    data={data.companyDetails.logo}
-                    alt={checkLanguage(
-                      data.companyDetails.company,
-                      data.companyDetails.arabicCompany
-                    )}
-                    width={28}
-                    height={28}
-                    className='w-100 h-100'
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
-
-                {/* Company Name */}
-                <span className='d-none d-sm-inline'>
-                  {checkLanguage(
+                <ImageComponent
+                  data={data.companyDetails.logo}
+                  alt={checkLanguage(
                     data.companyDetails.company,
                     data.companyDetails.arabicCompany
                   )}
-                </span>
+                  width={28}
+                  height={28}
+                  className='w-100 h-100'
+                  style={{ objectFit: 'cover' }}
+                />
               </div>
-            )}
-          </Link>
+
+              {/* Company Name */}
+              <span className=''>
+                {checkLanguage(
+                  data.companyDetails.company,
+                  data.companyDetails.arabicCompany
+                )}
+              </span>
+            </div>
+          )}
         </div>
         <div className='onhover-show'>
           <div className=' d-flex align-items-center justify-content-between'>

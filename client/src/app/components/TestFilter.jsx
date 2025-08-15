@@ -20,6 +20,13 @@ import '../components/testFilter.scss';
 import { checkLanguage } from '../../../utils/helper';
 
 const TestFilter = ({
+  categoryList,
+  categoryError,
+  categoryLoading,
+  onCategoryClick,
+  classificationList,
+  classificationLoading,
+  classificationError,
   categoryArr,
   setCategoryArr,
   classificationArr,
@@ -27,52 +34,26 @@ const TestFilter = ({
   refetch,
 }) => {
   const scrollRef = useRef(null);
-  // ===============================================
-  // 📋 CATEGORY = FETCH & USE TS_QUERY
-  // ===============================================
-  const {
-    data: categoryList = [],
-    isLoading: categoryLoading,
-    isError: categoryError,
-  } = useQuery({
-    queryKey: ['category-list'],
-    queryFn: async () => {
-      const resp = await USER_CATEGORYLIST();
-      return resp?.data?.data ?? [];
-    },
-  });
-
-  // ===============================================
-  // 📋 CLASSIFICATION_LIST = FETCH & USE TS_QUERY
-  // ===============================================
-  const {
-    data: classificationList = [],
-    isLoading: classificationLoading,
-    isError: classificationError,
-  } = useQuery({
-    queryKey: ['classification-filter-list', categoryArr[0]],
-    queryFn: async () => {
-      if (categoryArr.length === 0) return [];
-      // Fetch classifications based on selected category
-      const resp = await GET_FILTER_CLASSIFICATION_API(categoryArr[0]);
-      return resp?.data?.data ?? [];
-    },
-    enabled: categoryArr.length > 0,
-  });
 
   // =========================================
   // 📁 HANDLE_CATEGORY
   // =========================================
   const handleCategoryClick = (category) => {
+    if (onCategoryClick) {
+      // Pass selected category ID to parent
+      onCategoryClick(category._id);
+    }
+
     if (categoryArr.includes(category._id)) {
+      // Deselect: clear category and classifications
       setCategoryArr([]);
       setClassificationArr([]);
+      if (onCategoryClick) onCategoryClick(null); // notify parent
     } else {
+      // Select: set category, clear classifications
       setCategoryArr([category._id]);
-      // Clear classifications when changing category
       setClassificationArr([]);
-      // Trigger refetch if needed
-      if (refetch) refetch();
+      // No need to call refetch — handled by React Query
     }
   };
 
@@ -88,7 +69,7 @@ const TestFilter = ({
       setClassificationArr([id]); // always only one
     }
 
-    if (refetch) refetch();
+    if (refetch && categoryArr.length > 0) refetch();
   };
 
   // =========================================

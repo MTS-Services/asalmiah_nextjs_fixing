@@ -12,8 +12,12 @@ import useDetails from '../../hooks/useDetails';
 
 import {
   GET_CATEGORY_LIST_HOME,
+  GET_CLASS_DROPDOWN,
+  GET_FILTER_CLASSIFICATION_API,
   GET_PRODUCTLIST,
   GET_USER_OFFERS,
+  USER_CATEGORYLIST,
+  USER_COMPANY_LIST,
 } from '../../services/APIServices';
 
 import Footer from '../../utils/Footer';
@@ -71,6 +75,8 @@ const Home = ({ params }) => {
     arabic: '',
   });
 
+  const [categoryID, setCategoryID] = useState('');
+
   const [subCategoryId, setSubCategoryId] = useState();
   const [show1, setShow1] = useState(false);
   const [search, setSearch] = useState('');
@@ -124,6 +130,62 @@ const Home = ({ params }) => {
       setMeta(resp?.data?._meta);
       return resp?.data?.data ?? [];
     },
+  });
+
+  // ================================
+  // 📋 COMPNAY LIST QUERY-CALL
+  // ================================
+  const { data: companyList } = useQuery({
+    queryKey: ['company-list', categoryID],
+    queryFn: async () => {
+      const resp = await USER_COMPANY_LIST(categoryID || null);
+      return resp?.data?.data ?? [];
+    },
+  });
+
+  // ================================
+  // 📋 CLSSIFICATION QUERY-CALL
+  // =================================
+  const { data: classListFilter } = useQuery({
+    queryKey: ['class-list'],
+    queryFn: async () => {
+      const resp = await GET_CLASS_DROPDOWN();
+
+      return resp?.data?.data ?? [];
+    },
+  });
+
+  // ===============================================
+  // 📋 CATEGORY = FETCH & USE TS_QUERY
+  // ===============================================
+  const {
+    data: categoryList = [],
+    isLoading: categoryLoading,
+    isError: categoryError,
+  } = useQuery({
+    queryKey: ['category-list'],
+    queryFn: async () => {
+      const resp = await USER_CATEGORYLIST();
+      return resp?.data?.data ?? [];
+    },
+  });
+
+  // ===============================================
+  // 📋 CLASSIFICATION_LIST = FETCH & USE TS_QUERY
+  // ===============================================
+  const {
+    data: classificationList = [],
+    isLoading: classificationLoading,
+    isError: classificationError,
+  } = useQuery({
+    queryKey: ['classification-filter-list', categoryArr[0]],
+    queryFn: async () => {
+      if (categoryArr.length === 0) return [];
+      // Fetch classifications based on selected category
+      const resp = await GET_FILTER_CLASSIFICATION_API(categoryArr[0]);
+      return resp?.data?.data ?? [];
+    },
+    enabled: categoryArr.length > 0,
   });
 
   // =========================================
@@ -180,6 +242,13 @@ const Home = ({ params }) => {
         <Row>
           <aside className='left-sidebar '>
             <TopFilter
+              categoryList={categoryList}
+              categoryError={categoryError}
+              categoryLoading={categoryLoading}
+              onCategoryClick={(id) => setCategoryID(id)}
+              classificationList={classificationList}
+              classificationLoading={classificationLoading}
+              classificationError={classificationError}
               refetch={refetch}
               setCategoryArr={setCategoryArr}
               categoryArr={categoryArr}
@@ -197,6 +266,8 @@ const Home = ({ params }) => {
           <Col lg={3}>
             <aside className='d-none d-lg-block'>
               <Filter
+                classListFilter={classListFilter}
+                companyList={companyList}
                 selectedCountry={selectedCountry}
                 refetch={refetch}
                 setCategoryArr={setCategoryArr}

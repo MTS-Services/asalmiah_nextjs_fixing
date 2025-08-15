@@ -20,8 +20,6 @@ const HomeBanner = () => {
     },
   });
 
-  console.log('bannerList: ', bannerList);
-
   const settings = {
     dots: true,
     infinite: bannerList?.length > 1 ? true : false,

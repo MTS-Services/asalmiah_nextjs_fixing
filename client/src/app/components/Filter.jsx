@@ -25,6 +25,8 @@ import { checkLanguage, formatCurrency } from '../../../utils/helper';
 
 const Filter = (props) => {
   const {
+    companyList,
+    classListFilter,
     companyArr,
     setCompanyArr,
     setClassificationArr,
@@ -67,25 +69,25 @@ const Filter = (props) => {
   // ================================
   // 📋 COMPNAY LIST QUERY-CALL
   // ================================
-  const { data: companyList } = useQuery({
-    queryKey: ['company-list'],
-    queryFn: async () => {
-      const resp = await USER_COMPANY_LIST();
+  // const { data: companyList } = useQuery({
+  //   queryKey: ['company-list'],
+  //   queryFn: async () => {
+  //     const resp = await USER_COMPANY_LIST();
 
-      return resp?.data?.data ?? [];
-    },
-  });
+  //     return resp?.data?.data ?? [];
+  //   },
+  // });
   // ================================
   // 📋 CLSSIFICATION QUERY-CALL
   // =================================
-  const { data: classListFilter } = useQuery({
-    queryKey: ['class-list'],
-    queryFn: async () => {
-      const resp = await GET_CLASS_DROPDOWN();
+  // const { data: classListFilter } = useQuery({
+  //   queryKey: ['class-list'],
+  //   queryFn: async () => {
+  //     const resp = await GET_CLASS_DROPDOWN();
 
-      return resp?.data?.data ?? [];
-    },
-  });
+  //     return resp?.data?.data ?? [];
+  //   },
+  // });
 
   // ================================
   // 📁 HANDLE INPUT
