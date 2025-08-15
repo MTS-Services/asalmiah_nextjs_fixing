@@ -100,49 +100,85 @@ const Footer = ({ testimonialLists }) => {
             <Col md={10} className='mx-auto'>
               <ul className='footerlinks d-flex gap-md-5 gap-3 justify-content-md-center justify-content-start flex-wrap mb-4 mt-5'>
                 <li>
-                  <Link href='/' className='text-white'>
+                  <Link
+                    style={{ textDecoration: 'none' }}
+                    href='/'
+                    className='text-white'
+                  >
                     {Home}
                   </Link>
                 </li>
                 <li>
-                  <Link href='/about-us' className='text-white'>
+                  <Link
+                    style={{ textDecoration: 'none' }}
+                    href='/about-us'
+                    className='text-white'
+                  >
                     About Us
                   </Link>
                 </li>
 
                 <li>
-                  <Link href='/privacy' className='text-white'>
+                  <Link
+                    style={{ textDecoration: 'none' }}
+                    href='/privacy'
+                    className='text-white'
+                  >
                     Privacy
                   </Link>
                 </li>
                 <li>
-                  <Link href='/refund-policy' className='text-white'>
+                  <Link
+                    style={{ textDecoration: 'none' }}
+                    href='/refund-policy'
+                    className='text-white'
+                  >
                     Refund Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href='/terms' className='text-white'>
+                  <Link
+                    style={{ textDecoration: 'none' }}
+                    href='/terms'
+                    className='text-white'
+                  >
                     Terms & Conditions
                   </Link>
                 </li>
                 <li>
-                  <a href='/best-seller' className='text-white'>
+                  <Link
+                    style={{ textDecoration: 'none' }}
+                    href='/best-seller'
+                    className='text-white'
+                  >
                     Best Sellers
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <Link href='/contact' className='text-white'>
+                  <Link
+                    style={{ textDecoration: 'none' }}
+                    href='/contact'
+                    className='text-white'
+                  >
                     Contact Us
                   </Link>
                 </li>
                 <li>
-                  <Link href='/faq' className='text-white'>
+                  <Link
+                    style={{ textDecoration: 'none' }}
+                    href='/faq'
+                    className='text-white'
+                  >
                     FAQ
                   </Link>
                 </li>
 
                 {pathName == '/' && testimonialLists !== 0 ? (
-                  <Link href='#' className='text-white'>
+                  <Link
+                    style={{ textDecoration: 'none' }}
+                    href='#'
+                    className='text-white'
+                  >
                     Testimonials
                   </Link>
                 ) : (
@@ -170,6 +206,7 @@ const Footer = ({ testimonialLists }) => {
                         <h4>Find Us</h4>
                         <p>
                           <Link
+                            style={{ textDecoration: 'none' }}
                             className='text-white'
                             href={`https://www.google.com/maps/search/?api=1&query=${socialLink?.address}`}
                             target='_blank'
@@ -205,22 +242,6 @@ const Footer = ({ testimonialLists }) => {
                         fill='#DA2A2C'
                       />
                     </svg>
-                    {/* {socialLink?.mobile ? (
-                      <div className="ms-3 notranslate ">
-                        <h4>Call Us</h4>
-                        <p>
-                          <Link
-                            className="footer_link"
-                            href={`tel:${socialLink?.countryCode + socialLink?.mobile
-                              }`}
-                          >
-                            {socialLink?.countryCode + " " + socialLink?.mobile}{" "}
-                          </Link>
-                        </p>
-                      </div>
-                    ) : (
-                      ""
-                    )} */}
 
                     {socialLink?.mobile ? (
                       <div className={`ms-3 ${isArabic ? 'text-right' : ''}`}>
@@ -298,6 +319,7 @@ const Footer = ({ testimonialLists }) => {
                         <h4>Mail Us</h4>
                         <p>
                           <Link
+                            style={{ textDecoration: 'none' }}
                             href={`mailto:${socialLink?.email}`}
                             className='footer_link notranslate'
                           >
@@ -321,6 +343,7 @@ const Footer = ({ testimonialLists }) => {
         <p className='text-center mb-0 pb-3 text-white pt-3'>
           © {new Date().getFullYear()}
           <Link
+            style={{ textDecoration: 'none' }}
             href='#'
             onClick={(e) => {
               e.preventDefault();
@@ -330,7 +353,14 @@ const Footer = ({ testimonialLists }) => {
             &nbsp;Offarat{' '}
           </Link>{' '}
           | All Rights Reserved. Developed By
-          <Link href='https://toxsl.com/' target='_blank'>
+          <Link
+            style={{ textDecoration: 'none' }}
+            href='#'
+            onClick={(e) => {
+              e.preventDefault();
+              navigate.push('/');
+            }}
+          >
             &nbsp;Offarat Company.
           </Link>
         </p>

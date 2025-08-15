@@ -231,18 +231,21 @@ const ProductCard = ({ data, selectedCountry, detail, refetch }) => {
       >
         <ul className='rating'>
           <li>
-            <div className=''>
-              <DynamicStar
-                rating={data?.averageRating?.averageRating}
-                height={15}
-                width={15}
-                outlined
-              />
-            </div>
+            <DynamicStar
+              rating={data?.averageRating?.averageRating}
+              height={15}
+              width={15}
+              outlined
+            />
           </li>
         </ul>
-        <Link href='#' className='text-capitalize'>
-          <h6>{checkLanguage(data?.productName, data?.productArabicName)}</h6>
+        <Link
+          href={`/product-detail/${data?._id}`}
+          style={{ textDecoration: 'none' }}
+        >
+          <h6 className='text-capitalize '>
+            {checkLanguage(data?.productName, data?.productArabicName)}
+          </h6>
         </Link>
         <Link href='#'>
           <h6>

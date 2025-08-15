@@ -648,10 +648,6 @@ input[type='radio'] {
   display: none;
 }
 
-.nav-rtl {
-  flex-direction: row-reverse;
-}
-
 @media (max-width: 992px) {
   // .navbar-collapse.collapse.show a,
   // .dropdownnew {
@@ -5491,6 +5487,7 @@ footer {
   color: #000;
   font-size: 16px;
   margin-top: 10px;
+  text-decoration: none;
 }
 
 .product-detail p {
