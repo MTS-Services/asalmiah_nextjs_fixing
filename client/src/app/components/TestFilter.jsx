@@ -81,11 +81,13 @@ const TestFilter = ({
   // =========================================
   const handleClassificationClick = (classification) => {
     const id = classification._id;
-    const newClassifications = classificationArr.includes(id)
-      ? classificationArr.filter((i) => i !== id)
-      : [...classificationArr, id];
 
-    setClassificationArr(newClassifications);
+    if (classificationArr.includes(id)) {
+      setClassificationArr([]);
+    } else {
+      setClassificationArr([id]); // always only one
+    }
+
     if (refetch) refetch();
   };
 
