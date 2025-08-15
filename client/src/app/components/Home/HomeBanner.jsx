@@ -21,11 +21,11 @@ const HomeBanner = () => {
   });
 
   const settings = {
-    dots: true,
+    dots: false,
     infinite: bannerList?.length > 1 ? true : false,
     loop: true,
     autoplay: true,
-    speed: 500,
+    speed: 1000,
     slidesToShow: 1,
     slidesToScroll: 1,
   };
