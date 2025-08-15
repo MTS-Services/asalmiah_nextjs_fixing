@@ -41,7 +41,7 @@ import { constant, Paginations } from '../../../../utils/constants';
 import Footer from '../../../../utils/Footer';
 import Header from '../../../../utils/Header';
 import UserLogInHeader from '../../../../utils/UserLogInHeader';
-import Breadcrums from '../../components/Breadcrums';
+// import Breadcrums from '../../components/Breadcrums';
 
 // import required modules
 import NoDataFound from '@/app/components/no-data-found/page';
@@ -504,11 +504,8 @@ const ProductDetail = () => {
 
       {productDetailData?.length !== 0 ? (
         <>
-          <Breadcrums
-            firstLink={Home}
-            secondLink={'Product Detail'}
-            language={language}
-          />
+          {/* <Breadcrums /> */}
+
           {/* ============================================= products detail
           ================================================= */}
           <section className='list-main gap-10'>

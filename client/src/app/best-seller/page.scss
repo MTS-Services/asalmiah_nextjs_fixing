@@ -104,7 +104,7 @@
   display: none;
 }
 .my-profile-inner-box .profile-info-box .inner-info-box .statistics li::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   right: -18px;
@@ -154,7 +154,7 @@
 
 .custom-tabs {
   border-bottom: 1px solid #ccc;
-  .nav-link{
+  .nav-link {
     color: #000;
     border-radius: 0px !important;
     &.active {
@@ -162,26 +162,24 @@
       color: #da2a2c !important;
       border-bottom: 1px solid #da2a2c !important;
     }
-
   }
 }
 
-.seller-view{
+.seller-view {
+  .tab-content > .tab-pane {
+    display: block !important;
+  }
 
-.tab-content > .tab-pane{
-  display: block  !important;
+  .fade:not(.show) {
+    opacity: 1 !important;
+  }
 }
-
-.fade:not(.show) {
-  opacity: 1 !important;
-}}
-.grid-tabs{
-  .nav-link{
+.grid-tabs {
+  .nav-link {
     color: #000;
-    &.active{
+    &.active {
       background: #da2a2c;
       color: #fff;
-      }
-  } 
+    }
+  }
 }
-
