@@ -1,19 +1,19 @@
 'use client';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
-import { SessionProvider } from 'next-auth/react';
+import { Suspense } from 'react';
 import { Provider } from 'react-redux';
+import { SessionProvider } from 'next-auth/react';
 import { PersistGate } from 'redux-persist/integration/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { GTMProvider, GTMBody } from '../app/components/GTMProvider.jsx';
 import { persistor, store } from '../../redux/store.js';
 import { toastAlert } from '../../utils/SweetAlert';
-import 'bootstrap/dist/css/bootstrap.css';
+
+import './rtl.scss';
 import './globals.scss';
 import './responsive.scss';
-import './rtl.scss';
-
-import { GTMProvider, GTMBody } from '../app/components/GTMProvider.jsx';
-import { Suspense } from 'react';
+import 'bootstrap/dist/css/bootstrap.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,8 +87,7 @@ export default function RootLayout({ children, session, ...pageProps }) {
                 session={pageProps?.session}
                 NEXTAUTH_URL={process.env.NEXTAUTH_URL}
               >
-                <GTMBody />
-                {children}
+                <GTMBody /> {children}
               </SessionProvider>
             </QueryClientProvider>
           </PersistGate>

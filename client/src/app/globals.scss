@@ -648,6 +648,10 @@ input[type='radio'] {
   display: none;
 }
 
+.nav-rtl {
+  flex-direction: row-reverse;
+}
+
 @media (max-width: 992px) {
   // .navbar-collapse.collapse.show a,
   // .dropdownnew {

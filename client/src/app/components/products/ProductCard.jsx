@@ -1,21 +1,26 @@
-import Link from 'next/link';
 import React from 'react';
-import { DynamicStar } from 'react-dynamic-star';
-import { AiFillHeart } from 'react-icons/ai';
-import { CiHeart } from 'react-icons/ci';
-import ImageComponent from '../../../../utils/ImageComponent';
-import { useMutation } from '@tanstack/react-query';
-import { checkLanguage, formatCurrency } from '../../../../utils/helper';
-import { ADD_WISHLIST } from '../../../../services/APIServices';
-import { toastAlert } from '../../../../utils/SweetAlert';
+import Link from 'next/link';
 import Swal from 'sweetalert2';
-// import { Router } from 'next/router';
-// import { useRouter } from 'next/router';
+import { CiHeart } from 'react-icons/ci';
+import { AiFillHeart } from 'react-icons/ai';
+import { DynamicStar } from 'react-dynamic-star';
+import { useMutation } from '@tanstack/react-query';
 import { usePathname, useRouter } from 'next/navigation';
+import { toastAlert } from '../../../../utils/SweetAlert';
+import { ADD_WISHLIST } from '../../../../services/APIServices';
+import { checkLanguage, formatCurrency } from '../../../../utils/helper';
+import classNames from 'classnames';
+
+import ImageComponent from '../../../../utils/ImageComponent';
 
 const ProductCard = ({ data, selectedCountry, detail, refetch }) => {
   const router = useRouter();
   const pathName = usePathname();
+
+  let language = localStorage.getItem('language');
+
+  const languageCode =
+    language && language.toLowerCase().includes('arabic') ? 'ar' : 'en';
 
   const wishlistMutation = useMutation({
     mutationFn: (body) => ADD_WISHLIST(body),
@@ -65,22 +70,29 @@ const ProductCard = ({ data, selectedCountry, detail, refetch }) => {
               onClick={() =>
                 router.push(`/companies/${data?.companyDetails?._id}`)
               }
-              className='position-absolute d-flex align-items-center'
+              className={classNames(
+                'position-absolute d-flex align-items-center',
+                {
+                  'flex-row-reverse': languageCode === 'ar',
+                }
+              )}
               style={{
                 cursor: 'pointer',
                 bottom: '10px',
-                left: '10px',
+                [languageCode === 'ar' ? 'right' : 'left']: '10px',
                 gap: '6px',
                 backgroundColor: 'rgba(15, 1, 1, 0.35)',
                 color: 'white',
                 borderRadius: '30px',
-                padding: '0px 16px 0px 0px',
+                padding:
+                  languageCode === 'ar'
+                    ? '0px 10px 0px 0px'
+                    : '0px 16px 0px 0px',
                 zIndex: 1,
                 fontSize: '12px',
                 fontWeight: '500',
               }}
             >
-              {/* Circular Logo */}
               <div
                 style={{
                   width: '50px',
@@ -102,8 +114,7 @@ const ProductCard = ({ data, selectedCountry, detail, refetch }) => {
                 />
               </div>
 
-              {/* Company Name */}
-              <span className=''>
+              <span className={languageCode === 'ar' ? 'ms-2' : 'me-2'}>
                 {checkLanguage(
                   data.companyDetails.company,
                   data.companyDetails.arabicCompany
@@ -213,7 +224,11 @@ const ProductCard = ({ data, selectedCountry, detail, refetch }) => {
           </div>
         </div>
       </div>
-      <div className='product-detail text-center mt-4'>
+      <div
+        className={classNames('product-detail text-center mt-4', {
+          'text-right': languageCode === 'ar',
+        })}
+      >
         <ul className='rating'>
           <li>
             <div className=''>

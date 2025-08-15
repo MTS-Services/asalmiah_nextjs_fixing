@@ -19,6 +19,7 @@
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.4",
+    "classnames": "^2.5.1",
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
     "moment": "^2.30.1",

@@ -124,7 +124,7 @@ const TestFilter = ({
                         : 'outline-danger'
                     }
                     onClick={() => handleCategoryClick(category)}
-                    className='rounded-pill btn-sm fw-medium'
+                    className='btn-sm fw-medium'
                   >
                     {checkLanguage(category.category, category.arabicCategory)}
                   </Button>

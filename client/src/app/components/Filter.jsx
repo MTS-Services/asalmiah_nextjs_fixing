@@ -10,17 +10,11 @@ Unauthorized copying of this file, via any medium, is strictly prohibited.
 
 'use client';
 
-import MultiRangeSlider from 'multi-range-slider-react';
-import { searchQuery } from '../../../redux/features/searchQuery';
-import { FaFilter } from 'react-icons/fa';
-import { useQuery } from '@tanstack/react-query';
 import { useDispatch } from 'react-redux';
 import { Form } from 'react-bootstrap';
+import MultiRangeSlider from 'multi-range-slider-react';
+import classNames from 'classnames';
 
-import {
-  GET_CLASS_DROPDOWN,
-  USER_COMPANY_LIST,
-} from '../../../services/APIServices';
 import { checkLanguage, formatCurrency } from '../../../utils/helper';
 
 const Filter = (props) => {
@@ -43,51 +37,7 @@ const Filter = (props) => {
 
   const language = localStorage.getItem('language');
   let dispatch = useDispatch();
-
-  // ================================
-  // 📋 CATEGORY LIST QUERY-CALL
-  // ================================
-  // const { data: categoryList } = useQuery({
-  //   queryKey: ['category-list'],
-  //   queryFn: async () => {
-  //     const resp = await GET_CATEGORY_LIST_HOME();
-  //     return resp?.data?.data ?? [];
-  //   },
-  // });
-
-  // ================================
-  // 📋 SUB_CATEGORY LIST QUERY-CALL
-  // ================================
-  // const { data: subcategoryList } = useQuery({
-  //   queryKey: ['subcategory-list'],
-  //   queryFn: async () => {
-  //     const resp = await GET_SUB_CATEGORY_LIST_HOME();
-  //     return resp?.data?.data ?? [];
-  //   },
-  // });
-
-  // ================================
-  // 📋 COMPNAY LIST QUERY-CALL
-  // ================================
-  // const { data: companyList } = useQuery({
-  //   queryKey: ['company-list'],
-  //   queryFn: async () => {
-  //     const resp = await USER_COMPANY_LIST();
-
-  //     return resp?.data?.data ?? [];
-  //   },
-  // });
-  // ================================
-  // 📋 CLSSIFICATION QUERY-CALL
-  // =================================
-  // const { data: classListFilter } = useQuery({
-  //   queryKey: ['class-list'],
-  //   queryFn: async () => {
-  //     const resp = await GET_CLASS_DROPDOWN();
-
-  //     return resp?.data?.data ?? [];
-  //   },
-  // });
+  const isArabic = language === 'ar';
 
   // ================================
   // 📁 HANDLE INPUT
@@ -119,16 +69,18 @@ const Filter = (props) => {
               return (
                 <div key={items?._id}>
                   <li
-                    className='d-flex align-items-center mb-3 gap-2'
+                    className={classNames(
+                      'd-flex align-items-center mb-3 gap-2',
+                      {
+                        'flex-row-reverse': isArabic,
+                      }
+                    )}
                     key={items.id}
                   >
                     <Form.Check
                       type='checkbox'
                       id={items._id}
-                      label={checkLanguage(
-                        items?.category,
-                        items?.arabicCompany
-                      )}
+                      label=''
                       checked={companyArr.includes(items._id)}
                       onChange={(e) => {
                         if (e.target.checked) {
@@ -143,7 +95,7 @@ const Filter = (props) => {
                         }
                       }}
                     />
-                    <span className='text-capitalize te'>
+                    <span className='text-capitalize'>
                       {checkLanguage(items?.company, items?.arabicCompany)}
                     </span>
                   </li>
@@ -167,11 +119,19 @@ const Filter = (props) => {
           >
             {classListFilter && classListFilter.length > 0
               ? classListFilter.map((items, i) => (
-                  <li className='d-flex align-items-center mb-3 gap-2' key={i}>
+                  <li
+                    className={classNames(
+                      'd-flex align-items-center mb-3 gap-2',
+                      {
+                        'flex-row-reverse': isArabic,
+                      }
+                    )}
+                    key={i}
+                  >
                     <Form.Check
                       type='checkbox'
                       id={items._id}
-                      label={checkLanguage(items?.name, items?.arbicName)}
+                      label=''
                       onChange={(e) => {
                         if (e.target.checked) {
                           setClassificationArr((prevClassification) => [
@@ -185,6 +145,9 @@ const Filter = (props) => {
                         }
                       }}
                     />
+                    <span className='text-capitalize'>
+                      {checkLanguage(items?.name, items?.arbicName)}
+                    </span>
                   </li>
                 ))
               : ''}
