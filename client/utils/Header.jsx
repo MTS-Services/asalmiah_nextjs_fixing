@@ -14,11 +14,11 @@ import TranslateWidget from './TranslateWidget';
 // utils/deviceToken.js
 import { useQuery } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import useDetails from '../hooks/useDetails';
 import { clearCart } from '../redux/features/cartSlice';
 import { USER_CART, USER_CART_WITHOUT_LOGIN } from '../services/APIServices';
-import { formatCurrency, getDeviceToken } from './helper';
+import { getDeviceToken } from './helper';
 import CountryState from '../hooks/useCountryState';
 import { trans } from './trans';
 import { country } from '../redux/features/CountrySlice';
@@ -68,6 +68,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
     const url = `https://wa.me/${phoneNumber}`;
     window.open(url, '_blank');
   };
+
   let dispatch = useDispatch();
   let detail = useDetails();
 
@@ -93,22 +94,37 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
   const translations = {
     en: {
       home: 'Home',
+      about: 'About Us',
+      bestseller: 'Best Sellers',
+      allProducts: 'All Products',
+      companies: 'Companies',
       testimonials: 'Testimonials',
     },
     ar: {
       home: 'الرئيسية',
+      about: 'من نحن',
+      bestseller: 'الأكثر مبيعًا',
+      allProducts: 'جميع المنتجات',
+      companies: 'شركات',
       testimonials: 'الشهادات',
     },
   };
 
   // Get language from localStorage, fallback to 'en'
   let language = localStorage.getItem('language');
+
   const languageCode =
     language && language.toLowerCase().includes('arabic') ? 'ar' : 'en';
 
   // Destructure the translations
-  const { home: homeText, testimonials: testimonialsText } =
-    translations[languageCode];
+  const {
+    home: homeText,
+    testimonials: testimonialsText,
+    about: aboutText,
+    bestseller: bestsellerText,
+    allProducts: allProductsText,
+    companies: companiesText,
+  } = translations[languageCode];
 
   const handleCountryChange = (e) => {
     const selectedCountry = e.target.value;
@@ -124,11 +140,10 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
 
   return (
     <>
-      <div className='topbar'>
+      <div className='topbar '>
         <Container>
           <div className='d-flex  py-3 align-items-center justify-content-between'>
             <Navbar.Brand href='/'>
-              {' '}
               <Image
                 src={`/assets/img/logo.png`}
                 height={57}
@@ -192,7 +207,6 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                 </div>
 
                 <div className='d-flex flex-wrap gap-3 d-md-none  d-none me-3'>
-                  <a href='#'></a>
                   <a href='#'>
                     <svg
                       width='22'
@@ -281,14 +295,25 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
           <hr />
         </Container>
 
-        <Navbar expand='lg' className='bg-white'>
-          <Container>
+        <Container>
+          <Navbar
+            expand='lg'
+            className='bg-white d-flex justify-content-between '
+          >
             <Navbar.Toggle aria-controls='navbarScroll' className=' d-none' />
+
             <Navbar.Collapse id='navbarScroll' className='d-lg-block d-none'>
-              <Nav className='me-auto ms-0 my-2 my-lg-0' navbarScroll>
+              <Nav
+                className={`d-flex my-2 my-lg-0 ${
+                  languageCode === 'ar'
+                    ? 'justify-content-end'
+                    : 'me-auto w-100'
+                }`}
+                navbarScroll
+              >
                 <Link
-                  className={`nav-link ps-lg-0 ${
-                    isActive('/') ? 'fw-bold' : ''
+                  className={`nav-link ${isActive('/') ? 'fw-bold' : ''} ${
+                    languageCode === 'ar' ? 'text-end pe-0' : 'ps-lg-0'
                   }`}
                   href='/'
                 >
@@ -300,7 +325,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                   }`}
                   href='/about-us'
                 >
-                  About Us
+                  {aboutText}
                 </Link>
                 <Link
                   className={`nav-link ${
@@ -308,7 +333,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                   }`}
                   href='/best-seller'
                 >
-                  Best Sellers
+                  {bestsellerText}
                 </Link>
                 <Link
                   className={`nav-link ${
@@ -316,7 +341,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                   }`}
                   href='/product-list'
                 >
-                  All Products
+                  {allProductsText}
                 </Link>
                 <Link
                   className={`nav-link ${
@@ -324,7 +349,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                   }`}
                   href='/companies'
                 >
-                  Companies
+                  {companiesText}
                 </Link>
                 {pathName === '/' && (
                   <Link
@@ -343,7 +368,6 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
             <div className='d-lg-none d-block' onClick={handleShow}>
               <FaBars />
             </div>
-
             <div className='d-flex align-items-center gap-3'>
               {localStorage.getItem('offarat-contact') ? (
                 <Link
@@ -409,8 +433,8 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                 </Link>
               </div>
             </div>
-          </Container>
-        </Navbar>
+          </Navbar>
+        </Container>
       </div>
 
       {/* Mobile Menu */}
@@ -433,7 +457,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                 className={`nav-link ${isActive('/about-us') ? 'fw-bold' : ''}`}
                 onClick={handleClose}
               >
-                About Us
+                {aboutText}
               </Link>
               <Link
                 href='/best-seller'
@@ -442,7 +466,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                 }`}
                 onClick={handleClose}
               >
-                Best Sellers
+                {bestsellerText}
               </Link>
               <Link
                 href='/product-list'
@@ -451,7 +475,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                 }`}
                 onClick={handleClose}
               >
-                All Products
+                {allProductsText}
               </Link>
               <Link
                 href='/companies'
@@ -460,7 +484,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                 }`}
                 onClick={handleClose}
               >
-                Companies
+                {companiesText}
               </Link>
               {pathName === '/' && (
                 <Link

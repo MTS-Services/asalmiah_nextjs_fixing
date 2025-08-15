@@ -1,5 +1,5 @@
 body {
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-size: 16px;
   font-weight: 500;
   line-height: normal;
@@ -118,7 +118,6 @@ body {
 }
 
 .products_section {
-
   .slick-arrow.slick-prev,
   .slick-arrow.slick-next {
     left: -79% !important;
@@ -203,7 +202,7 @@ body {
     background: linear-gradient(134deg, #f1fcff 0%, #fff8f8 100%);
   }
 
-  .login-box+footer {
+  .login-box + footer {
     width: 100% !important;
     margin: 0 !important;
     text-align: center !important;
@@ -221,7 +220,7 @@ body {
   }
 
   .login-box .form-section:before {
-    content: "";
+    content: '';
     width: 196px;
     height: 50px;
     position: absolute;
@@ -233,7 +232,7 @@ body {
   }
 
   .login-box .form-section:after {
-    content: "";
+    content: '';
     width: 196px;
     height: 50px;
     position: absolute;
@@ -274,10 +273,10 @@ body {
     width: 100%;
     height: 1px;
     background: #d8dcdc;
-    content: "";
+    content: '';
   }
 
-  .login-box .form-section .extra-login>span {
+  .login-box .form-section .extra-login > span {
     width: auto;
     float: none;
     display: inline-block;
@@ -319,7 +318,7 @@ body {
     text-decoration: none;
     background: #fff;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    font-family: "Jost", sans-serif;
+    font-family: 'Jost', sans-serif;
   }
 
   .login-box .form-section .social-list li a i {
@@ -391,7 +390,7 @@ body {
   }
 
   .login-box .form-section .form-check label::before {
-    content: "";
+    content: '';
     display: inline-block;
     position: absolute;
     width: 18px;
@@ -410,7 +409,11 @@ body {
     color: #535353;
   }
 
-  .login-box .form-section .checkbox-theme input[type="checkbox"]:checked+label::before {
+  .login-box
+    .form-section
+    .checkbox-theme
+    input[type='checkbox']:checked
+    + label::before {
     background-color: #e91f23;
     border-color: #e91f23;
   }
@@ -583,7 +586,7 @@ body {
     &:before {
       border: 2px solid #fff;
       border-radius: 100%;
-      content: "";
+      content: '';
       height: 100%;
       left: 50%;
       opacity: 0;
@@ -671,7 +674,6 @@ body {
   }
 }
 
-
 .delivery-main {
   .nav-tabs {
     border-bottom: 0;
@@ -758,28 +760,26 @@ a.deleteButton {
       transition: all 0.3s;
       border-radius: 5px;
       cursor: pointer;
-      
     }
   }
 
   .boxed {
-    input[type="radio"] {
+    input[type='radio'] {
       display: none;
     }
-  
   }
 
   .boxed {
-    input[type="radio"] {
-      &:checked+label {
+    input[type='radio'] {
+      &:checked + label {
         border: solid 1px #da2a2c;
         background: #da2a2c;
         color: #fff;
       }
     }
     input[disabled] {
-      background-color: #ccc!important;
-  }
+      background-color: #ccc !important;
+    }
   }
 }
 

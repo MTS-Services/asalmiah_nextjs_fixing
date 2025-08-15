@@ -291,7 +291,7 @@ const Home = ({ params }) => {
             </aside>
             {/* View All Products Button */}
 
-            <div className='d-flex align-items-center justify-content-center gap-3 '>
+            {/* <div className='d-flex align-items-center justify-content-center gap-3 '>
               <div
                 className='btn btn-theme filter_btn d-block d-lg-none'
                 onClick={handleShow}
@@ -308,7 +308,7 @@ const Home = ({ params }) => {
                   View All Products
                 </Link>
               </div>
-            </div>
+            </div> */}
           </Col>
 
           <Col lg={9}>
