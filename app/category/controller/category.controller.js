@@ -373,6 +373,223 @@ category.list = async (req, res, next) => {
   }
 };
 
+
+
+
+category.list2 = async (req, res, next) => {
+  try {
+    let language = req.headers["language"] ? req.headers["language"] : "EN";
+
+    let pageNo = parseInt(req.query.pageNo) || 1;
+    let pageLimit = parseInt(req.query.pageLimit) || 10;
+    let roleFilter = {};
+
+    if (req.roleId == CONST.USER || req.roleId == CONST.SALES) {
+      roleFilter = {
+        stateId: CONST.ACTIVE,
+      };
+    }
+
+    if (req.roleId == CONST.ADMIN) {
+      roleFilter = {
+        stateId: { $ne: CONST.DELETED },
+      };
+    }
+
+    if (!req.roleId) {
+      roleFilter = {
+        stateId: CONST.ACTIVE,
+      };
+    }
+
+    let searchFilter = {};
+    if (req.query.search && req.query.search !== "undefined") {
+      searchFilter = {
+        category: {
+          $regex: req.query.search.trim()
+            ? req.query.search.trim()
+            : "".replace(new RegExp("\\\\", "g"), "\\\\").trim(),
+          $options: "i",
+        },
+      };
+    }
+
+    let stateFilter = {};
+    switch (req.query.stateId) {
+      case "1":
+        stateFilter = {
+          stateId: CONST.ACTIVE,
+        };
+        break;
+
+      case "2":
+        stateFilter = {
+          stateId: CONST.INACTIVE,
+        };
+        break;
+
+      default:
+        break;
+    }
+
+    let permissionsData = await PERMISSION_MODEL.findOne({
+      $or: [{ promotionId: req.userId }, { designedId: req.userId }],
+    });
+
+    let categoryFilter = {};
+    if (permissionsData?.categoryId) {
+      categoryFilter = {
+        _id: {
+          $in: permissionsData.categoryId.map(
+            (i) => new mongoose.Types.ObjectId(i)
+          ),
+        },
+      };
+    }
+
+    let list = await CATEGORY_MODEL.aggregate([
+      {
+        $match: roleFilter,
+      },
+      {
+        $match: searchFilter,
+      },
+      {
+        $match: stateFilter,
+      },
+      {
+        $match: categoryFilter,
+      },
+      {
+        $lookup: {
+          from: "subcategories",
+          let: { id: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$categoryId"] },
+                stateId: CONST.ACTIVE,
+              },
+            },
+          ],
+          as: "subcategories",
+        },
+      },
+      {
+        $match: {
+          "subcategories.0": { $exists: true },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { id: { $ifNull: ["$createdBy", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                email: 1,
+                fullName: 1,
+                firstName: 1,
+                lastName: 1,
+                roleId:1
+              },
+            },
+          ],
+          as: "createdBy",
+        },
+      },
+      {
+        $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { id: { $ifNull: ["$updatedBy", ""] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                email: 1,
+                fullName: 1,
+                firstName: 1,
+                lastName: 1,
+                roleId:1
+
+              },
+            },
+          ],
+          as: "updatedBy",
+        },
+      },
+      {
+        $unwind: { path: "$updatedBy", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          category: {
+            $cond: {
+              if: { $eq: [language, "AR"] },
+              then: {
+                $ifNull: ["$arabicCategory", "$category"],
+              },
+              else: "$category",
+            },
+          },
+          arabicCategory: 1,
+          categoryImg: 1,
+          order: 1,
+          stateId: 1,
+          createdAt: 1,
+          createdBy: 1,
+          updatedBy: 1,
+        },
+      },
+      {
+        $sort: {
+          order: 1,
+        },
+      },
+      {
+        $facet: {
+          data: [{ $skip: pageLimit * (pageNo - 1) }, { $limit: pageLimit }],
+          count: [{ $count: "count" }],
+        },
+      },
+    ]);
+
+    if (list && list[0].data.length) {
+      await setResponseObject(
+        req,
+        true,
+        "Category list found successfully",
+        list[0].data,
+        list[0].count[0].count,
+        pageNo,
+        pageLimit
+      );
+      next();
+    } else {
+      await setResponseObject(req, true, "Category list not found", []);
+      next();
+    }
+  } catch (error) {
+    await setResponseObject(req, false, error.message, "");
+    next();
+  }
+};
+
 /*View category */
 category.detail = async (req, res, next) => {
   try {

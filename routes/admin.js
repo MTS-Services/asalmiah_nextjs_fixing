@@ -196,7 +196,8 @@ router.group('/db', (backup) => {
 /* Category Management  */
 router.group('/category', (category) => {
   category.post('/add', _category.add);
-  category.get('/list', _category.list);
+  category.get('/list', _category.list2);
+
   category.get('/detail/:id', _category.detail);
   category.put('/update/:id', _category.update);
   category.put('/updateState/:id', _category.updateState);
