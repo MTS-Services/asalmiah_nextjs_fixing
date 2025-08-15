@@ -1,6 +1,6 @@
 'use client';
 
-import Breadcrums from '@/app/components/Breadcrums';
+// import Breadcrums from '@/app/components/Breadcrums';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -125,11 +125,11 @@ export default function page() {
       ) : (
         <Header refetchAPI={refetch} />
       )}{' '}
-      <Breadcrums
+      {/* <Breadcrums
         firstLink={Home}
         secondLink={'Companies'}
         language={language}
-      />
+      /> */}
       <section className='bst-seller-sec mt-2 company-list-card '>
         <Container>
           <Row>

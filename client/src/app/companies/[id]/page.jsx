@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import Breadcrums from "@/app/components/Breadcrums";
-import { Pagination } from "@/app/components/Pagination";
-import NoDataFound from "@/app/components/no-data-found/page";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Nav, TabContent } from "react-bootstrap";
-import Col from "react-bootstrap/Col";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import { AiFillHeart } from "react-icons/ai";
-import { CiHeart } from "react-icons/ci";
-import { FaWalking } from "react-icons/fa";
-import { RiCouponLine } from "react-icons/ri";
-import { TbTruckDelivery } from "react-icons/tb";
-import { ShimmerPostItem, ShimmerThumbnail } from "react-shimmer-effects";
-import Swal from "sweetalert2";
-import useCountryState from "../../../../hooks/useCountryState";
-import useDetails from "../../../../hooks/useDetails";
+// import Breadcrums from "@/app/components/Breadcrums";
+import { Pagination } from '@/app/components/Pagination';
+import NoDataFound from '@/app/components/no-data-found/page';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Nav, TabContent } from 'react-bootstrap';
+import Col from 'react-bootstrap/Col';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import { AiFillHeart } from 'react-icons/ai';
+import { CiHeart } from 'react-icons/ci';
+import { FaWalking } from 'react-icons/fa';
+import { RiCouponLine } from 'react-icons/ri';
+import { TbTruckDelivery } from 'react-icons/tb';
+import { ShimmerPostItem, ShimmerThumbnail } from 'react-shimmer-effects';
+import Swal from 'sweetalert2';
+import useCountryState from '../../../../hooks/useCountryState';
+import useDetails from '../../../../hooks/useDetails';
 import {
   ADD_WISHLIST,
   GET_BEST_SELLER_DETAIL,
@@ -27,27 +27,27 @@ import {
   GET_CLASSIFICATION_PRODUCTLIST_AUTH,
   GET_USERS_CLASSIFICATION_API,
   USER_GET_BEST_SELLER_DETAIL,
-} from "../../../../services/APIServices";
-import "../../../../styles/globals.scss";
-import Footer from "../../../../utils/Footer";
-import Header from "../../../../utils/Header";
-import ImageComponent from "../../../../utils/ImageComponent";
-import { toastAlert } from "../../../../utils/SweetAlert";
-import UserLogInHeader from "../../../../utils/UserLogInHeader";
-import { constant, Paginations } from "../../../../utils/constants";
+} from '../../../../services/APIServices';
+import '../../../../styles/globals.scss';
+import Footer from '../../../../utils/Footer';
+import Header from '../../../../utils/Header';
+import ImageComponent from '../../../../utils/ImageComponent';
+import { toastAlert } from '../../../../utils/SweetAlert';
+import UserLogInHeader from '../../../../utils/UserLogInHeader';
+import { constant, Paginations } from '../../../../utils/constants';
 import {
   checkLanguage,
   FORMAT_NUMBER,
   formatCurrency,
-} from "../../../../utils/helper";
-import { trans } from "../../../../utils/trans";
-import "../page.scss";
+} from '../../../../utils/helper';
+import { trans } from '../../../../utils/trans';
+import '../page.scss';
 export default function page() {
   let detail = useDetails();
   const selectedCountry = useCountryState();
   let router = useRouter();
   let { id } = useParams();
-  const [meta, setMeta] = useState("");
+  const [meta, setMeta] = useState('');
   const [page, setPage] = useState(Paginations?.DEFAULT_PAGE);
 
   const {
@@ -56,52 +56,56 @@ export default function page() {
     isPending,
     isFetching,
   } = useQuery({
-    queryKey: ["company-detail-data", { id }],
+    queryKey: ['company-detail-data', { id }],
     queryFn: async () => {
       const res =
         detail?.roleId == constant?.USER
           ? await USER_GET_BEST_SELLER_DETAIL(id)
           : await GET_BEST_SELLER_DETAIL(id);
-      return res?.data?.data ?? "";
+      return res?.data?.data ?? '';
     },
   });
   const [type, setType] = useState(null);
   const [activeTab, setActiveTab] = useState(null);
   const { data: classificationList } = useQuery({
-    queryKey: ["classification-detail-data", { id }],
+    queryKey: ['classification-detail-data', { id }],
     queryFn: async () => {
       const res = await GET_USERS_CLASSIFICATION_API(id);
       setActiveTab(res?.data?.data?.at(0)?._id);
-      return res?.data?.data ?? "";
+      return res?.data?.data ?? '';
     },
   });
 
-  const { data: classificationProductList, refetch: classificationRefetch, isPending: isPendingCompanies } =
-    useQuery({
-      queryKey: ["classification-product-data", activeTab, page],
-      queryFn: async () => {
-        const res = activeTab ? detail?.roleId == constant?.USER
+  const {
+    data: classificationProductList,
+    refetch: classificationRefetch,
+    isPending: isPendingCompanies,
+  } = useQuery({
+    queryKey: ['classification-product-data', activeTab, page],
+    queryFn: async () => {
+      const res = activeTab
+        ? detail?.roleId == constant?.USER
           ? await GET_CLASSIFICATION_PRODUCTLIST_AUTH(activeTab, id, page)
-          : await GET_CLASSIFICATION_PRODUCTLIST(activeTab, id, page) : ""
-        setMeta(res?.data?._meta);
-        return res?.data?.data ?? "";
-      },
-    });
+          : await GET_CLASSIFICATION_PRODUCTLIST(activeTab, id, page)
+        : '';
+      setMeta(res?.data?._meta);
+      return res?.data?.data ?? '';
+    },
+  });
 
   const wishlistMutation = useMutation({
     mutationFn: (body) => ADD_WISHLIST(body),
     onSuccess: (resp) => {
-      toastAlert("success", resp?.data?.message);
+      toastAlert('success', resp?.data?.message);
       classificationRefetch();
     },
   });
-  let language = localStorage.getItem("language");
-  const Home = trans("home");
+  let language = localStorage.getItem('language');
+  const Home = trans('home');
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [page]);
-
 
   return (
     <>
@@ -109,100 +113,98 @@ export default function page() {
         <UserLogInHeader refetchAPI={refetch} />
       ) : (
         <Header refetchAPI={refetch} />
-      )}{" "}
+      )}{' '}
       {companyDetailData?.length !== 0 ? (
         <>
-          <Breadcrums
+          {/* <Breadcrums
             firstLink={Home}
             secondLink={"Company Detail"}
             language={language}
-          />
-          <section className="seller-view">
+          /> */}
+          <section className='seller-view p-0'>
             <Container>
-              <div className="my-profile-inner-box">
-                <div className="profile-cover-image">
-                <Link href="#">
-                {isPending ? <ShimmerThumbnail
-                  height={250}
-                  rounded
-
-                /> : <ImageComponent
-                  data={companyDetailData?.coverImg}
-                  shimmerHeight={250}
-                  dynamicLabellingState={true}
-                />}
-
-              </Link>
+              <div className='my-profile-inner-box'>
+                <div className='profile-cover-image'>
+                  <Link href='#'>
+                    {isPending ? (
+                      <ShimmerThumbnail height={250} rounded />
+                    ) : (
+                      <ImageComponent
+                        data={companyDetailData?.coverImg}
+                        shimmerHeight={250}
+                        dynamicLabellingState={true}
+                      />
+                    )}
+                  </Link>
                 </div>
-                <div className="profile-info-box">
-                  <div className="inner-info-box d-flex justify-content-between align-items-center">
-                    <div className="profile-image d-flex align-items-center">
-                      <div className="info-image">
-                      {isPending ? <ShimmerThumbnail
-                      height={200}
-                      rounded
-
-                    /> : <ImageComponent
-                      data={companyDetailData?.logo}
-                      dynamicLabellingState={true}
-                      shimmerHeight={200}
-                    />}
+                <div className='profile-info-box'>
+                  <div className='inner-info-box d-flex justify-content-between align-items-center'>
+                    <div className='profile-image d-flex align-items-center'>
+                      <div className='info-image'>
+                        {isPending ? (
+                          <ShimmerThumbnail height={200} rounded />
+                        ) : (
+                          <ImageComponent
+                            data={companyDetailData?.logo}
+                            dynamicLabellingState={true}
+                            shimmerHeight={200}
+                          />
+                        )}
                       </div>
 
-                      <div className="info-text ms-3">
+                      <div className='info-text ms-3'>
                         <h3>
-                          <Link href="#">{companyDetailData?.company}</Link>
+                          <Link href='#'>{companyDetailData?.company}</Link>
                         </h3>
                       </div>
                     </div>
-                    <div className="comapny-right-icon">
+                    <div className='comapny-right-icon'>
                       {companyDetailData?.couponService == true ? (
-                        <RiCouponLine title="Coupon Service" />
+                        <RiCouponLine title='Coupon Service' />
                       ) : (
-                        ""
+                        ''
                       )}
 
                       {companyDetailData?.pickupService == true ? (
-                        <FaWalking title="Pickup Service" />
+                        <FaWalking title='Pickup Service' />
                       ) : (
-                        ""
+                        ''
                       )}
 
                       {companyDetailData?.deliveryEligible == true ? (
-                        <TbTruckDelivery title="Self Delivery" />
+                        <TbTruckDelivery title='Self Delivery' />
                       ) : (
-                        ""
+                        ''
                       )}
 
                       {companyDetailData?.deliveryService == true ? (
-                        <TbTruckDelivery title="Delivery Service" />
+                        <TbTruckDelivery title='Delivery Service' />
                       ) : (
-                        ""
+                        ''
                       )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="dashboard_content mt-5">
-                <div className="inner_card">
+              <div className='dashboard_content mt-5'>
+                <div className='inner_card'>
                   <Row>
-
                     <Col lg={6}>
-                      <small className="text-muted">Category</small>
+                      <small className='text-muted'>Category</small>
                       <p>{companyDetailData?.categoryDetails?.category} </p>
                       <hr />
                     </Col>
                     <Col lg={6}>
-                      <small className="text-muted">
-                        Delivery Cost ({formatCurrency("", selectedCountry)})
+                      <small className='text-muted'>
+                        Delivery Cost ({formatCurrency('', selectedCountry)})
                       </small>
-                      <p>{companyDetailData?.costDelivery ?? "-"} </p>
+                      <p>{companyDetailData?.costDelivery ?? '-'} </p>
                       <hr />
                     </Col>
 
                     <Col lg={12}>
-                      <small className="text-muted">Description</small>
+                      <small className='text-muted'>Description</small>
                       <p>{companyDetailData?.description}</p>
                       <hr />
                     </Col>
@@ -210,12 +212,15 @@ export default function page() {
                 </div>
               </div>
 
-              <Nav variant="tabs grid-tabs mt-4 mb-3">
+              <Nav variant='tabs grid-tabs mt-4 mb-3'>
                 {classificationList?.map((tab, index) => (
                   <Nav.Item key={index}>
                     <Nav.Link
                       eventKey={tab?._id}
-                      onClick={() => { setActiveTab(tab?._id); setPage(1); }}
+                      onClick={() => {
+                        setActiveTab(tab?._id);
+                        setPage(1);
+                      }}
                       active={activeTab === tab?._id}
                     >
                       {tab?.classification?.name}
@@ -226,58 +231,62 @@ export default function page() {
 
               <TabContent activeKey={activeTab}>
                 <Row>
-
-                  {isPendingCompanies ? Array.from({ length: 4 }, (_, index) => (
-                    <Col lg={3} className="mb-4 pb-5" key={index}>   
-                      <ShimmerPostItem 
-                        variant="secondary" imageHeight={357} /></Col>
-                  )) : classificationProductList?.length !== 0 ? (
+                  {isPendingCompanies ? (
+                    Array.from({ length: 4 }, (_, index) => (
+                      <Col lg={3} className='mb-4 pb-5' key={index}>
+                        <ShimmerPostItem
+                          variant='secondary'
+                          imageHeight={357}
+                        />
+                      </Col>
+                    ))
+                  ) : classificationProductList?.length !== 0 ? (
                     classificationProductList?.map((data, index) => {
                       return (
-                        <Col lg={3} key={data?._id} className="mb-4">
-                          {" "}
-                          <div className="product-box-3  product-new">
-                            <div className="img-wrapper position-relative">
-                              <div className="product-image">
+                        <Col lg={3} key={data?._id} className='mb-4'>
+                          {' '}
+                          <div className='product-box-3  product-new'>
+                            <div className='img-wrapper position-relative'>
+                              <div className='product-image'>
                                 <Link
-                                  className="pro-first bg-size"
+                                  className='pro-first bg-size'
                                   href={`/product-detail/${data?._id}`}
                                 >
                                   {data?.productImg[0]?.type ? (
                                     data?.productImg[0]?.type?.includes(
-                                      "image"
+                                      'image'
                                     ) ? (
                                       <ImageComponent
-                                        className={"bg-img w-100"}
+                                        className={'bg-img w-100'}
                                         data={data?.productImg[0]?.url}
                                         width={300}
                                         height={400}
-                                        alt={"image"}
+                                        alt={'image'}
                                       />
                                     ) : (
                                       <video
-                                        width="100%"
-                                        height="100%"
+                                        width='100%'
+                                        height='100%'
                                         src={data?.productImg[0]?.url}
                                       />
                                     )
                                   ) : (
                                     <ImageComponent
-                                      className={"bg-img w-100"}
+                                      className={'bg-img w-100'}
                                       data={data?.productImg[0]?.url}
                                       width={300}
                                       height={400}
-                                      alt={"image"}
+                                      alt={'image'}
                                     />
                                   )}
                                 </Link>
                               </div>
-                              <div className="onhover-show">
+                              <div className='onhover-show'>
                                 <ul>
                                   <li>
                                     {data?.isWishlist == true ? (
                                       <Link
-                                        href="#"
+                                        href='#'
                                         onClick={(e) => {
                                           e.preventDefault();
 
@@ -287,13 +296,13 @@ export default function page() {
                                           ) {
                                             Swal.fire({
                                               title:
-                                                "You need to login to add the product in wishlist",
-                                              icon: "warning",
+                                                'You need to login to add the product in wishlist',
+                                              icon: 'warning',
                                               showCancelButton: true,
-                                              confirmButtonColor: "#3085d6",
-                                              cancelButtonColor: "#d33",
-                                              confirmButtonText: "Yes",
-                                              cancelButtonText: "Cancel",
+                                              confirmButtonColor: '#3085d6',
+                                              cancelButtonColor: '#d33',
+                                              confirmButtonText: 'Yes',
+                                              cancelButtonText: 'Cancel',
                                             }).then((result) => {
                                               if (result.isConfirmed) {
                                                 router.push(
@@ -307,7 +316,7 @@ export default function page() {
                                             let body = {
                                               productId: data?._id,
 
-                                              type: "1",
+                                              type: '1',
                                               isWishlist: false,
                                               web: true,
                                             };
@@ -319,7 +328,7 @@ export default function page() {
                                       </Link>
                                     ) : (
                                       <Link
-                                        href="#"
+                                        href='#'
                                         onClick={(e) => {
                                           e.preventDefault();
                                           if (
@@ -328,13 +337,13 @@ export default function page() {
                                           ) {
                                             Swal.fire({
                                               title:
-                                                "You need to login to add the product in wishlist",
-                                              icon: "warning",
+                                                'You need to login to add the product in wishlist',
+                                              icon: 'warning',
                                               showCancelButton: true,
-                                              confirmButtonColor: "#3085d6",
-                                              cancelButtonColor: "#d33",
-                                              confirmButtonText: "Yes",
-                                              cancelButtonText: "Cancel",
+                                              confirmButtonColor: '#3085d6',
+                                              cancelButtonColor: '#d33',
+                                              confirmButtonText: 'Yes',
+                                              cancelButtonText: 'Cancel',
                                             }).then((result) => {
                                               if (result.isConfirmed) {
                                                 router.push(
@@ -347,7 +356,7 @@ export default function page() {
                                           } else {
                                             let body = {
                                               productId: data?._id,
-                                              type: "1",
+                                              type: '1',
                                               isWishlist: true,
                                               web: true,
                                             };
@@ -362,8 +371,8 @@ export default function page() {
                                 </ul>
                               </div>
                             </div>
-                            <div className="product-detail text-center mt-4">
-                              <Link href="#">
+                            <div className='product-detail text-center mt-4'>
+                              <Link href='#'>
                                 <h6>
                                   {checkLanguage(
                                     data?.productName,
@@ -371,16 +380,16 @@ export default function page() {
                                   )}
                                 </h6>
                               </Link>
-                              <Link href="#">
+                              <Link href='#'>
                                 <h6>
                                   {data?.quantity == 0 ? (
-                                    <p className="text-danger">Out of stock</p>
+                                    <p className='text-danger'>Out of stock</p>
                                   ) : (
-                                    ""
+                                    ''
                                   )}
                                 </h6>
                               </Link>
-                              <p className="notranslate">
+                              <p className='notranslate'>
                                 {formatCurrency(
                                   data?.size?.at(0)?.price
                                     ? data?.size?.at(0)?.price
@@ -396,7 +405,7 @@ export default function page() {
                                   </del>
                                 ) : data?.discount ? (
                                   <del>
-                                    {" "}
+                                    {' '}
                                     {formatCurrency(
                                       data?.size?.at(0)?.mrp
                                         ? data?.size?.at(0)?.mrp
@@ -405,17 +414,17 @@ export default function page() {
                                     )}
                                   </del>
                                 ) : (
-                                  ""
+                                  ''
                                 )}
                                 {data?.discount !== null ? (
                                   <span>
                                     {FORMAT_NUMBER(data?.discount, true)}% off
                                   </span>
                                 ) : (
-                                  ""
+                                  ''
                                 )}
                                 {data?.size?.at(0)?.discount !== null &&
-                                  data?.size?.length !== 0 ? (
+                                data?.size?.length !== 0 ? (
                                   <span>
                                     {FORMAT_NUMBER(
                                       data?.size?.at(0)?.discount,
@@ -424,14 +433,14 @@ export default function page() {
                                     % off
                                   </span>
                                 ) : (
-                                  ""
+                                  ''
                                 )}
                               </p>
-                              <div className="listing-button text-center">
+                              <div className='listing-button text-center'>
                                 <Link
                                   href={`/product-detail/${data?._id}`}
-                                  className="btn btn-theme text-capitalize"
-                                  title="View Product"
+                                  className='btn btn-theme text-capitalize'
+                                  title='View Product'
                                 >
                                   View Product
                                 </Link>
@@ -446,33 +455,29 @@ export default function page() {
                       <NoDataFound />
                     </Col>
                   )}
-                  {!isPendingCompanies ? Math.ceil(meta?.totalCount / 10) > 1 && (
-                    <Pagination
-                      pageCount={"YES"}
-                      totalCount={meta?.totalCount}
-                      handelPageChange={(e) => setPage(e.selected + 1)}
-                      page={page}
-                    />
-                  ) : ""}
-
-
+                  {!isPendingCompanies
+                    ? Math.ceil(meta?.totalCount / 10) > 1 && (
+                        <Pagination
+                          pageCount={'YES'}
+                          totalCount={meta?.totalCount}
+                          handelPageChange={(e) => setPage(e.selected + 1)}
+                          page={page}
+                        />
+                      )
+                    : ''}
                 </Row>
               </TabContent>
-
-
             </Container>
           </section>
-
-
         </>
       ) : (
-        <Container className="d-flex justify-content-center align-items-center company-list-card">
+        <Container className='d-flex justify-content-center align-items-center company-list-card'>
           <Row>
-            <Col className="text-center">
+            <Col className='text-center'>
               <h4>Company details not found</h4>
               <button
-                className="btn btn-theme m-2"
-                onClick={() => router.push("/")}
+                className='btn btn-theme m-2'
+                onClick={() => router.push('/')}
               >
                 Go Back to Home
               </button>
@@ -481,7 +486,6 @@ export default function page() {
         </Container>
       )}
       <Footer />
-
     </>
   );
 }
