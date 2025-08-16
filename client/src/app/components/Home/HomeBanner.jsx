@@ -32,7 +32,7 @@ const HomeBanner = () => {
 
   return (
     <section className='p-0'>
-      <div className='slider-container bannerslide'>
+      <div className='slider-container bannerslide '>
         <Slider {...settings} dots={bannerList?.length > 1}>
           {bannerList?.map((data) => (
             <div className='bannersec' key={data?._id}>

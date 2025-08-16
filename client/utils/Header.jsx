@@ -368,6 +368,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
             <div className='d-lg-none d-block' onClick={handleShow}>
               <FaBars />
             </div>
+
             <div className='d-flex align-items-center gap-3'>
               {localStorage.getItem('offarat-contact') ? (
                 <Link
@@ -376,6 +377,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                   onClick={() =>
                     redirectToWhatsApp(localStorage.getItem('offarat-contact'))
                   }
+                  className='align-items-center gap-1 text-dark d-none d-md-flex'
                   dir='ltr'
                 >
                   <svg

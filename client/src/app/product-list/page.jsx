@@ -281,12 +281,12 @@ const ProductList = () => {
                         <BiFilter size={16} />
                         <small className='ms-2'>Filter</small>
                       </div>
-                      <div className='list-view'>
+                      <div className='list-view d-none d-lg-block'>
                         <Link className='active-btn' href='/product-list'>
                           <IoGrid />
                         </Link>
                       </div>
-                      <div className='grid-view'>
+                      <div className='grid-view d-none d-lg-block'>
                         <Link href='/product-grid'>
                           <FaList />
                         </Link>
