@@ -240,15 +240,15 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
               </div>
 
               <div className='d-flex align-items-center gap-2'>
-                <div className='form-group position-relative selectform mb-0 me-3'>
+                <div className='form-group position-relative selectform mb-0 me-3 d-none d-md-block'>
                   <Form.Select
                     onChange={handleCountryChange}
                     value={selectedCountry}
                   >
                     <option value={'Kuwait'}>Kuwait</option>
 
-                    <option value={'Jordan'}>Jordan</option>
-                    <option value={'United Arab Emirates'}>UAE</option>
+                    {/* <option value={'Jordan'}>Jordan</option>
+                    <option value={'United Arab Emirates'}>UAE</option> */}
                   </Form.Select>
                 </div>
                 <div>
@@ -368,6 +368,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
             <div className='d-lg-none d-block' onClick={handleShow}>
               <FaBars />
             </div>
+
             <div className='d-flex align-items-center gap-3'>
               {localStorage.getItem('offarat-contact') ? (
                 <Link
@@ -376,6 +377,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                   onClick={() =>
                     redirectToWhatsApp(localStorage.getItem('offarat-contact'))
                   }
+                  className='align-items-center gap-1 text-dark d-none d-md-flex'
                   dir='ltr'
                 >
                   <svg

@@ -234,8 +234,6 @@ const Home = ({ params }) => {
 
       <Container>
         <Row>
-          {/* <HomeHero /> */}
-          {/* Banner Section */}
           <HomeBanner />
         </Row>
 

@@ -7,14 +7,9 @@
 'use client';
 
 import { useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Container, Row, Col, Button, Spinner, Alert } from 'react-bootstrap';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
 
-import {
-  GET_FILTER_CLASSIFICATION_API,
-  USER_CATEGORYLIST,
-} from '../../../services/APIServices';
 import '../components/testFilter.scss';
 
 import { checkLanguage } from '../../../utils/helper';
@@ -167,8 +162,8 @@ const TestFilter = ({
                     key={cls._id}
                     variant={
                       classificationArr.includes(cls._id)
-                        ? 'primary'
-                        : 'outline-primary'
+                        ? 'danger'
+                        : 'outline-danger'
                     }
                     onClick={() => handleClassificationClick(cls)}
                     className='btn btn-sm fw-medium'
