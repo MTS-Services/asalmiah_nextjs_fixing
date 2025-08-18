@@ -2,91 +2,85 @@ import { useEffect, useState } from 'react';
 
 const TranslateWidget = () => {
   const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    // Load the Google Translate script
     const addGoogleTranslateScript = () => {
+      // Avoid duplicate script loading
+      if (document.querySelector('script[src*="translate_a/element.js"]')) {
+        return;
+      }
+
       const script = document.createElement('script');
       script.src =
         '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
       script.async = true;
+      script.onerror = () => {
+        console.error('Failed to load Google Translate script.');
+        setLoading(false);
+      };
       document.body.appendChild(script);
     };
 
-    const googleTranslateElementInit = () => {
+    // Declare the callback globally *before* loading the script
+    window.googleTranslateElementInit = () => {
+      /* eslint-disable no-undef */
       new window.google.translate.TranslateElement(
         {
-          pageLanguage: 'en', // Set your default language here
-          includedLanguages: 'en,ar', // Include only English and Arabic
-          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE, // Use SIMPLE layout
+          pageLanguage: 'en',
+          includedLanguages: 'en,ar',
+          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
           autoDisplay: false,
           multilanguagePage: true,
-          gaTrack: 'no',
-          disablePoweredBy: true,
-          attribute: false,
+          gaTrack: false,
+          // Note: `disablePoweredBy` and `attribute` are not valid options anymore
         },
         'google_translate_element'
       );
+      setLoading(false);
     };
 
-    window.googleTranslateElementInit = googleTranslateElementInit;
+    setLoading(true);
     addGoogleTranslateScript();
 
-    const removeDuplicateLanguageSelectors = () => {
-      const languageSelectors = document.getElementsByClassName(
-        'skiptranslate goog-te-gadget'
-      );
+    // Cleanup on unmount
+    return () => {
+      delete window.googleTranslateElementInit;
+    };
+  }, []);
 
-      const spanRemove = document.getElementsByClassName(
-        'VIpgJd-ZVi9od-xl07Ob-lTBxed'
+  // Observe for dropdown and language changes
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const dropdown = document.querySelector(
+        '#google_translate_element select.goog-te-combo'
       );
-      // Check if there are any span elements
-      if (spanRemove.length > 0) {
-        // Remove all but the last span element if there are duplicates
-        if (spanRemove?.length > 1) {
-          for (let i = 0; i < spanRemove?.length - 1; i++) {
-            spanRemove[i].remove();
-          }
-        }
-        // Loop through the span elements to get the language text
-        for (let i = 0; i < spanRemove.length; i++) {
-          const spanElement = spanRemove[i]?.querySelector('span');
-          if (
-            spanElement &&
-            spanElement?.textContent?.trim() != '' &&
-            spanElement?.textContent?.trim() != 'Select Language'
-          ) {
-            const currentLanguage = localStorage.getItem('language');
-            localStorage.setItem('language', spanElement?.textContent?.trim());
-            if (spanElement?.textContent?.trim() !== currentLanguage) {
-              setLoading(true);
-              window.location.reload(); // Refresh the page
-            }
-          }
-        }
-      }
-      const dropdown = document.querySelector('.goog-te-combo');
-      if (dropdown) {
+      if (dropdown && !dropdown.dataset.listenerAdded) {
+        dropdown.dataset.listenerAdded = 'true';
         dropdown.addEventListener('change', (event) => {
-          const selectedLanguage = event.target.value; // Get the selected value
-          localStorage.setItem('language', selectedLanguage); // Store it in localStorage
+          const lang = event.target.value;
+          localStorage.setItem('language', lang);
+          // Optional: reload to re-apply translation
+          // window.location.reload(); // Use sparingly
         });
       }
-    };
-    const observer = new MutationObserver(removeDuplicateLanguageSelectors);
-    observer.observe(document.getElementById('google_translate_element'), {
-      childList: true,
-      subtree: true,
+
+      // Restore last selected language
+      const savedLang = localStorage.getItem('language');
+      if (savedLang && dropdown && dropdown.value !== savedLang) {
+        dropdown.value = savedLang;
+        dropdown.dispatchEvent(new Event('change'));
+      }
     });
 
-    return () => {
-      observer.disconnect(); // Cleanup observer on component unmount
-    };
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
   }, []);
 
   return (
     <div className='transalte-style'>
-      {/* {loading && <Loading />} */}
-      <div id='google_translate_element'></div>
+      {loading && <div>Loading...</div>}
+      <div id='google_translate_element' />
     </div>
   );
 };

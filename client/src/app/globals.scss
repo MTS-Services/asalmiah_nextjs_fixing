@@ -106,7 +106,8 @@ header {
   }
 
   .slick-dots {
-    bottom: 15px !important;
+    display: block !important;
+    bottom: 12px !important;
     width: fit-content !important;
     margin: auto !important;
     list-style: none;
@@ -140,11 +141,17 @@ header {
         transform: translate(-50%, -50%);
       }
     }
+
+    li.slick-active button::before {
+      background: #da2a2c !important;
+    }
   }
 
-  .slick-dots li.slick-active button::before {
-    opacity: 1;
-    background: #da2a2c !important;
+  @media screen and (max-width: 991px) {
+    .slick-dots {
+      display: none !important;
+      bottom: 0px !important;
+    }
   }
 }
 

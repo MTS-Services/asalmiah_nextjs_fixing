@@ -355,19 +355,19 @@ const Home = ({ params }) => {
       /> */}
 
       {/* Offers Section */}
-      <OfferListComponent OfferLists={OfferLists} />
+      {/* <OfferListComponent OfferLists={OfferLists} /> */}
 
       {/* Dynamic Labels Section */}
-      <HomeDynamicLabels />
+      {/* <HomeDynamicLabels /> */}
 
       {/* Download App Section */}
-      <HomeDownloadApp />
+      {/* <HomeDownloadApp /> */}
 
       {/* Services Section */}
-      <HomeServices />
+      {/* <HomeServices /> */}
 
       {/* Testimonials Section */}
-      <HomeTestimonials testimonialRef={testimonialRef} />
+      {/* <HomeTestimonials testimonialRef={testimonialRef} /> */}
 
       {/* Footer */}
       <Footer testimonialLists={0} />
@@ -384,19 +384,22 @@ const Home = ({ params }) => {
               <b className='mt-2 m-2'>Filter</b>
             </span>
             <Filter
+              classListFilter={classListFilter}
+              companyList={companyList}
+              selectedCountry={selectedCountry}
               refetch={refetch}
               setCategoryArr={setCategoryArr}
+              categoryArr={categoryArr}
               setClassificationArr={setClassificationArr}
               classificationArr={classificationArr}
-              selectedCountry={selectedCountry}
-              categoryArr={categoryArr}
               setCompanyArr={setCompanyArr}
-              setSubCategoryArr={setSubCategoryArr}
               companyArr={companyArr}
+              setSubCategoryArr={setSubCategoryArr}
               subCategoryArr={subCategoryArr}
+              setSearch={setSearch}
               minPrice={minPrice}
-              maxPrice={maxPrice}
               setMinPrice={setMinPrice}
+              maxPrice={maxPrice}
               setMaxPrice={setMaxPrice}
               setMinDiscount={setMinDiscount}
               setMaxDiscount={setMaxDiscount}

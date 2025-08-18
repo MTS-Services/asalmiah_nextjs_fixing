@@ -45,11 +45,14 @@ import { trans } from '../../../../utils/trans';
 import '../page.scss';
 export default function page() {
   let detail = useDetails();
-  const selectedCountry = useCountryState();
   let router = useRouter();
   let { id } = useParams();
-  const [meta, setMeta] = useState('');
+  const selectedCountry = useCountryState();
+
   const [page, setPage] = useState(Paginations?.DEFAULT_PAGE);
+  const [activeTab, setActiveTab] = useState(null);
+  const [type, setType] = useState(null);
+  const [meta, setMeta] = useState('');
 
   const {
     data: companyDetailData,
@@ -67,10 +70,6 @@ export default function page() {
     },
   });
 
-  const [type, setType] = useState(null);
-
-  const [activeTab, setActiveTab] = useState(null);
-
   const { data: classificationList } = useQuery({
     queryKey: ['classification-detail-data', { id }],
     queryFn: async () => {
@@ -80,28 +79,65 @@ export default function page() {
     },
   });
 
+  //================================================================
+  // 📋 All Company Products
+  //================================================================
+  // const {
+  //   data: allCompanyProducts,
+  //   refetch: ProductsRefetch,
+  //   isPending: isPendingProducts,
+  // } = useQuery({
+  //   queryKey: ['all-company-products', activeTab, page, id],
+  //   queryFn: async () => {
+  //     const res = activeTab
+  //       ? detail?.roleId == constant?.USER
+  //         ? await GET_CLASSIFICATION_PRODUCTLIST_AUTH(activeTab, id, page)
+  //         : await GET_COMPANY_PRODUCTS_LIST(activeTab, id, page)
+  //       : '';
+  //     // const res = await GET_COMPANY_PRODUCTS_LIST(activeTab, id, page);
+  //     setMeta(res?.data?._meta);
+  //     return res?.data?.data ?? '';
+  //   },
+  // });
+
   const {
     data: allCompanyProducts,
-    refetch: classificationRefetch,
+    refetch: productsRefetch,
     isPending: isPendingProducts,
   } = useQuery({
-    queryKey: ['classification-product-data', activeTab, page, id],
+    queryKey: ['company-all-products', id, page],
     queryFn: async () => {
-      const res = activeTab
-        ? detail?.roleId == constant?.USER
-          ? await GET_CLASSIFICATION_PRODUCTLIST_AUTH(activeTab, id, page)
-          : await GET_CLASSIFICATION_PRODUCTLIST(activeTab, id, page)
-        : '';
-      setMeta(res?.data?._meta);
-      return res?.data?.data ?? '';
+      try {
+        const res = await GET_COMPANY_PRODUCTS_LIST(
+          id,
+          page,
+          Paginations.PAGE_LIMIT
+        );
+
+        // Set pagination metadata
+        setMeta(res?.data?._meta);
+
+        // Return product list
+        return res?.data?.data || [];
+      } catch (error) {
+        console.error('Failed to fetch company products:', error);
+        return [];
+      }
     },
+    enabled: !!id, // Only run if company ID exists
   });
 
+  console.log('allCompanyProducts :', allCompanyProducts);
+  //================================================================
+  // 📋 All Company Products End
+  //================================================================
   const wishlistMutation = useMutation({
     mutationFn: (body) => ADD_WISHLIST(body),
     onSuccess: (resp) => {
       toastAlert('success', resp?.data?.message);
       classificationRefetch();
+      productsRefetch();
+      // isFetching();
       // productsRefetch();
     },
   });
@@ -154,6 +190,7 @@ export default function page() {
                             data={companyDetailData?.logo}
                             dynamicLabellingState={true}
                             shimmerHeight={200}
+                            width={10}
                           />
                         )}
                       </div>
@@ -225,7 +262,7 @@ export default function page() {
                 </div>
               </div>
 
-              <Nav variant='tabs grid-tabs mt-4 mb-3'>
+              {/* <Nav variant='tabs grid-tabs mt-4 mb-3'>
                 {classificationList?.map((tab, index) => (
                   <Nav.Item key={index}>
                     <Nav.Link
@@ -240,9 +277,9 @@ export default function page() {
                     </Nav.Link>
                   </Nav.Item>
                 ))}
-              </Nav>
+              </Nav> */}
 
-              <TabContent activeKey={activeTab}>
+              <TabContent activeKey={activeTab} className='mt-4'>
                 {/* <Row>
                   {isPendingCompanies ? (
                     Array.from({ length: 4 }, (_, index) => (

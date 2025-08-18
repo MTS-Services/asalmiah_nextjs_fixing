@@ -1470,9 +1470,13 @@ export const GET_CLASS_DROPDOWN = async (id) => {
 // =================================
 // 📋 CLASS_LIST QUERY-CALL
 // =================================
-export const GET_COMPANY_PRODUCTS_LIST = async (id, page) => {
-  return await http.get(`product/filter`, {
-    params: { companyId: id },
+export const GET_COMPANY_PRODUCTS_LIST = async (id, page, pageLimit = 12) => {
+  return await http.get(`/product/filter`, {
+    params: {
+      pageLimit: pageLimit,
+      companyId: id,
+      pageNo: page,
+    },
   });
 };
 
@@ -1493,22 +1497,6 @@ export const GET_CLASSIFICATION_PRODUCTLIST = async (
     },
   });
 };
-
-// export const GET_CLASSIFICATION_PRODUCTLIST = async (
-//   classification,
-//   classificationCompany,
-//   page,
-//   pageLimit = 12
-// ) => {
-//   return await http.get(`/product/userProduct`, {
-//     params: {
-//       classification: classification,
-//       classificationCompany: classificationCompany,
-//       pageNo: page,
-//       pageLimit: pageLimit,
-//     },
-//   });
-// };
 
 export const GET_CLASSIFICATION_PRODUCTLIST_AUTH = async (
   classification,
