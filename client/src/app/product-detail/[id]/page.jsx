@@ -879,7 +879,7 @@ const ProductDetail = () => {
                                   window.dataLayer.push({
                                     event: 'add_to_cart', // GA4 Enhanced Ecommerce Event
                                     ecommerce: {
-                                      currency: 'BDT', // Your currency code (e.g., BDT, USD, EUR)
+                                      currency: 'EUR', // Your currency code (e.g., BDT, USD, EUR)
                                       value: productDetailData?.price * 1, // Assuming quantity is 1 if no selector
                                       items: [
                                         {
@@ -1049,7 +1049,12 @@ const ProductDetail = () => {
                                 {/* Offer Content */}
                                 {productDetailData?.offerContent ? (
                                   <div className='mt-4'>
-                                    <h5 className='mb-2 dis-title'>
+                                    <h5
+                                      className='mb-2 dis-title'
+                                      style={{
+                                        color: '#d33',
+                                      }}
+                                    >
                                       {offerContent}
                                     </h5>
                                     <p
@@ -1068,7 +1073,12 @@ const ProductDetail = () => {
                                 {/* Terms & Conditions */}
                                 {productDetailData?.termsCondition ? (
                                   <div className='comment mt-4'>
-                                    <h5 className='mb-2 dis-title'>
+                                    <h5
+                                      className='mb-2 dis-title'
+                                      style={{
+                                        color: '#d33',
+                                      }}
+                                    >
                                       Terms & Conditions
                                     </h5>
                                     <p

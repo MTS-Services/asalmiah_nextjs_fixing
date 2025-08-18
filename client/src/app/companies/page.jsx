@@ -112,8 +112,11 @@ export default function page() {
   });
 
   let router = useRouter();
+
   let language = localStorage.getItem('language');
+
   const languageCode = language && language.startsWith('Arabic') ? 'ar' : 'en';
+
   const Home = trans('home');
   useEffect(() => {
     window.scrollTo(0, 0);

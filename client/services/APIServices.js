@@ -1453,25 +1453,62 @@ export const GET_USERS_CLASSIFICATION_API = async (id) => {
   return await http.get(`/classification/companyClassification/${id}`);
 };
 
+// export const GET_CLASS_DROPDOWN = async (id) => {
+//   return await http.get(`/class/dropDownClass/${id}`);
+// };
+
+// =================================
+// 📋 CLASS_LIST QUERY-CALL
+// =================================
 export const GET_CLASS_DROPDOWN = async (id) => {
-  return await http.get(`/class/dropDownClass`);
+  if (!id) {
+    return await http.get('/class/dropDownClass');
+  }
+  return await http.get(`/class/dropDownClass/${id}`);
+};
+
+// =================================
+// 📋 CLASS_LIST QUERY-CALL
+// =================================
+export const GET_COMPANY_PRODUCTS_LIST = async (id, page) => {
+  return await http.get(`product/filter`, {
+    params: { companyId: id },
+  });
 };
 
 export const GET_CLASSIFICATION_PRODUCTLIST = async (
+  id,
   classification,
   classificationCompany,
   page,
   pageLimit = 12
 ) => {
-  return await http.get(`/product/userProduct`, {
+  return await http.get(`/product/filter`, {
     params: {
       classification: classification,
       classificationCompany: classificationCompany,
       pageNo: page,
       pageLimit: pageLimit,
+      classificationId: id, // Assuming you want to filter by classification ID
     },
   });
 };
+
+// export const GET_CLASSIFICATION_PRODUCTLIST = async (
+//   classification,
+//   classificationCompany,
+//   page,
+//   pageLimit = 12
+// ) => {
+//   return await http.get(`/product/userProduct`, {
+//     params: {
+//       classification: classification,
+//       classificationCompany: classificationCompany,
+//       pageNo: page,
+//       pageLimit: pageLimit,
+//     },
+//   });
+// };
 
 export const GET_CLASSIFICATION_PRODUCTLIST_AUTH = async (
   classification,
