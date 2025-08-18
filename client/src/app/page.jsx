@@ -11,13 +11,12 @@ import { useEffect, useRef, useState } from 'react';
 import useDetails from '../../hooks/useDetails';
 
 import {
-  GET_CATEGORY_LIST_HOME,
+  GET_USER_OFFERS,
+  GET_PRODUCTLIST,
+  USER_COMPANY_LIST,
+  USER_CATEGORYLIST,
   GET_CLASS_DROPDOWN,
   GET_FILTER_CLASSIFICATION_API,
-  GET_PRODUCTLIST,
-  GET_USER_OFFERS,
-  USER_CATEGORYLIST,
-  USER_COMPANY_LIST,
 } from '../../services/APIServices';
 
 import Footer from '../../utils/Footer';
@@ -39,11 +38,8 @@ import TopFilter from './components/TestFilter';
 import { Col, Container, Offcanvas, Row } from 'react-bootstrap';
 import Filter from './components/Filter';
 import useCountryState from '../../hooks/useCountryState';
-import Link from 'next/link';
 import { FaFilter, FaList } from 'react-icons/fa';
-import HomeHero from './components/Home/HomeHero';
 import { BiFilter } from 'react-icons/bi';
-import { IoGrid } from 'react-icons/io5';
 
 const Home = ({ params }) => {
   // =========================================
@@ -75,9 +71,8 @@ const Home = ({ params }) => {
     arabic: '',
   });
 
-  const [categoryID, setCategoryID] = useState('');
+  const [categoryID, setCategoryID] = useState(null);
 
-  const [subCategoryId, setSubCategoryId] = useState();
   const [show1, setShow1] = useState(false);
   const [search, setSearch] = useState('');
   const handleShow = () => setShow(true);
@@ -132,31 +127,8 @@ const Home = ({ params }) => {
     },
   });
 
-  // ================================
-  // 📋 COMPNAY LIST QUERY-CALL
-  // ================================
-  const { data: companyList } = useQuery({
-    queryKey: ['company-list', categoryID],
-    queryFn: async () => {
-      const resp = await USER_COMPANY_LIST(categoryID || null);
-      return resp?.data?.data ?? [];
-    },
-  });
-
-  // ================================
-  // 📋 CLSSIFICATION QUERY-CALL
-  // =================================
-  const { data: classListFilter } = useQuery({
-    queryKey: ['class-list'],
-    queryFn: async () => {
-      const resp = await GET_CLASS_DROPDOWN();
-
-      return resp?.data?.data ?? [];
-    },
-  });
-
   // ===============================================
-  // 📋 CATEGORY = FETCH & USE TS_QUERY
+  // 📋 CATEGORY-LIST = FETCH & USE TS_QUERY
   // ===============================================
   const {
     data: categoryList = [],
@@ -188,8 +160,31 @@ const Home = ({ params }) => {
     enabled: categoryArr.length > 0,
   });
 
+  // ================================
+  // 📋 COMPNAY_LIST QUERY-CALL
+  // ================================
+  const { data: companyList } = useQuery({
+    queryKey: ['company-list', categoryID],
+    queryFn: async () => {
+      const resp = await USER_COMPANY_LIST(categoryID || null);
+      return resp?.data?.data ?? [];
+    },
+  });
+
+  // ================================
+  // 📋 CLASS_LIST QUERY-CALL
+  // =================================
+  const { data: classListFilter } = useQuery({
+    queryKey: ['class-list', categoryID],
+    queryFn: async () => {
+      const resp = await GET_CLASS_DROPDOWN(categoryID || null);
+
+      return resp?.data?.data ?? [];
+    },
+  });
+
   // =========================================
-  // 📋 OFFER_LIS = FETCH & USE TS_QUERY
+  // 📋 OFFER_LIST = FETCH & USE TS_QUERY
   // =========================================
   const { data: OfferLists, refetch: refetchOfferList } = useQuery({
     queryKey: ['offer-list-home'],
@@ -235,6 +230,22 @@ const Home = ({ params }) => {
       <Container>
         <Row>
           <HomeBanner />
+        </Row>
+
+        <Row>
+          <div className='top-filter-menu '>
+            <Col lg={6} className='mt-lg-0 mt-4'>
+              <div className='d-flex align-items-center justify-content-lg-end justify-content-start gap-3 prodiuct-view'>
+                <div
+                  className='btn btn-theme filter_btn d-block d-lg-none'
+                  onClick={handleShow}
+                >
+                  <BiFilter size={16} />
+                  <small className='ms-2'>Filter</small>
+                </div>
+              </div>
+            </Col>
+          </div>
         </Row>
 
         <Row>

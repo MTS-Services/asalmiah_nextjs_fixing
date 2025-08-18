@@ -25,6 +25,7 @@ import {
   GET_BEST_SELLER_DETAIL,
   GET_CLASSIFICATION_PRODUCTLIST,
   GET_CLASSIFICATION_PRODUCTLIST_AUTH,
+  GET_COMPANY_PRODUCTS_LIST,
   GET_USERS_CLASSIFICATION_API,
   USER_GET_BEST_SELLER_DETAIL,
 } from '../../../../services/APIServices';
@@ -65,8 +66,11 @@ export default function page() {
       return res?.data?.data ?? '';
     },
   });
+
   const [type, setType] = useState(null);
+
   const [activeTab, setActiveTab] = useState(null);
+
   const { data: classificationList } = useQuery({
     queryKey: ['classification-detail-data', { id }],
     queryFn: async () => {
@@ -77,11 +81,11 @@ export default function page() {
   });
 
   const {
-    data: classificationProductList,
+    data: allCompanyProducts,
     refetch: classificationRefetch,
-    isPending: isPendingCompanies,
+    isPending: isPendingProducts,
   } = useQuery({
-    queryKey: ['classification-product-data', activeTab, page],
+    queryKey: ['classification-product-data', activeTab, page, id],
     queryFn: async () => {
       const res = activeTab
         ? detail?.roleId == constant?.USER
@@ -98,8 +102,10 @@ export default function page() {
     onSuccess: (resp) => {
       toastAlert('success', resp?.data?.message);
       classificationRefetch();
+      // productsRefetch();
     },
   });
+
   let language = localStorage.getItem('language');
   const Home = trans('home');
 
@@ -154,7 +160,14 @@ export default function page() {
 
                       <div className='info-text ms-3'>
                         <h3>
-                          <Link href='#'>{companyDetailData?.company}</Link>
+                          <Link
+                            href='#'
+                            style={{
+                              textDecoration: 'none',
+                            }}
+                          >
+                            {companyDetailData?.company}
+                          </Link>
                         </h3>
                       </div>
                     </div>
@@ -230,7 +243,7 @@ export default function page() {
               </Nav>
 
               <TabContent activeKey={activeTab}>
-                <Row>
+                {/* <Row>
                   {isPendingCompanies ? (
                     Array.from({ length: 4 }, (_, index) => (
                       <Col lg={3} className='mb-4 pb-5' key={index}>
@@ -465,6 +478,181 @@ export default function page() {
                         />
                       )
                     : ''}
+                </Row> */}
+                <Row>
+                  {isPendingProducts ? (
+                    Array.from({ length: 4 }, (_, index) => (
+                      <Col lg={3} className='mb-4 pb-5' key={index}>
+                        <ShimmerPostItem
+                          variant='secondary'
+                          imageHeight={357}
+                        />
+                      </Col>
+                    ))
+                  ) : allCompanyProducts?.length > 0 ? (
+                    allCompanyProducts.map((data) => (
+                      <Col lg={3} key={data._id} className='mb-4'>
+                        <div className='product-box-3 product-new'>
+                          <div className='img-wrapper position-relative'>
+                            <div className='product-image'>
+                              <Link
+                                className='pro-first bg-size'
+                                href={`/product-detail/${data._id}`}
+                              >
+                                {data.productImg?.[0]?.url ? (
+                                  data.productImg[0].type?.includes('image') ? (
+                                    <ImageComponent
+                                      className={'bg-img w-100'}
+                                      data={data.productImg[0].url}
+                                      width={300}
+                                      height={400}
+                                      alt='product'
+                                    />
+                                  ) : (
+                                    <video
+                                      width='100%'
+                                      height='100%'
+                                      src={data.productImg[0].url}
+                                    />
+                                  )
+                                ) : (
+                                  <ImageComponent
+                                    className={'bg-img w-100'}
+                                    data='/images/no-image.jpg'
+                                    width={300}
+                                    height={400}
+                                    alt='no image'
+                                  />
+                                )}
+                              </Link>
+                            </div>
+                            <div className='onhover-show'>
+                              <ul>
+                                <li>
+                                  {data.isWishlist ? (
+                                    <Link
+                                      href='#'
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        if (!detail) {
+                                          Swal.fire({
+                                            /* login prompt */
+                                          });
+                                        } else {
+                                          wishlistMutation.mutate({
+                                            productId: data._id,
+                                            type: '1',
+                                            isWishlist: false,
+                                            web: true,
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <AiFillHeart />
+                                    </Link>
+                                  ) : (
+                                    <Link
+                                      href='#'
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        if (!detail) {
+                                          Swal.fire({
+                                            /* login prompt */
+                                          });
+                                        } else {
+                                          wishlistMutation.mutate({
+                                            productId: data._id,
+                                            type: '1',
+                                            isWishlist: true,
+                                            web: true,
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <CiHeart />
+                                    </Link>
+                                  )}
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                          <div className='product-detail text-center mt-4'>
+                            <Link href='#'>
+                              <h6>
+                                {checkLanguage(
+                                  data.productName,
+                                  data.productArabicName
+                                )}
+                              </h6>
+                            </Link>
+                            <Link href='#'>
+                              <h6>
+                                {data.quantity == 0 ? (
+                                  <p className='text-danger'>Out of stock</p>
+                                ) : (
+                                  ''
+                                )}
+                              </h6>
+                            </Link>
+                            <p className='notranslate'>
+                              {formatCurrency(
+                                data.size?.[0]?.price || data.price,
+                                selectedCountry
+                              )}
+                              {data.size?.[0]?.discount ? (
+                                <del>
+                                  {formatCurrency(
+                                    data.size[0].mrp,
+                                    selectedCountry
+                                  )}
+                                </del>
+                              ) : data.discount ? (
+                                <del>
+                                  {formatCurrency(
+                                    data.size?.[0]?.mrp || data.mrpPrice,
+                                    selectedCountry
+                                  )}
+                                </del>
+                              ) : null}
+                              {data.discount && (
+                                <span>
+                                  {FORMAT_NUMBER(data.discount, true)}% off
+                                </span>
+                              )}
+                              {data.size?.[0]?.discount && (
+                                <span>
+                                  {FORMAT_NUMBER(data.size[0].discount, true)}%
+                                  off
+                                </span>
+                              )}
+                            </p>
+                            <div className='listing-button text-center'>
+                              <Link
+                                href={`/product-detail/${data._id}`}
+                                className='btn btn-theme text-capitalize'
+                                title='View Product'
+                              >
+                                View Product
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </Col>
+                    ))
+                  ) : (
+                    <Col lg={12}>
+                      <NoDataFound />
+                    </Col>
+                  )}
+
+                  {/* Pagination */}
+                  {!isPendingProducts && meta?.totalCount > 10 && (
+                    <Pagination
+                      totalCount={meta.totalCount}
+                      handelPageChange={(e) => setPage(e.selected + 1)}
+                      page={page}
+                    />
+                  )}
                 </Row>
               </TabContent>
             </Container>
