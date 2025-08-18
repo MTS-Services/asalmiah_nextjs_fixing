@@ -914,21 +914,27 @@ const ProductDetail = () => {
                           </Link>
                         )}
                       </div>
+
                       {/* Product Description and Details */}
                       <section
-                        className='product-description-main -mt-'
-                        style={{ marginTop: '-60px' }}
+                        className='product-description-main mt-2'
+                        style={{ marginTop: '60px' }}
                       >
                         <Container>
                           <Row>
                             <Col lg={12}>
                               <div className='product-description'>
-                                <h5 className='mb-2 dis-title'>
+                                <h5
+                                  className=' dis-title'
+                                  style={{
+                                    color: '#d33',
+                                  }}
+                                >
                                   {description}
                                 </h5>
 
                                 <div
-                                  className='mt-4'
+                                  className='mt-2'
                                   style={{ fontSize: '16px !important' }}
                                 >
                                   <p
@@ -936,13 +942,12 @@ const ProductDetail = () => {
                                       font: '400px',
                                       fontSize: '16px !important',
                                     }}
-                                    dangerouslySetInnerHTML={{
-                                      __html: checkLanguage(
-                                        productDetailData?.description,
-                                        productDetailData?.arabicDescription
-                                      ),
-                                    }}
-                                  ></p>
+                                  >
+                                    {checkLanguage(
+                                      productDetailData?.description,
+                                      productDetailData?.arabicDescription
+                                    )}
+                                  </p>
                                 </div>
 
                                 {/* Specifications */}
@@ -956,17 +961,16 @@ const ProductDetail = () => {
                                 productDetailData?.Brand ? (
                                   <div className='specification'>
                                     <h5
-                                      className='mb-2 dis-title'
+                                      className='mt-4 dis-title'
                                       style={{
-                                        font: '400px',
-                                        fontSize: '16px',
+                                        color: '#d33',
                                       }}
                                     >
                                       {specifications}
                                     </h5>
-                                    <div className='mt-1 table-responsive'>
+                                    <div className='mt-2 table-responsive'>
                                       {productDetailData?.madeIn ? (
-                                        <div>
+                                        <div className='mt-1'>
                                           <b>Made In: </b>
                                           <span>
                                             {productDetailData?.madeIn}
@@ -975,9 +979,10 @@ const ProductDetail = () => {
                                       ) : (
                                         ''
                                       )}
+
                                       {productDetailData?.companyDetails
                                         ?.costDelivery ? (
-                                        <div>
+                                        <div className='mt-1'>
                                           <b>Delivery Cost: </b>
                                           <span className='notranslate'>
                                             {formatCurrency(
@@ -990,8 +995,9 @@ const ProductDetail = () => {
                                       ) : (
                                         ''
                                       )}
+
                                       {productDetailData?.warranty ? (
-                                        <div>
+                                        <div className='mt-1'>
                                           <b>Warranty (Years) : </b>
                                           <span>
                                             {productDetailData?.warranty}
@@ -1001,7 +1007,7 @@ const ProductDetail = () => {
                                         ''
                                       )}
                                       {productDetailData?.material ? (
-                                        <div>
+                                        <div className='mt-1'>
                                           <b>Material : </b>
                                           <span>
                                             {productDetailData?.material}
@@ -1011,7 +1017,7 @@ const ProductDetail = () => {
                                         ''
                                       )}
                                       {productDetailData?.serialCode ? (
-                                        <div>
+                                        <div className='mt-1'>
                                           <b>Serial Code : </b>
                                           <span>
                                             {productDetailData?.serialCode}
@@ -1021,7 +1027,7 @@ const ProductDetail = () => {
                                         ''
                                       )}
                                       {productDetailData?.weight ? (
-                                        <div>
+                                        <div className='mt-1'>
                                           <b>Weight (KG) : </b>
                                           <span>
                                             {productDetailData?.weight}

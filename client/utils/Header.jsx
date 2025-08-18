@@ -142,7 +142,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
     <>
       <div className='topbar '>
         <Container>
-          <div className='d-flex  py-3 align-items-center justify-content-between'>
+          <div className='d-flex py-3 align-items-center justify-content-between'>
             <Navbar.Brand href='/'>
               <Image
                 src={`/assets/img/logo.png`}
@@ -292,7 +292,6 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
               </Button>
             </Form>
           </div>
-          <hr />
         </Container>
 
         <Container>
@@ -351,7 +350,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                 >
                   {companiesText}
                 </Link>
-                {pathName === '/' && (
+                {/* {pathName === '/' && (
                   <Link
                     className={`nav-link ${
                       window.location.hash === '#testimonials' ? 'fw-bold' : ''
@@ -361,7 +360,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                   >
                     {testimonialsText}
                   </Link>
-                )}
+                )} */}
               </Nav>
             </Navbar.Collapse>
 
@@ -489,7 +488,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
               >
                 {companiesText}
               </Link>
-              {pathName === '/' && (
+              {/* {pathName === '/' && (
                 <Link
                   href='#'
                   className={`nav-link ${
@@ -503,7 +502,7 @@ export const Header = ({ params, scrollToTestimonial, refetchAPI }) => {
                 >
                   {testimonialsText}
                 </Link>
-              )}
+              )} */}
             </Nav>
 
             {contact && (
