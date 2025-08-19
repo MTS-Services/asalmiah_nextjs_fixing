@@ -5449,14 +5449,21 @@ product.filterProducts = async (req, res, next) => {
 
     // Build dynamic match filter based on query parameters
     let matchFilter = { stateId: CONST.ACTIVE };
+    let additionalCompanyFilter = {};
 
     // Add filters based on query parameters
     if (req.query.companyId) {
       matchFilter.company = new mongoose.Types.ObjectId(req.query.companyId);
     }
+    
+    // For category filtering, we need to consider both:
+    // 1. Products that directly belong to this category
+    // 2. Products whose company belongs to this category (company->category relationship)
     if (req.query.categoryId) {
-      matchFilter.categoryId = new mongoose.Types.ObjectId(req.query.categoryId);
+      // We'll handle this in the company lookup pipeline
+      additionalCompanyFilter.categoryId = new mongoose.Types.ObjectId(req.query.categoryId);
     }
+    
     if (req.query.subcategoryId) {
       matchFilter.subcategoryId = new mongoose.Types.ObjectId(req.query.subcategoryId);
     }
@@ -5465,20 +5472,20 @@ product.filterProducts = async (req, res, next) => {
     }
 
     // Handle classId filtering - find classifications that belong to this class
-    let classificationIds = [];
     if (req.query.classId) {
       const classificationsInClass = await CALSSIFICATION.find({
         classId: new mongoose.Types.ObjectId(req.query.classId),
         stateId: { $ne: CONST.DELETED }
       }).select('_id');
       
-      classificationIds = classificationsInClass.map(c => c._id);
+      const classificationIds = classificationsInClass.map(c => c._id);
       
       if (classificationIds.length > 0) {
         matchFilter.classification = { $in: classificationIds };
       } else {
         // If no classifications found for this class, return empty result
-        matchFilter._id = new mongoose.Types.ObjectId('000000000000000000000000'); // Non-existent ID
+        await setResponseObject(req, true, "No products found", []);
+        return next();
       }
     }
 
@@ -5677,43 +5684,24 @@ product.filterProducts = async (req, res, next) => {
       ];
     }
 
-    // Build aggregate pipeline with debug steps
+    // Build aggregate pipeline
     let pipeline = [
       { $match: matchFilter },
-      // Add debug stage to see what's left after initial match
-      {
-        $addFields: {
-          debug_step: "after_initial_match"
-        }
-      },
       {
         $lookup: {
           from: "companies",
           let: { id: "$company" },
           pipeline: [
             {
-              $match: {
-                $expr: { $eq: ["$$id", "$_id"] },
-                stateId: CONST.ACTIVE,
-                country: country
-              },
+              $match: Object.assign(
+                {
+                  $expr: { $eq: ["$$id", "$_id"] },
+                  stateId: CONST.ACTIVE,
+                  country: country
+                },
+                additionalCompanyFilter
+              )
             },
-            {
-              $lookup: {
-                from: "branches",
-                let: { companyId: "$_id" },
-                pipeline: [
-                  {
-                    $match: {
-                      $expr: { $eq: ["$$companyId", "$companyId"] },
-                      stateId: CONST.ACTIVE,
-                    },
-                  },
-                ],
-                as: "activeBranches",
-              },
-            },
-            // Make this optional - don't require branches for now
             {
               $project: {
                 _id: 1,
@@ -5729,8 +5717,8 @@ product.filterProducts = async (req, res, next) => {
                 arabicCompany: 1,
                 logo: 1,
                 coverImg: 1,
-                activeBranches: 1,
-                branchCount: { $size: "$activeBranches" }
+                categoryId: 1,
+                subcategoryId: 1
               },
             },
           ],
@@ -5738,20 +5726,8 @@ product.filterProducts = async (req, res, next) => {
         },
       },
       {
-        $unwind: { path: "$companyDetails", preserveNullAndEmptyArrays: true },
+        $unwind: { path: "$companyDetails", preserveNullAndEmptyArrays: false },
       },
-      // Debug: Check if company lookup is working
-      {
-        $addFields: {
-          debug_company_exists: { $cond: [{ $ifNull: ["$companyDetails", false] }, "yes", "no"] },
-          debug_branch_count: { $ifNull: ["$companyDetails.branchCount", 0] }
-        }
-      },
-      // Only filter by company existence, not branches for now
-      {
-        $match: { companyDetails: { $exists: true } },
-      },
-      // Skip the quantity grouping for now to isolate the issue
     ];
 
     // Add price filter if provided
@@ -5973,10 +5949,6 @@ product.filterProducts = async (req, res, next) => {
             averageRating: { $ifNull: ["$averageRating", 0] },
           },
           createdAt: 1,
-          // Include debug fields to see what's happening
-          debug_step: 1,
-          debug_company_exists: 1,
-          debug_branch_count: 1
         },
       },
       {
@@ -6015,30 +5987,9 @@ product.filterProducts = async (req, res, next) => {
       }
     );
 
-    // Debug: Check company details before pipeline
-    if (req.query.companyId) {
-      const companyDebug = await COMPANY_MODEL.findById(req.query.companyId);
-      console.log("Company debug:", companyDebug ? {
-        _id: companyDebug._id,
-        company: companyDebug.company,
-        stateId: companyDebug.stateId,
-        country: companyDebug.country
-      } : "Company not found");
-    }
-
     const products = await PRODUCT_MODEL.aggregate(pipeline);
 
     console.log("Final pipeline result count:", products[0]?.data?.length || 0);
-    
-    // Debug: Show first result if any
-    if (products[0]?.data?.length > 0) {
-      console.log("First result debug fields:", {
-        debug_step: products[0].data[0].debug_step,
-        debug_company_exists: products[0].data[0].debug_company_exists,
-        debug_branch_count: products[0].data[0].debug_branch_count,
-        productName: products[0].data[0].productName
-      });
-    }
 
     if (products && products[0].data.length) {
       await setResponseObject(
