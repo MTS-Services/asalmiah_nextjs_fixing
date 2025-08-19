@@ -21,6 +21,38 @@
   }
 }
 
+/* This class will style the container of the profile image */
+.profile-logo-container {
+  width: 120px; // Sets a smaller width
+  height: 120px; // Sets a smaller height
+  border-radius: 50%; // This is the key to making it round
+  overflow: hidden; // Ensures the image corners are clipped
+  border: 4px solid white; // Optional: Adds a nice border
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); // Optional: Adds a subtle shadow
+  background-color: #f0f0f0; // Fallback color while image loads
+
+  /* This targets the actual <img> tag rendered by your ImageComponent */
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; // Prevents the image from being stretched or squished
+  }
+}
+/* Media Queries for responsiveness */
+@media (min-width: 768px) {
+  .profile-logo-container {
+    width: var(--logo-size-medium);
+    height: var(--logo-size-medium);
+  }
+}
+
+@media (min-width: 1024px) {
+  .profile-logo-container {
+    width: var(--logo-size-large);
+    height: var(--logo-size-large);
+  }
+}
+
 .my-profile-inner-box .profile-info-box {
   padding: 15px 30px 15px;
   position: relative;
@@ -105,7 +137,7 @@
   display: none;
 }
 .my-profile-inner-box .profile-info-box .inner-info-box .statistics li::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   right: -18px;
