@@ -5449,44 +5449,116 @@ product.filterProducts = async (req, res, next) => {
 
     // Build dynamic match filter based on query parameters
     let matchFilter = { stateId: CONST.ACTIVE };
-    let additionalCompanyFilter = {};
+    let companiesInCategory = [];
 
     // Add filters based on query parameters
-    if (req.query.companyId) {
-      matchFilter.company = new mongoose.Types.ObjectId(req.query.companyId);
-    }
-    
-    // For category filtering, we need to consider both:
-    // 1. Products that directly belong to this category
-    // 2. Products whose company belongs to this category (company->category relationship)
-    if (req.query.categoryId) {
-      // We'll handle this in the company lookup pipeline
-      additionalCompanyFilter.categoryId = new mongoose.Types.ObjectId(req.query.categoryId);
-    }
-    
-    if (req.query.subcategoryId) {
-      matchFilter.subcategoryId = new mongoose.Types.ObjectId(req.query.subcategoryId);
-    }
-    if (req.query.classificationId) {
-      matchFilter.classification = new mongoose.Types.ObjectId(req.query.classificationId);
-    }
-
-    // Handle classId filtering - find classifications that belong to this class
-    if (req.query.classId) {
+    if (req.query.companyId && req.query.categoryId && req.query.classId) {
+      // When all three are provided: categoryId, companyId, and classId
+      // First verify the company belongs to the specified category
+      const companyInCategory = await COMPANY_MODEL.findOne({
+        _id: new mongoose.Types.ObjectId(req.query.companyId),
+        categoryId: new mongoose.Types.ObjectId(req.query.categoryId),
+        stateId: CONST.ACTIVE,
+        country: country
+      }).select('_id').lean();
+      
+      if (!companyInCategory) {
+        console.log(`Company ${req.query.companyId} does NOT belong to category ${req.query.categoryId}`);
+        await setResponseObject(req, true, "No products found", []);
+        return next();
+      }
+      
+      // Find classifications that belong to the specified class
       const classificationsInClass = await CALSSIFICATION.find({
         classId: new mongoose.Types.ObjectId(req.query.classId),
         stateId: { $ne: CONST.DELETED }
-      }).select('_id');
+      }).select('_id').lean();
+      
+      if (classificationsInClass.length === 0) {
+        console.log(`No classifications found for class ${req.query.classId}`);
+        await setResponseObject(req, true, "No products found", []);
+        return next();
+      }
       
       const classificationIds = classificationsInClass.map(c => c._id);
+      console.log(`Company ${req.query.companyId} belongs to category ${req.query.categoryId}`);
+      console.log(`Found ${classificationIds.length} classifications in class ${req.query.classId}`);
+      
+      // Filter by both company and classifications
+      matchFilter.company = new mongoose.Types.ObjectId(req.query.companyId);
+      matchFilter.classification = { $in: classificationIds };
+      
+    } else if (req.query.companyId && req.query.categoryId) {
+      // When both categoryId and companyId are provided:
+      // First verify the company belongs to the specified category
+      const companyInCategory = await COMPANY_MODEL.findOne({
+        _id: new mongoose.Types.ObjectId(req.query.companyId),
+        categoryId: new mongoose.Types.ObjectId(req.query.categoryId),
+        stateId: CONST.ACTIVE,
+        country: country
+      }).select('_id').lean();
+      
+      if (companyInCategory) {
+        console.log(`Company ${req.query.companyId} belongs to category ${req.query.categoryId}`);
+        matchFilter.company = new mongoose.Types.ObjectId(req.query.companyId);
+      } else {
+        console.log(`Company ${req.query.companyId} does NOT belong to category ${req.query.categoryId}`);
+        // Company doesn't belong to this category, return empty result
+        await setResponseObject(req, true, "No products found", []);
+        return next();
+      }
+    } else if (req.query.companyId) {
+      // Only companyId provided
+      matchFilter.company = new mongoose.Types.ObjectId(req.query.companyId);
+    } else if (req.query.categoryId) {
+      // Only categoryId provided - find all companies in this category, then products from those companies
+      const companiesInCategoryResult = await COMPANY_MODEL.find({
+        categoryId: new mongoose.Types.ObjectId(req.query.categoryId),
+        stateId: CONST.ACTIVE,
+        country: country
+      }).select('_id').lean();
+      
+      companiesInCategory = companiesInCategoryResult.map(c => c._id);
+      
+      console.log(`Companies in category ${req.query.categoryId}:`, companiesInCategory.length);
+      
+      if (companiesInCategory.length > 0) {
+        // Filter products by companies that belong to this category
+        matchFilter.company = { $in: companiesInCategory };
+      } else {
+        // If no companies found in this category, return empty result
+        await setResponseObject(req, true, "No products found", []);
+        return next();
+      }
+    } else if (req.query.classId) {
+      // Only classId provided - find classifications with this classId, then products with those classifications
+      const classificationsInClass = await CALSSIFICATION.find({
+        classId: new mongoose.Types.ObjectId(req.query.classId),
+        stateId: { $ne: CONST.DELETED }
+      }).select('_id').lean();
+      
+      const classificationIds = classificationsInClass.map(c => c._id);
+      console.log(`Classifications in class ${req.query.classId}:`, classificationIds.length);
       
       if (classificationIds.length > 0) {
+        // Filter products by classifications that belong to this class
         matchFilter.classification = { $in: classificationIds };
       } else {
         // If no classifications found for this class, return empty result
         await setResponseObject(req, true, "No products found", []);
         return next();
       }
+    }
+    
+    if (req.query.subcategoryId) {
+      matchFilter.subcategoryId = new mongoose.Types.ObjectId(req.query.subcategoryId);
+    }
+    
+    // Handle classificationId - this can be combined with any other filters
+    if (req.query.classificationId) {
+      // If classificationId is provided, it overrides any classification filter from classId
+      matchFilter.classification = new mongoose.Types.ObjectId(req.query.classificationId);
+      console.log(`Direct classification filter applied: ${req.query.classificationId}`);
     }
 
     // Build price filter
@@ -5645,6 +5717,89 @@ product.filterProducts = async (req, res, next) => {
     console.log("Price filter:", priceFilter);
     console.log("Discount filter:", discountFilter);
 
+    // Debug: Check how many products match the filters
+    if (req.query.companyId && req.query.categoryId && req.query.classId && req.query.classificationId) {
+      console.log("All filters applied: company, category, class, and specific classification");
+      const productsWithAllFiltersCount = await PRODUCT_MODEL.countDocuments({
+        company: matchFilter.company,
+        classification: matchFilter.classification,
+        stateId: CONST.ACTIVE
+      });
+      console.log(`Products matching all filters:`, productsWithAllFiltersCount);
+    } else if (req.query.companyId && req.query.categoryId && req.query.classId) {
+      const productsWithAllFiltersCount = await PRODUCT_MODEL.countDocuments({
+        company: matchFilter.company,
+        classification: matchFilter.classification,
+        stateId: CONST.ACTIVE
+      });
+      console.log(`Products matching company ${req.query.companyId}, category ${req.query.categoryId}, and class ${req.query.classId}:`, productsWithAllFiltersCount);
+      
+      // Debug: Show all products matching all three filters
+      const productsWithAllFilters = await PRODUCT_MODEL.find({
+        company: matchFilter.company,
+        classification: matchFilter.classification,
+        stateId: CONST.ACTIVE
+      }).select('_id productName company classification stateId').lean();
+      
+      console.log("All products matching all three filters:", productsWithAllFilters.map(p => ({
+        id: p._id,
+        name: p.productName,
+        companyId: p.company,
+        classificationId: p.classification,
+        stateId: p.stateId
+      })));
+    } else if (req.query.categoryId && !req.query.companyId && companiesInCategory.length > 0) {
+      const productsFromCompaniesCount = await PRODUCT_MODEL.countDocuments({
+        company: { $in: companiesInCategory },
+        stateId: CONST.ACTIVE
+      });
+      console.log(`Products from companies in category ${req.query.categoryId}:`, productsFromCompaniesCount);
+      
+      // Debug: Show all products from companies in this category
+      const productsFromCompanies = await PRODUCT_MODEL.find({
+        company: { $in: companiesInCategory },
+        stateId: CONST.ACTIVE
+      }).select('_id productName company stateId').lean();
+      
+      console.log("All products from companies in this category:", productsFromCompanies.map(p => ({
+        id: p._id,
+        name: p.productName,
+        companyId: p.company,
+        stateId: p.stateId
+      })));
+    } else if (req.query.classId && matchFilter.classification && !req.query.classificationId) {
+      const productsWithClassificationsCount = await PRODUCT_MODEL.countDocuments({
+        classification: matchFilter.classification,
+        stateId: CONST.ACTIVE
+      });
+      console.log(`Products with classifications in class ${req.query.classId}:`, productsWithClassificationsCount);
+      
+      // Debug: Show all products with classifications in this class
+      const productsWithClassifications = await PRODUCT_MODEL.find({
+        classification: matchFilter.classification,
+        stateId: CONST.ACTIVE
+      }).select('_id productName classification stateId').lean();
+      
+      console.log("All products with classifications in this class:", productsWithClassifications.map(p => ({
+        id: p._id,
+        name: p.productName,
+        classificationId: p.classification,
+        stateId: p.stateId
+      })));
+    } else if (req.query.classificationId) {
+      const productsWithClassificationCount = await PRODUCT_MODEL.countDocuments({
+        classification: matchFilter.classification,
+        stateId: CONST.ACTIVE
+      });
+      console.log(`Products with specific classification ${req.query.classificationId}:`, productsWithClassificationCount);
+    } else if (req.query.companyId) {
+      const productsFromCompanyCount = await PRODUCT_MODEL.countDocuments({
+        company: new mongoose.Types.ObjectId(req.query.companyId),
+        stateId: CONST.ACTIVE
+      });
+      console.log(`Products from company ${req.query.companyId}:`, productsFromCompanyCount);
+    }
+
     // Search filter
     let searchFilter = {};
     if (req.query.search && req.query.search !== "undefined") {
@@ -5693,14 +5848,10 @@ product.filterProducts = async (req, res, next) => {
           let: { id: "$company" },
           pipeline: [
             {
-              $match: Object.assign(
-                {
-                  $expr: { $eq: ["$$id", "$_id"] },
-                  stateId: CONST.ACTIVE,
-                  country: country
-                },
-                additionalCompanyFilter
-              )
+              $match: {
+                $expr: { $eq: ["$$id", "$_id"] },
+                stateId: CONST.ACTIVE
+              }
             },
             {
               $project: {
@@ -5718,7 +5869,8 @@ product.filterProducts = async (req, res, next) => {
                 logo: 1,
                 coverImg: 1,
                 categoryId: 1,
-                subcategoryId: 1
+                subcategoryId: 1,
+                country: 1
               },
             },
           ],
@@ -5726,7 +5878,11 @@ product.filterProducts = async (req, res, next) => {
         },
       },
       {
-        $unwind: { path: "$companyDetails", preserveNullAndEmptyArrays: false },
+        $unwind: { path: "$companyDetails", preserveNullAndEmptyArrays: true },
+      },
+      // Only include products with valid companies
+      {
+        $match: { companyDetails: { $exists: true } }
       },
     ];
 
@@ -5768,7 +5924,7 @@ product.filterProducts = async (req, res, next) => {
       {
         $lookup: {
           from: "categories",
-          let: { id: "$categoryId" },
+          let: { id: "$companyDetails.categoryId" },
           pipeline: [
             {
               $match: {
@@ -5937,7 +6093,6 @@ product.filterProducts = async (req, res, next) => {
           order: 1,
           isDelivered: 1,
           company: 1,
-          categoryId: 1,
           subcategoryId: 1,
           classification: 1,
           companyDetails: 1,
@@ -5990,6 +6145,20 @@ product.filterProducts = async (req, res, next) => {
     const products = await PRODUCT_MODEL.aggregate(pipeline);
 
     console.log("Final pipeline result count:", products[0]?.data?.length || 0);
+    console.log("Total count from facet:", products[0]?.count[0]?.count || 0);
+    
+    // Debug: Show company details for each result
+    if (products[0]?.data?.length > 0) {
+      products[0].data.forEach((product, index) => {
+        console.log(`Product ${index + 1}:`, {
+          id: product._id,
+          name: product.productName,
+          companyExists: !!product.companyDetails,
+          companyCountry: product.companyDetails?.country,
+          companyCategoryId: product.companyDetails?.categoryId
+        });
+      });
+    }
 
     if (products && products[0].data.length) {
       await setResponseObject(
