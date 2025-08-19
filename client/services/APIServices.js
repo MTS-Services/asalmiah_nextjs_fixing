@@ -42,33 +42,15 @@ paymentHttp.interceptors.request.use(
   }
 );
 
-/****************************Test PRODUCTS*******************************/
-
-// export const GET_PRODUCTLIST = async (
-//   classId,
-//   companyId,
-//   classificationId,
-//   maxPrice,
-//   minPrice,
-//   minDiscount,
-//   maxDiscount,
-//   pageNo
-// ) => {
-//   return await http.get(`/product/filter`, {
-//     params: {
-//       classId: classId,
-//       companyId: companyId,
-//       classificationId: classificationId,
-//       pageNo: pageNo || 1,
-//     },
-//   });
-// };
-
+/****************************
+ * ✅ TEST PRODUCTS
+ * *******************************/
 export const GET_PRODUCTLIST = async (
-  classId,
-  companyId,
+  categoryID,
   classificationId,
-  pageNo,
+  companyId,
+  classId,
+  pageNo = 1,
   minPrice = 0,
   maxPrice = 1000,
   minDiscount = 0,
@@ -76,14 +58,15 @@ export const GET_PRODUCTLIST = async (
 ) => {
   return await http.get(`/product/filter`, {
     params: {
-      classId: classId,
-      companyId: companyId,
+      categoryId: categoryID,
       classificationId: classificationId,
-      pageNo: pageNo || 1,
-      minPrice, // ✅ Add to params
-      maxPrice, // ✅
-      minDiscount, // ✅
-      maxDiscount, // ✅
+      companyId: companyId,
+      classId: classId,
+      pageNo,
+      minPrice,
+      maxPrice,
+      minDiscount,
+      maxDiscount,
     },
   });
 };

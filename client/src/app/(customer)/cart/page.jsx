@@ -235,7 +235,7 @@ const Cart = () => {
       ) : (
         <Header refetchAPI={refetch} />
       )}
-      <Breadcrums firstLink={Home} secondLink={'Cart'} language={language} />
+      {/* <Breadcrums firstLink={Home} secondLink={'Cart'} language={language} /> */}
 
       <section className='cart-main'>
         <Container>

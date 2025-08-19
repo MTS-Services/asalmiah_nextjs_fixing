@@ -23,22 +23,26 @@ import Footer from '../../utils/Footer';
 import Header from '../../utils/Header';
 import { trans } from '../../utils/trans';
 import { constant } from '../../utils/constants';
+
 import UserLogInHeader from '../../utils/UserLogInHeader';
 
 import OfferListComponent from './components/OfferListComponent';
 import HomeDynamicLabels from './components/Home/HomeDynamicLabels';
-import HomeDownloadApp from './components/Home/HomeDownloadApp';
-import HomeBanner from './components/Home/HomeBanner';
-import HomeServices from './components/Home/HomeServices';
-import HomeProductList from './components/Home/HomeProductList';
 import HomeTestimonials from './components/Home/HomeTestimonials';
-
+import HomeDownloadApp from './components/Home/HomeDownloadApp';
+import HomeServices from './components/Home/HomeServices';
 import CategoryModal from './components/CategoryModal';
-import TopFilter from './components/TestFilter';
+
+import HomeProductList from './components/Home/HomeProductList';
+import HomeBanner from './components/Home/HomeBanner';
+
 import { Col, Container, Offcanvas, Row } from 'react-bootstrap';
 import Filter from './components/Filter';
+import TopFilter from './components/TestFilter';
+
 import useCountryState from '../../hooks/useCountryState';
-import { FaFilter, FaList } from 'react-icons/fa';
+
+import { FaFilter } from 'react-icons/fa';
 import { BiFilter } from 'react-icons/bi';
 
 const Home = ({ params }) => {
@@ -49,8 +53,11 @@ const Home = ({ params }) => {
   const [subCategoryArr, setSubCategoryArr] = useState([]);
   const [categoryArr, setCategoryArr] = useState([]);
   const [companyArr, setCompanyArr] = useState([]);
+  const [classId, setClassId] = useState([]); // plural & array
+  const [categoryID, setCategoryID] = useState(null);
 
-  const selectedCountry = useCountryState();
+  console.log('classId:', classId);
+  console.log('categoryID:', categoryID);
 
   // =========================================
   // ✅ RANGE STATE
@@ -60,19 +67,18 @@ const Home = ({ params }) => {
   const [maxPrice, setMaxPrice] = useState(1000000);
   const [maxDiscount, setMaxDiscount] = useState(100);
 
-  // =========================================
-  // ✅ EXISTING STATE
-  // =========================================
-  const [show, setShow] = useState(false);
-  const testimonialRef = useRef(null);
   const [categoryId, setCategoryId] = useState({
     id: '',
     name: '',
     arabic: '',
   });
+  // =========================================
+  // ✅ EXISTING STATE
+  // =========================================
+  const selectedCountry = useCountryState();
+  const testimonialRef = useRef(null);
 
-  const [categoryID, setCategoryID] = useState(null);
-
+  const [show, setShow] = useState(false);
   const [show1, setShow1] = useState(false);
   const [search, setSearch] = useState('');
   const handleShow = () => setShow(true);
@@ -85,7 +91,6 @@ const Home = ({ params }) => {
   const handleShow1 = () => setShow1(true);
 
   const offarat = trans('offarat');
-
   // =========================================
   // ✅ CALL USE-EFFECT
   // =========================================
@@ -103,8 +108,10 @@ const Home = ({ params }) => {
   } = useQuery({
     queryKey: [
       'product-all-list',
-      companyArr[0],
+      categoryID,
+      classId,
       classificationArr[0],
+      companyArr[0],
       minPrice,
       maxPrice,
       minDiscount,
@@ -113,10 +120,11 @@ const Home = ({ params }) => {
     ],
     queryFn: async () => {
       const resp = await GET_PRODUCTLIST(
-        null,
-        companyArr[0],
+        categoryID,
         classificationArr[0],
-        page, // ← 4th: pageNo
+        companyArr[0],
+        classId[0] || null,
+        page,
         minPrice,
         maxPrice,
         minDiscount,
@@ -178,7 +186,6 @@ const Home = ({ params }) => {
     queryKey: ['class-list', categoryID],
     queryFn: async () => {
       const resp = await GET_CLASS_DROPDOWN(categoryID || null);
-
       return resp?.data?.data ?? [];
     },
   });
@@ -186,13 +193,13 @@ const Home = ({ params }) => {
   // =========================================
   // 📋 OFFER_LIST = FETCH & USE TS_QUERY
   // =========================================
-  const { data: OfferLists, refetch: refetchOfferList } = useQuery({
-    queryKey: ['offer-list-home'],
-    queryFn: async () => {
-      const resp = await GET_USER_OFFERS();
-      return resp?.data?.data ?? [];
-    },
-  });
+  // const { data: OfferLists, refetch: refetchOfferList } = useQuery({
+  //   queryKey: ['offer-list-home'],
+  //   queryFn: async () => {
+  //     const resp = await GET_USER_OFFERS();
+  //     return resp?.data?.data ?? [];
+  //   },
+  // });
 
   // =========================================
   // 📁 TESTIMONIAL
@@ -275,6 +282,8 @@ const Home = ({ params }) => {
           <Col lg={3}>
             <aside className='d-none d-lg-block'>
               <Filter
+                classId={classId}
+                setClassId={setClassId}
                 classListFilter={classListFilter}
                 companyList={companyList}
                 selectedCountry={selectedCountry}
@@ -384,6 +393,8 @@ const Home = ({ params }) => {
               <b className='mt-2 m-2'>Filter</b>
             </span>
             <Filter
+              classId={classId}
+              setClassId={setClassId}
               classListFilter={classListFilter}
               companyList={companyList}
               selectedCountry={selectedCountry}
