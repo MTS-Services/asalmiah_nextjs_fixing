@@ -11,13 +11,11 @@ import { Nav, TabContent } from 'react-bootstrap';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
-import { AiFillHeart } from 'react-icons/ai';
-import { CiHeart } from 'react-icons/ci';
+
 import { FaWalking } from 'react-icons/fa';
 import { RiCouponLine } from 'react-icons/ri';
 import { TbTruckDelivery } from 'react-icons/tb';
 import { ShimmerPostItem, ShimmerThumbnail } from 'react-shimmer-effects';
-import Swal from 'sweetalert2';
 import useCountryState from '../../../../hooks/useCountryState';
 import useDetails from '../../../../hooks/useDetails';
 import {
@@ -51,12 +49,10 @@ export default function page() {
   let router = useRouter();
   let { id } = useParams();
   const selectedCountry = useCountryState();
-
+  const [classificationId, setClassificationId] = useState(null);
   const [page, setPage] = useState(Paginations?.DEFAULT_PAGE);
-  const [activeTab, setActiveTab] = useState(null);
-  const [type, setType] = useState(null);
+  const [activeTab, setActiveTab] = useState('all');
   const [meta, setMeta] = useState('');
-
   //================================================================
   // 📋 Company Detail Data
   //================================================================
@@ -75,6 +71,7 @@ export default function page() {
       return res?.data?.data ?? '';
     },
   });
+
   //================================================================
   // 📋 Classification List
   //================================================================
@@ -87,44 +84,6 @@ export default function page() {
     },
   });
 
-  //================================================================
-  // 📋 All Company Products
-  //================================================================
-  // const {
-  //   data: allCompanyProducts,
-  //   refetch: productsRefetch,
-  //   isPending: isPendingProducts,
-  // } = useQuery({
-  //   queryKey: ['company-all-products', id, activeTab, page], // include all relevant params
-  //   queryFn: async () => {
-  //     if (!activeTab) return [];
-
-  //     try {
-  //       const res =
-  //         detail?.roleId == constant?.USER
-  //           ? await GET_CLASSIFICATION_PRODUCTLIST_AUTH(
-  //               activeTab, // id / classificationId
-  //               null, // classification (if not needed)
-  //               id, // company ID
-  //               page
-  //             )
-  //           : await GET_CLASSIFICATION_PRODUCTLIST(
-  //               activeTab, // id / classificationId
-  //               null, // classification
-  //               id, // company ID
-  //               page
-  //             );
-
-  //       setMeta(res?.data?._meta);
-  //       return res?.data?.data || [];
-  //     } catch (err) {
-  //       console.error('Failed to fetch products:', err);
-  //       return [];
-  //     }
-  //   },
-  //   enabled: !!id && !!activeTab,
-  // });
-
   // ==========================================
   // 📋 COMPANY ALL PRODUCTS LIST
   // ==========================================
@@ -133,28 +92,33 @@ export default function page() {
     isPending: isPendingProducts,
     refetch: refetchProducts,
   } = useQuery({
-    queryKey: ['company-all-products', id, activeTab, page],
+    queryKey: ['company-all-products', id, classificationId, activeTab, page],
     queryFn: async () => {
       try {
         let resp;
 
         if (activeTab === 'all') {
-          resp = await GET_PRODUCTLIST(
-            null, // classId
-            id, // companyId
-            null, // classificationId
+          resp = await GET_COMPANY_PRODUCTS_LIST(
+            activeTab,
+            classificationId,
+            id,
             page
           );
         } else {
           resp =
             detail?.roleId == constant?.USER
               ? await GET_CLASSIFICATION_PRODUCTLIST_AUTH(
-                  activeTab, // classificationId
-                  null,
-                  id, // companyId
+                  activeTab,
+                  classificationId,
+                  id,
                   page
                 )
-              : await GET_CLASSIFICATION_PRODUCTLIST(activeTab, null, id, page);
+              : await GET_CLASSIFICATION_PRODUCTLIST(
+                  activeTab,
+                  classificationId,
+                  id,
+                  page
+                );
         }
 
         setMeta(resp?.data?._meta);
@@ -175,7 +139,7 @@ export default function page() {
     onSuccess: (resp) => {
       toastAlert('success', resp?.data?.message);
       classificationRefetch();
-      productsRefetch();
+      refetchProducts();
       // isFetching();
       // productsRefetch();
     },
@@ -197,11 +161,6 @@ export default function page() {
       )}{' '}
       {companyDetailData?.length !== 0 ? (
         <>
-          {/* <Breadcrums
-            firstLink={Home}
-            secondLink={"Company Detail"}
-            language={language}
-          /> */}
           <section className='seller-view p-0'>
             <Container>
               <div className='my-profile-inner-box'>
@@ -305,6 +264,7 @@ export default function page() {
                     <Nav.Link
                       eventKey={tab?._id}
                       onClick={() => {
+                        setClassificationId(tab?._id);
                         setActiveTab(tab?._id);
                         setPage(1);
                       }}
