@@ -1464,19 +1464,19 @@ export const GET_COMPANY_PRODUCTS_LIST = async (id, page, pageLimit = 12) => {
 };
 
 export const GET_CLASSIFICATION_PRODUCTLIST = async (
+  activeTab,
+  classificationId,
   id,
-  classification,
-  classificationCompany,
   page,
   pageLimit = 12
 ) => {
   return await http.get(`/product/filter`, {
     params: {
-      classification: classification,
-      classificationCompany: classificationCompany,
+      companyId: id,
+      classificationId: classificationId, // Assuming you want to filter by classification ID
       pageNo: page,
       pageLimit: pageLimit,
-      classificationId: id, // Assuming you want to filter by classification ID
+      classificationId: activeTab, // Assuming you want to filter by classification ID
     },
   });
 };
