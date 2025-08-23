@@ -1,0 +1,119 @@
+.custom_margin {
+  hr {
+    margin: 10px 0;
+    width: 100%;
+    border-top: 2px solid #d9d9d9;
+  }
+}
+// .slidercustom {
+  .swiper-button-prev:after,
+  .swiper-button-next:after {
+    font-size: 13px;
+    background: #da2a2c;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    line-height: 25px;
+    text-align: center;
+  }
+// }
+.product-detail {
+  .slick-slide {
+    padding: 0 !important;
+
+    &.slick-active {
+      padding: 0 !important;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      div {
+        width: 100%;
+        .product_slider {
+          width: 250px;
+          height: 250px;
+          img {
+            height: 100%;
+            width: 100%;
+            object-fit: contain;
+          }
+        }
+        .slick-thumb {
+          margin-top: 30px;
+        }
+      }
+    }
+  }
+}
+
+.hero {
+  .slick-slide {
+    padding: 0 !important;
+  }
+}
+
+.product-detail {
+  .product-description-main {
+    p {
+      display: unset !important;
+    }
+  }
+}
+
+.select-input {
+  width: 300px;
+}
+
+.reviews-section {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.review-card {
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.review-image {
+  object-fit: cover;
+}
+
+.yellow-star {
+  color: rgb(221, 218, 10); /* Set the star color to yellow */
+}
+
+.empty-star {
+  color: lightgray; /* Set the outline star color to light gray */
+}
+
+.image-default-icon{
+  width:50px;
+  min-width: 50px;
+  height:50px;
+  float: inline-end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  background-color: #ffc9ca;
+  color: #da2a2c;
+}
+
+.form-check-input:checked {
+  background-color: #da2a2c;
+  border-color: #da2a2c;
+}
+.form-check-input:focus{
+  box-shadow: none;
+}
+.custom-checkbox {
+  height: 30px;
+  width: 30px;
+  min-width: 30px;
+  input{
+    font-size: 25px;
+  }
+}

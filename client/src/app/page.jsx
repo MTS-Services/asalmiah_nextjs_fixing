@@ -1,0 +1,427 @@
+/**
+@copyright    : Mak Tech Solution < https://www.maktechsolution.com >
+@author       : Nayem Islam < https://github.com/Nayem707 >
+@Updated_Date : 7/8/2025
+**/
+
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
+import useDetails from '../../hooks/useDetails';
+
+import {
+  GET_USER_OFFERS,
+  GET_PRODUCTLIST,
+  USER_COMPANY_LIST,
+  USER_CATEGORYLIST,
+  GET_CLASS_DROPDOWN,
+  GET_FILTER_CLASSIFICATION_API,
+} from '../../services/APIServices';
+
+import Footer from '../../utils/Footer';
+import Header from '../../utils/Header';
+import { trans } from '../../utils/trans';
+import { constant } from '../../utils/constants';
+
+import UserLogInHeader from '../../utils/UserLogInHeader';
+
+import OfferListComponent from './components/OfferListComponent';
+import HomeDynamicLabels from './components/Home/HomeDynamicLabels';
+import HomeTestimonials from './components/Home/HomeTestimonials';
+import HomeDownloadApp from './components/Home/HomeDownloadApp';
+import HomeServices from './components/Home/HomeServices';
+import CategoryModal from './components/CategoryModal';
+
+import HomeProductList from './components/Home/HomeProductList';
+import HomeBanner from './components/Home/HomeBanner';
+
+import { Col, Container, Offcanvas, Row } from 'react-bootstrap';
+import Filter from './components/Filter';
+import TopFilter from './components/TestFilter';
+
+import useCountryState from '../../hooks/useCountryState';
+
+import { FaFilter } from 'react-icons/fa';
+import { BiFilter } from 'react-icons/bi';
+
+const Home = ({ params }) => {
+  // =========================================
+  // ✅ EXISTING STATE
+  // =========================================
+  const [classificationArr, setClassificationArr] = useState([]);
+  const [subCategoryArr, setSubCategoryArr] = useState([]);
+  const [categoryArr, setCategoryArr] = useState([]);
+  const [companyArr, setCompanyArr] = useState([]);
+  const [classId, setClassId] = useState([]); // plural & array
+  const [categoryID, setCategoryID] = useState(null);
+
+  console.log('classId:', classId);
+  console.log('categoryID:', categoryID);
+
+  // =========================================
+  // ✅ RANGE STATE
+  // =========================================
+  const [minPrice, setMinPrice] = useState(0);
+  const [minDiscount, setMinDiscount] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(1000000);
+  const [maxDiscount, setMaxDiscount] = useState(100);
+
+  const [categoryId, setCategoryId] = useState({
+    id: '',
+    name: '',
+    arabic: '',
+  });
+  // =========================================
+  // ✅ EXISTING STATE
+  // =========================================
+  const selectedCountry = useCountryState();
+  const testimonialRef = useRef(null);
+
+  const [show, setShow] = useState(false);
+  const [show1, setShow1] = useState(false);
+  const [search, setSearch] = useState('');
+  const handleShow = () => setShow(true);
+  const handleClose1 = () => setShow1(false);
+
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState('');
+
+  const handleClose = () => setShow(false);
+  const handleShow1 = () => setShow1(true);
+
+  const offarat = trans('offarat');
+  // =========================================
+  // ✅ CALL USE-EFFECT
+  // =========================================
+  useEffect(() => {
+    document.title = offarat;
+  }, []);
+
+  // ==========================================
+  // 📋 ALL_PRODUCTS_LIST USE TS_QUERY
+  // ==========================================
+  const {
+    data: allProductList,
+    isPending,
+    refetch,
+  } = useQuery({
+    queryKey: [
+      'product-all-list',
+      categoryID,
+      classId,
+      classificationArr[0],
+      companyArr[0],
+      minPrice,
+      maxPrice,
+      minDiscount,
+      maxDiscount,
+      page,
+    ],
+    queryFn: async () => {
+      const resp = await GET_PRODUCTLIST(
+        categoryID,
+        classificationArr[0],
+        companyArr[0],
+        classId[0] || null,
+        page,
+        minPrice,
+        maxPrice,
+        minDiscount,
+        maxDiscount
+      );
+      setMeta(resp?.data?._meta);
+      return resp?.data?.data ?? [];
+    },
+  });
+
+  // ===============================================
+  // 📋 CATEGORY-LIST = FETCH & USE TS_QUERY
+  // ===============================================
+  const {
+    data: categoryList = [],
+    isLoading: categoryLoading,
+    isError: categoryError,
+  } = useQuery({
+    queryKey: ['category-list'],
+    queryFn: async () => {
+      const resp = await USER_CATEGORYLIST();
+      return resp?.data?.data ?? [];
+    },
+  });
+
+  // ===============================================
+  // 📋 CLASSIFICATION_LIST = FETCH & USE TS_QUERY
+  // ===============================================
+  const {
+    data: classificationList = [],
+    isLoading: classificationLoading,
+    isError: classificationError,
+  } = useQuery({
+    queryKey: ['classification-filter-list', categoryArr[0]],
+    queryFn: async () => {
+      if (categoryArr.length === 0) return [];
+      // Fetch classifications based on selected category
+      const resp = await GET_FILTER_CLASSIFICATION_API(categoryArr[0]);
+      return resp?.data?.data ?? [];
+    },
+    enabled: categoryArr.length > 0,
+  });
+
+  // ================================
+  // 📋 COMPNAY_LIST QUERY-CALL
+  // ================================
+  const { data: companyList } = useQuery({
+    queryKey: ['company-list', categoryID],
+    queryFn: async () => {
+      const resp = await USER_COMPANY_LIST(categoryID || null);
+      return resp?.data?.data ?? [];
+    },
+  });
+
+  // ================================
+  // 📋 CLASS_LIST QUERY-CALL
+  // =================================
+  const { data: classListFilter } = useQuery({
+    queryKey: ['class-list', categoryID],
+    queryFn: async () => {
+      const resp = await GET_CLASS_DROPDOWN(categoryID || null);
+      return resp?.data?.data ?? [];
+    },
+  });
+
+  // =========================================
+  // 📋 OFFER_LIST = FETCH & USE TS_QUERY
+  // =========================================
+  // const { data: OfferLists, refetch: refetchOfferList } = useQuery({
+  //   queryKey: ['offer-list-home'],
+  //   queryFn: async () => {
+  //     const resp = await GET_USER_OFFERS();
+  //     return resp?.data?.data ?? [];
+  //   },
+  // });
+
+  // =========================================
+  // 📁 TESTIMONIAL
+  // =========================================
+  const scrollToTestimonial = () => {
+    if (testimonialRef.current) {
+      testimonialRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  let detail = useDetails();
+
+  // =========================================
+  // 📁 RE_FETCH
+  // =========================================
+  const refetchFunc = () => {
+    refetch();
+    refetchOfferList();
+  };
+
+  return (
+    <>
+      {detail?.roleId == constant?.USER ? (
+        <UserLogInHeader
+          scrollToTestimonial={scrollToTestimonial}
+          refetchAPI={refetchFunc}
+        />
+      ) : (
+        <Header
+          scrollToTestimonial={scrollToTestimonial}
+          refetchAPI={refetchFunc}
+        />
+      )}
+
+      <Container>
+        <Row>
+          <HomeBanner />
+        </Row>
+
+        <Row>
+          <div className='top-filter-menu '>
+            <Col lg={6} className='mt-lg-0 mt-4'>
+              <div className='d-flex align-items-center justify-content-lg-end justify-content-start gap-3 prodiuct-view'>
+                <div
+                  className='btn btn-theme filter_btn d-block d-lg-none'
+                  onClick={handleShow}
+                >
+                  <BiFilter size={16} />
+                  <small className='ms-2'>Filter</small>
+                </div>
+              </div>
+            </Col>
+          </div>
+        </Row>
+
+        <Row>
+          <aside className='left-sidebar '>
+            <TopFilter
+              categoryList={categoryList}
+              categoryError={categoryError}
+              categoryLoading={categoryLoading}
+              onCategoryClick={(id) => setCategoryID(id)}
+              classificationList={classificationList}
+              classificationLoading={classificationLoading}
+              classificationError={classificationError}
+              refetch={refetch}
+              setCategoryArr={setCategoryArr}
+              categoryArr={categoryArr}
+              setClassificationArr={setClassificationArr}
+              classificationArr={classificationArr}
+              setSubCategoryArr={setSubCategoryArr}
+              subCategoryArr={subCategoryArr}
+            />
+          </aside>
+        </Row>
+      </Container>
+
+      <Container>
+        <Row>
+          <Col lg={3}>
+            <aside className='d-none d-lg-block'>
+              <Filter
+                classId={classId}
+                setClassId={setClassId}
+                classListFilter={classListFilter}
+                companyList={companyList}
+                selectedCountry={selectedCountry}
+                refetch={refetch}
+                setCategoryArr={setCategoryArr}
+                categoryArr={categoryArr}
+                setClassificationArr={setClassificationArr}
+                classificationArr={classificationArr}
+                setCompanyArr={setCompanyArr}
+                companyArr={companyArr}
+                setSubCategoryArr={setSubCategoryArr}
+                subCategoryArr={subCategoryArr}
+                setSearch={setSearch}
+                minPrice={minPrice}
+                setMinPrice={setMinPrice}
+                maxPrice={maxPrice}
+                setMaxPrice={setMaxPrice}
+                setMinDiscount={setMinDiscount}
+                setMaxDiscount={setMaxDiscount}
+                minDiscount={minDiscount}
+                maxDiscount={maxDiscount}
+              />
+            </aside>
+            {/* View All Products Button */}
+
+            {/* <div className='d-flex align-items-center justify-content-center gap-3 '>
+              <div
+                className='btn btn-theme filter_btn d-block d-lg-none'
+                onClick={handleShow}
+              >
+                <BiFilter size={16} />
+                <small className='ms-2'>Filter</small>
+              </div>
+
+              <div className=''>
+                <Link
+                  href='/product-list'
+                  className='btn btn-outline-danger btn-lg'
+                >
+                  View All Products
+                </Link>
+              </div>
+            </div> */}
+          </Col>
+
+          <Col lg={9}>
+            {/* Product List Section */}
+            <HomeProductList
+              isPending={isPending}
+              allProductList={allProductList}
+            />
+          </Col>
+        </Row>
+      </Container>
+
+      {/* Categories Section */}
+      {/* <HomeCategories
+        onCategoryClick={(category) => {
+          setCategoryId(category);
+          handleShow(true);
+        }}
+      /> */}
+
+      {/* Category Modal */}
+      {/* <CategoryModal
+        show={show}
+        onHide={handleClose}
+        categoryId={categoryId}
+        onSubCategoryClick={(subCategory) => {
+          setSubCategoryId(subCategory);
+          handleClose();
+          handleShow1(true);
+        }}
+        page={page}
+        setPage={setPage}
+        meta={meta}
+        setMeta={setMeta}
+      /> */}
+
+      {/* Offers Section */}
+      {/* <OfferListComponent OfferLists={OfferLists} /> */}
+
+      {/* Dynamic Labels Section */}
+      {/* <HomeDynamicLabels /> */}
+
+      {/* Download App Section */}
+      {/* <HomeDownloadApp /> */}
+
+      {/* Services Section */}
+      {/* <HomeServices /> */}
+
+      {/* Testimonials Section */}
+      {/* <HomeTestimonials testimonialRef={testimonialRef} /> */}
+
+      {/* Footer */}
+      <Footer testimonialLists={0} />
+
+      {/*********************** Filter Off Canvas *******************************/}
+      <Offcanvas show={show} onHide={handleClose}>
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>Filter Menu</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <aside className='left-sidebar'>
+            <span className='filter-text'>
+              <FaFilter size='20' />
+              <b className='mt-2 m-2'>Filter</b>
+            </span>
+            <Filter
+              classId={classId}
+              setClassId={setClassId}
+              classListFilter={classListFilter}
+              companyList={companyList}
+              selectedCountry={selectedCountry}
+              refetch={refetch}
+              setCategoryArr={setCategoryArr}
+              categoryArr={categoryArr}
+              setClassificationArr={setClassificationArr}
+              classificationArr={classificationArr}
+              setCompanyArr={setCompanyArr}
+              companyArr={companyArr}
+              setSubCategoryArr={setSubCategoryArr}
+              subCategoryArr={subCategoryArr}
+              setSearch={setSearch}
+              minPrice={minPrice}
+              setMinPrice={setMinPrice}
+              maxPrice={maxPrice}
+              setMaxPrice={setMaxPrice}
+              setMinDiscount={setMinDiscount}
+              setMaxDiscount={setMaxDiscount}
+              minDiscount={minDiscount}
+              maxDiscount={maxDiscount}
+            />
+          </aside>
+        </Offcanvas.Body>
+      </Offcanvas>
+    </>
+  );
+};
+
+export default Home;

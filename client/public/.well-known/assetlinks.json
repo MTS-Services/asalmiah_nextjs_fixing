@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.offaratcustomer",
+      "sha256_cert_fingerprints": [
+        "99:9D:05:6C:92:C5:D6:4C:16:36:A4:25:74:EC:2A:8B:16:42:24:FA:40:0A:D2:6D:2F:04:2B:F7:DD:93:C8:88"
+      ]
+    }
+  }
+]
